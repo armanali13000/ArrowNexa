@@ -195,7 +195,7 @@ export default function GameScreen() {
     setMoveHistory((history) => [...history, arrowId]);
     setArrows((current) => {
       const next = markArrowRemoved(current, arrowId);
-      if (isBoardComplete(next)) completeHandlerRef.current(next);
+      if (isBoardComplete(next)) setTimeout(() => completeHandlerRef.current(next), 0);
       return next;
     });
   }, []);
