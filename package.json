@@ -34,8 +34,8 @@
     "test:phase8": "node scripts/phase8-retention-tests.mjs",
     "test:generator:bulk": "node scripts/generator-bulk-test.mjs 100",
     "test:generator:500": "node scripts/generator-bulk-test.mjs 500",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
     "web": "expo start --web"
   },
   "private": true

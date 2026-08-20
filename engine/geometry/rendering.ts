@@ -21,11 +21,12 @@ export const createArrowSvgPath = (path: GridPoint[], cellSize: number, boardPad
 
 export const createArrowHeadPath = (path: GridPoint[], direction: Direction, cellSize: number, boardPadding: number) => {
   const tip = gridToPixel(path[path.length - 1], cellSize, boardPadding);
-  const size = Math.max(5, cellSize * 0.24);
-  if (direction === 'UP') return `M ${tip.x} ${tip.y - size} L ${tip.x - size * 0.72} ${tip.y + size * 0.54} L ${tip.x + size * 0.72} ${tip.y + size * 0.54} Z`;
-  if (direction === 'DOWN') return `M ${tip.x} ${tip.y + size} L ${tip.x - size * 0.72} ${tip.y - size * 0.54} L ${tip.x + size * 0.72} ${tip.y - size * 0.54} Z`;
-  if (direction === 'LEFT') return `M ${tip.x - size} ${tip.y} L ${tip.x + size * 0.54} ${tip.y - size * 0.72} L ${tip.x + size * 0.54} ${tip.y + size * 0.72} Z`;
-  return `M ${tip.x + size} ${tip.y} L ${tip.x - size * 0.54} ${tip.y - size * 0.72} L ${tip.x - size * 0.54} ${tip.y + size * 0.72} Z`;
+  const size = Math.max(6, cellSize * 0.28);
+  const spread = size * 0.72;
+  if (direction === 'UP') return `M ${(tip.x - spread).toFixed(2)} ${(tip.y + size).toFixed(2)} L ${tip.x.toFixed(2)} ${(tip.y - size * 0.25).toFixed(2)} L ${(tip.x + spread).toFixed(2)} ${(tip.y + size).toFixed(2)}`;
+  if (direction === 'DOWN') return `M ${(tip.x - spread).toFixed(2)} ${(tip.y - size).toFixed(2)} L ${tip.x.toFixed(2)} ${(tip.y + size * 0.25).toFixed(2)} L ${(tip.x + spread).toFixed(2)} ${(tip.y - size).toFixed(2)}`;
+  if (direction === 'LEFT') return `M ${(tip.x + size).toFixed(2)} ${(tip.y - spread).toFixed(2)} L ${(tip.x - size * 0.25).toFixed(2)} ${tip.y.toFixed(2)} L ${(tip.x + size).toFixed(2)} ${(tip.y + spread).toFixed(2)}`;
+  return `M ${(tip.x - size).toFixed(2)} ${(tip.y - spread).toFixed(2)} L ${(tip.x + size * 0.25).toFixed(2)} ${tip.y.toFixed(2)} L ${(tip.x - size).toFixed(2)} ${(tip.y + spread).toFixed(2)}`;
 };
 
 export const getEscapeTranslation = (

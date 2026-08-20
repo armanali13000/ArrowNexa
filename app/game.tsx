@@ -416,7 +416,6 @@ const BoostersModal = ({ visible, lives, inventory, onClose, onExtraLife, onUndo
       <Button title={`Extra Life x${inventory.extraLife}`} variant="tool" disabled={inventory.extraLife <= 0 || lives >= MAX_LIVES_WITH_BOOSTER} onPress={onExtraLife} />
       <Button title={`Undo x${inventory.undo}`} variant="tool" disabled={inventory.undo <= 0 || undoDisabled} onPress={onUndo} />
       <Button title={`Reveal x${inventory.reveal}`} variant="tool" disabled={inventory.reveal <= 0 || revealDisabled} onPress={onReveal} />
-      <Button title="Clear Blocker  Coming Soon" variant="tool" disabled />
       <Button title="Close" variant="ghost" onPress={onClose} />
     </View>
   </AppModal>

@@ -34,6 +34,12 @@ const started = Date.now();
 const distribution = { Easy: 0, Normal: 0, Hard: 0, Expert: 0 };
 let totalAttempts = 0;
 let totalGenerationMs = 0;
+let maxGenerationMs = 0;
+let totalDensity = 0;
+let totalArrowCount = 0;
+let totalScore = 0;
+let totalPathLength = 0;
+let totalTurns = 0;
 let failures = 0;
 
 for (let levelNumber = 1; levelNumber <= count; levelNumber += 1) {
@@ -42,18 +48,31 @@ for (let levelNumber = 1; levelNumber <= count; levelNumber += 1) {
     distribution[level.difficulty] += 1;
     totalAttempts += level.generationAttempts;
     totalGenerationMs += level.generationDurationMs;
+    maxGenerationMs = Math.max(maxGenerationMs, level.generationDurationMs);
+    totalDensity += level.metrics.density;
+    totalArrowCount += level.metrics.arrowCount;
+    totalScore += level.difficultyScore;
+    totalPathLength += level.metrics.averagePathLength;
+    totalTurns += level.metrics.averageTurns;
   } catch {
     failures += 1;
   }
 }
 
 const duration = Date.now() - started;
+const successful = count - failures;
 console.log(JSON.stringify({
   requested: count,
-  successful: count - failures,
+  successful,
   failures,
-  averageAttempts: Number((totalAttempts / Math.max(1, count - failures)).toFixed(2)),
-  averageGenerationMs: Number((totalGenerationMs / Math.max(1, count - failures)).toFixed(2)),
+  averageAttempts: Number((totalAttempts / Math.max(1, successful)).toFixed(2)),
+  averageGenerationMs: Number((totalGenerationMs / Math.max(1, successful)).toFixed(2)),
+  maxGenerationMs,
+  averageDensity: Number((totalDensity / Math.max(1, successful)).toFixed(3)),
+  averageArrowCount: Number((totalArrowCount / Math.max(1, successful)).toFixed(2)),
+  averageDifficultyScore: Number((totalScore / Math.max(1, successful)).toFixed(2)),
+  averagePathLength: Number((totalPathLength / Math.max(1, successful)).toFixed(2)),
+  averageTurns: Number((totalTurns / Math.max(1, successful)).toFixed(2)),
   wallClockMs: duration,
   difficultyDistribution: distribution,
 }, null, 2));
