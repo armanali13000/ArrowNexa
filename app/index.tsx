@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { AppBackground } from '../components/layout/AppBackground';
@@ -11,11 +11,15 @@ import { ProgressBar } from '../components/ui/ProgressBar';
 import { Text } from '../components/ui/Text';
 import { TOTAL_LEVELS } from '../constants/levels';
 import { useTheme } from '../hooks/useTheme';
+import { loadGameplaySession } from '../services/gameplay/sessionStorage';
+import { getChapterForLevel } from '../services/progression/chapterService';
+import { xpRequiredForRank } from '../services/progression/xpService';
 import { useProgressStore } from '../store/progress/progressStore';
 
 const menu = [
   { title: 'Levels', route: '/levels' },
-  { title: 'Daily Challenge', route: null },
+  { title: 'Daily Reward', route: '/daily' },
+  { title: 'Progress', route: '/progress' },
   { title: 'Achievements', route: '/achievements' },
   { title: 'Statistics', route: '/statistics' },
   { title: 'How to Play', route: '/tutorial' },
@@ -25,8 +29,18 @@ const menu = [
 export default function HomeScreen() {
   const theme = useTheme();
   const currentLevel = useProgressStore((state) => state.currentLevel);
-  const stars = useProgressStore((state) => state.stars);
+  const completedLevels = useProgressStore((state) => state.completedLevels);
   const hints = useProgressStore((state) => state.hints);
+  const xp = useProgressStore((state) => state.xp);
+  const nexaRank = useProgressStore((state) => state.nexaRank);
+  const [hasSession, setHasSession] = useState(false);
+  const stars = Object.values(completedLevels).reduce((sum, value) => sum + value, 0);
+  const chapter = getChapterForLevel(currentLevel);
+  const chapterCompleted = Array.from({ length: chapter.endLevel - chapter.startLevel + 1 }, (_, index) => chapter.startLevel + index).filter((level) => completedLevels[level]).length;
+
+  useEffect(() => {
+    loadGameplaySession().then((session) => setHasSession(Boolean(session))).catch(() => undefined);
+  }, []);
 
   return (
     <AppBackground>
@@ -45,6 +59,7 @@ export default function HomeScreen() {
             <View>
               <Text variant="caption" color={theme.colors.textSecondary}>Current Level</Text>
               <Text variant="heading1">Level {currentLevel}</Text>
+              <Text variant="caption" color={theme.colors.textSecondary}>Nexa Rank {nexaRank} - {xp} / {xpRequiredForRank(nexaRank)} XP</Text>
             </View>
             <View style={styles.wallet}>
               <View style={styles.walletItem}><StarIcon color={theme.colors.accent} /><Text variant="title">{stars}</Text></View>
@@ -58,7 +73,17 @@ export default function HomeScreen() {
           <ProgressBar value={currentLevel / TOTAL_LEVELS} />
         </Card>
 
-        <PrimaryButton title="PLAY" accessibilityLabel="Play latest unlocked level" onPress={() => router.push('/game')} style={styles.play} />
+        <Card>
+          <Text variant="heading2">Chapter {chapter.chapter}</Text>
+          <Text variant="title" color={theme.colors.textSecondary}>{chapter.name}</Text>
+          <View style={styles.progressCopy}>
+            <Text variant="bodySmall" color={theme.colors.textSecondary}>Level {currentLevel} / {chapter.endLevel}</Text>
+            <Text variant="bodySmall" color={theme.colors.textSecondary}>{chapterCompleted} / 50 complete</Text>
+          </View>
+          <ProgressBar value={chapterCompleted / 50} />
+        </Card>
+
+        <PrimaryButton title={hasSession ? 'CONTINUE' : 'PLAY'} accessibilityLabel="Play latest unlocked level" onPress={() => router.push('/game')} style={styles.play} />
 
         <View style={styles.menuGrid}>
           {menu.map((item) => (

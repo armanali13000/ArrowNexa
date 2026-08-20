@@ -1,23 +1,35 @@
 import { router } from 'expo-router';
-import React from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useGameStore } from '../../store/game/gameStore';
 import { AppModal } from '../ui/AppModal';
 import { PrimaryButton, SecondaryButton, Button } from '../ui/Button';
 import { Text } from '../ui/Text';
 
-export const PauseModal = () => {
+export const PauseModal = ({ onRestart }: { onRestart?: () => void }) => {
   const visible = useGameStore((state) => state.pauseVisible);
   const setVisible = useGameStore((state) => state.setPauseVisible);
+  const [confirmRestart, setConfirmRestart] = useState(false);
   return (
-    <AppModal visible={visible} onClose={() => setVisible(false)}>
+    <AppModal visible={visible} onClose={() => { setConfirmRestart(false); setVisible(false); }}>
       <View style={styles.stack}>
-        <Text variant="heading2" align="center">Paused</Text>
-        <PrimaryButton title="Resume" onPress={() => setVisible(false)} />
-        <SecondaryButton title="Restart" onPress={() => setVisible(false)} />
-        <Button title="Settings" variant="tool" onPress={() => router.push('/settings')} />
-        <Button title="How to Play" variant="tool" onPress={() => router.push('/tutorial')} />
-        <Button title="Exit to Menu" variant="ghost" onPress={() => router.replace('/')} />
+        {confirmRestart ? (
+          <>
+            <Text variant="heading2" align="center">Restart Level?</Text>
+            <Text variant="body" align="center">Restarting resets this attempt. Used hints and boosters are not refunded.</Text>
+            <PrimaryButton title="Cancel" onPress={() => setConfirmRestart(false)} />
+            <SecondaryButton title="Restart" onPress={() => { setConfirmRestart(false); setVisible(false); onRestart?.(); }} />
+          </>
+        ) : (
+          <>
+            <Text variant="heading2" align="center">Paused</Text>
+            <PrimaryButton title="Resume" onPress={() => setVisible(false)} />
+            <SecondaryButton title="Restart" onPress={() => setConfirmRestart(true)} />
+            <Button title="Settings" variant="tool" onPress={() => router.push('/settings')} />
+            <Button title="How to Play" variant="tool" onPress={() => router.push('/tutorial')} />
+            <Button title="Exit to Menu" variant="ghost" onPress={() => router.replace('/')} />
+          </>
+        )}
       </View>
     </AppModal>
   );

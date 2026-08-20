@@ -10,5 +10,6 @@ export const hapticsService = {
   tap: () => run(() => Haptics.selectionAsync()),
   success: () => run(() => Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)),
   error: () => run(() => Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error)),
+  warning: () => run(() => Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning)),
   levelComplete: () => run(() => Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)),
 };

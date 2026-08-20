@@ -32,6 +32,14 @@ execFileSync(
     'engine/levels/levelFactory.ts',
     'engine/levels/levelConfig.ts',
     'engine/generator/validation.ts',
+    'engine/rewards/stars.ts',
+    'engine/rewards/rewards.ts',
+    'constants/gameBalance.ts',
+    'constants/progression.ts',
+    'services/progression/xpService.ts',
+    'services/progression/dailyRewardService.ts',
+    'services/progression/chapterService.ts',
+    'services/progression/progressionService.ts',
   ],
   { stdio: 'inherit' },
 );
@@ -41,6 +49,11 @@ const { canArrowEscape, getBlockingArrow, getValidMoves, isBoardComplete, markAr
 const { phaseTwoTestLevels } = require(join(outDir, 'engine/levels/testLevels.js'));
 const { createLevel } = require(join(outDir, 'engine/levels/levelFactory.js'));
 const { validateLevelGeometry } = require(join(outDir, 'engine/generator/validation.js'));
+const { calculateStars } = require(join(outDir, 'engine/rewards/stars.js'));
+const { calculateCompletionRewards } = require(join(outDir, 'engine/rewards/rewards.js'));
+const { calculateLevelXP, applyXP } = require(join(outDir, 'services/progression/xpService.js'));
+const { defaultDailyRewardState, claimDailyReward, getDailyClaimStatus } = require(join(outDir, 'services/progression/dailyRewardService.js'));
+const { getChapterForLevel } = require(join(outDir, 'services/progression/chapterService.js'));
 
 const arrow = (id, path, direction, state = 'normal') => ({
   id,
@@ -101,6 +114,27 @@ assert.equal(hard.metrics.density >= easy.metrics.density, true, 'later boards s
 const cache = new Map();
 cache.set(cacheKey(generated120a), JSON.stringify(generated120a));
 assert.deepEqual(JSON.parse(cache.get(cacheKey(generated120a))), generated120a, 'cached level should load identically');
+
+assert.equal(calculateStars({ mistakes: 0, hintsUsed: 0, livesRemaining: 3, moves: 10, difficulty: 'Easy' }), 3, 'perfect play should receive 3 stars');
+assert.equal(calculateStars({ mistakes: 2, hintsUsed: 1, livesRemaining: 1, moves: 10, difficulty: 'Hard' }), 2, 'small mistakes or hint use should receive 2 stars');
+assert.equal(calculateStars({ mistakes: 3, hintsUsed: 2, livesRemaining: 1, moves: 10, difficulty: 'Expert' }), 1, 'rough completion should still receive 1 star');
+const rewards = calculateCompletionRewards({ levelNumber: 10, completed: true, stars: 3, moves: 10, mistakes: 0, hintsUsed: 0, livesRemaining: 3, timeSeconds: 30, difficulty: 'Easy', usedExtraLife: false }, {});
+assert.equal(rewards.rewards.some((reward) => reward.type === 'hint'), true, 'completion rewards should include hint rewards');
+const duplicate = calculateCompletionRewards({ levelNumber: 10, completed: true, stars: 3, moves: 10, mistakes: 0, hintsUsed: 0, livesRemaining: 3, timeSeconds: 30, difficulty: 'Easy', usedExtraLife: false }, { 'milestone:10': true });
+assert.equal(duplicate.rewardKeys.includes('milestone:10'), false, 'milestone rewards should not duplicate');
+assert.equal(calculateLevelXP('Easy', 3, true), 63, 'first completion should grant performance XP');
+assert.equal(calculateLevelXP('Easy', 3, false), 0, 'replay should not grant base XP');
+assert.equal(applyXP(10000, 1, 0).rank > 1, true, 'large XP should rank up');
+assert.equal(getChapterForLevel(237).chapter, 5, 'level 237 should be in chapter 5');
+
+const dayOne = claimDailyReward(defaultDailyRewardState, '2026-08-20');
+assert.equal(dayOne.claimed, true, 'first daily claim should be available');
+assert.equal(getDailyClaimStatus(dayOne.state, '2026-08-20').available, false, 'same-day duplicate claim should be blocked');
+const dayTwo = claimDailyReward(dayOne.state, '2026-08-21');
+assert.equal(dayTwo.claimed, true, 'next calendar day should be claimable');
+assert.equal(dayTwo.state.currentStreak, 2, 'consecutive claim should increase streak');
+assert.equal(dayTwo.state.cycleDay, 3, 'daily reward cycle should advance after claims');
+assert.equal(getDailyClaimStatus(dayTwo.state, '2026-08-19').available, false, 'clock rollback should not grant rewards');
 
 console.log('Engine tests passed');
 rmSync(outDir, { recursive: true, force: true });

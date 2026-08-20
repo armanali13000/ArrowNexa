@@ -8,13 +8,13 @@ import { ArrowPiece } from './ArrowPiece';
 type Props = {
   level: PuzzleLevel;
   arrows: PuzzleArrow[];
-  hintedArrowId?: string;
+  hintedArrowIds?: string[];
   debug?: boolean;
   onArrowPress: (arrowId: string) => void;
   onEscapeComplete: (arrowId: string) => void;
 };
 
-export const GameBoard = memo(({ level, arrows, hintedArrowId, debug = false, onArrowPress, onEscapeComplete }: Props) => {
+export const GameBoard = memo(({ level, arrows, hintedArrowIds = [], debug = false, onArrowPress, onEscapeComplete }: Props) => {
   const theme = useTheme();
   const [availableWidth, setAvailableWidth] = useState(0);
   const boardSize = Math.max(0, availableWidth);
@@ -70,7 +70,7 @@ export const GameBoard = memo(({ level, arrows, hintedArrowId, debug = false, on
                 boardPadding={boardPadding}
                 theme={theme}
                 debug={debug}
-                isHinted={hintedArrowId === arrow.id}
+                isHinted={hintedArrowIds.includes(arrow.id)}
                 onPress={onArrowPress}
                 onEscapeComplete={onEscapeComplete}
               />
