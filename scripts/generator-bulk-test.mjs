@@ -2,9 +2,10 @@ import { execFileSync } from 'node:child_process';
 import { createRequire } from 'node:module';
 import { rmSync } from 'node:fs';
 import { join } from 'node:path';
+import { tmpdir } from 'node:os';
 
 const count = Number(process.argv[2] ?? 100);
-const outDir = join(process.cwd(), '.tmp-generator-bulk');
+const outDir = join(tmpdir(), 'arrownexa-generator-bulk');
 const tscBin = join(process.cwd(), 'node_modules', 'typescript', 'bin', 'tsc');
 
 rmSync(outDir, { recursive: true, force: true });

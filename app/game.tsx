@@ -21,6 +21,8 @@ import { economyService } from '../services/economy/economyService';
 import { clearGameplaySession, loadGameplaySession, saveGameplaySession } from '../services/gameplay/sessionStorage';
 import { hapticsService } from '../services/haptics/hapticsService';
 import { audioService } from '../services/audio/audioService';
+import { createDailyChallengeLevel, getDailyDifficulty } from '../services/progression/dailyChallengeService';
+import { formatDayMonth, getLocalDateKey } from '../services/progression/dateService';
 import { loadCachedLevel, saveCachedLevel } from '../services/storage/levelCacheStorage';
 import { useGameStore } from '../store/game/gameStore';
 import { useProgressStore } from '../store/progress/progressStore';
@@ -42,7 +44,9 @@ type CompletionSummary = {
 
 export default function GameScreen() {
   const theme = useTheme();
-  const params = useLocalSearchParams<{ level?: string }>();
+  const params = useLocalSearchParams<{ level?: string; mode?: string; date?: string }>();
+  const isDailyMode = params.mode === 'daily';
+  const dailyDate = typeof params.date === 'string' ? params.date : getLocalDateKey();
   const recommendedLevel = useProgressStore((state) => state.currentLevel);
   const currentLevel = Math.max(1, Math.min(500, Number(params.level) || recommendedLevel));
   const completedLevels = useProgressStore((state) => state.completedLevels);
@@ -51,10 +55,14 @@ export default function GameScreen() {
   const boosters = useProgressStore((state) => state.boosterInventory);
   const claimedRewards = useProgressStore((state) => state.claimedRewards);
   const recordLevelCompletion = useProgressStore((state) => state.recordLevelCompletion);
+  const recordDailyChallengeCompletion = useProgressStore((state) => state.recordDailyChallengeCompletion);
+  const recordDailyChallengeStarted = useProgressStore((state) => state.recordDailyChallengeStarted);
   const recordLifeLost = useProgressStore((state) => state.recordLifeLost);
+  const recordBlockedTap = useProgressStore((state) => state.recordBlockedTap);
+  const recordUndoUsed = useProgressStore((state) => state.recordUndoUsed);
   const recordRetry = useProgressStore((state) => state.recordRetry);
   const setPauseVisible = useGameStore((state) => state.setPauseVisible);
-  const [level, setLevel] = useState<GeneratedLevel>(() => createLevel(currentLevel));
+  const [level, setLevel] = useState<GeneratedLevel>(() => (isDailyMode ? createDailyChallengeLevel(dailyDate) : createLevel(currentLevel)));
   const [arrows, setArrows] = useState<PuzzleArrow[]>(() => cloneLevelArrows(level));
   const [lives, setLives] = useState(DEFAULT_LIVES);
   const [moveCount, setMoveCount] = useState(0);
@@ -82,10 +90,11 @@ export default function GameScreen() {
   useEffect(() => {
     let mounted = true;
     const prepare = async () => {
-      const cached = await loadCachedLevel(currentLevel, GENERATION_VERSION);
-      const nextLevel = cached ?? createLevel(currentLevel);
-      if (!cached) await saveCachedLevel(nextLevel);
-      const session = await loadGameplaySession();
+      const cached = isDailyMode ? undefined : await loadCachedLevel(currentLevel, GENERATION_VERSION);
+      const nextLevel = isDailyMode ? createDailyChallengeLevel(dailyDate) : cached ?? createLevel(currentLevel);
+      if (!isDailyMode && !cached) await saveCachedLevel(nextLevel);
+      if (isDailyMode) await recordDailyChallengeStarted(dailyDate);
+      const session = isDailyMode ? undefined : await loadGameplaySession();
       if (!mounted) return;
       setLevel(nextLevel);
       if (session?.levelNumber === currentLevel && session.generationVersion === GENERATION_VERSION) {
@@ -107,7 +116,7 @@ export default function GameScreen() {
     return () => {
       mounted = false;
     };
-  }, [currentLevel]);
+  }, [currentLevel, dailyDate, isDailyMode, recordDailyChallengeStarted]);
 
   useEffect(() => {
     const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
@@ -118,7 +127,7 @@ export default function GameScreen() {
   }, [setPauseVisible]);
 
   useEffect(() => {
-    if (completeVisible) return;
+    if (completeVisible || isDailyMode) return;
     saveGameplaySession({
       levelNumber: currentLevel,
       generationVersion: GENERATION_VERSION,
@@ -133,7 +142,7 @@ export default function GameScreen() {
       startedAt: startedAtRef.current,
       elapsedSeconds: getElapsedSeconds(),
     }).catch(() => undefined);
-  }, [completeVisible, currentLevel, freeUndosUsed, hintsUsed, lives, mistakes, moveCount, moveHistory, removedArrowIds, usedExtraLife]);
+  }, [completeVisible, currentLevel, freeUndosUsed, hintsUsed, isDailyMode, lives, mistakes, moveCount, moveHistory, removedArrowIds, usedExtraLife]);
 
   const resetAttempt = useCallback((nextLevel = level) => {
     setArrows(cloneLevelArrows(nextLevel));
@@ -180,6 +189,7 @@ export default function GameScreen() {
         await recordLifeLost();
         await Promise.all([hapticsService.lifeLost(), audioService.play('lifeLost')]);
       }
+      await recordBlockedTap();
       return;
     }
 
@@ -188,7 +198,7 @@ export default function GameScreen() {
     setMovingArrowIds((ids) => (ids.includes(arrowId) ? ids : [...ids, arrowId]));
     setMoveCount((count) => count + 1);
     setArrows((current) => current.map((arrow) => (arrow.id === arrowId ? { ...arrow, state: 'moving' } : arrow)));
-  }, [arrows, completeVisible, currentLevel, failedVisible, level.size, recordLifeLost, restoreBlockedArrow]);
+  }, [arrows, completeVisible, currentLevel, failedVisible, level.size, recordBlockedTap, recordLifeLost, restoreBlockedArrow]);
 
   const handleEscapeComplete = useCallback((arrowId: string) => {
     setMovingArrowIds((ids) => ids.filter((id) => id !== arrowId));
@@ -233,8 +243,9 @@ export default function GameScreen() {
     setMoveHistory((history) => history.slice(0, -1));
     setMoveCount((count) => Math.max(0, count - 1));
     setArrows((current) => current.map((arrow) => (arrow.id === arrowId ? { ...arrow, state: 'restoring' } : arrow)));
+    await recordUndoUsed();
     await Promise.all([hapticsService.undo(), audioService.play('undo')]);
-  }, [freeUndosUsed, moveHistory, undoAvailable]);
+  }, [freeUndosUsed, moveHistory, recordUndoUsed, undoAvailable]);
 
   const useExtraLife = useCallback(async () => {
     if (lives >= MAX_LIVES_WITH_BOOSTER) return;
@@ -282,14 +293,19 @@ export default function GameScreen() {
       difficulty: level.difficulty,
       usedExtraLife,
     };
-    const rewards = calculateCompletionRewards(performance, claimedRewards);
-    await recordLevelCompletion(performance, rewards.rewards, rewards.rewardKeys);
-    await clearGameplaySession();
-    setCompletion({ stars, moves: moveCount, mistakes, hintsUsed, timeSeconds, rewardLabel: rewards.label, xpGained, nexaRank });
+    if (isDailyMode) {
+      const result = await recordDailyChallengeCompletion(dailyDate, performance);
+      setCompletion({ stars, moves: moveCount, mistakes, hintsUsed, timeSeconds, rewardLabel: result.rewardLabel, xpGained: 0, nexaRank: result.streak });
+    } else {
+      const rewards = calculateCompletionRewards(performance, claimedRewards);
+      await recordLevelCompletion(performance, rewards.rewards, rewards.rewardKeys);
+      await clearGameplaySession();
+      setCompletion({ stars, moves: moveCount, mistakes, hintsUsed, timeSeconds, rewardLabel: rewards.label, xpGained, nexaRank });
+    }
     setArrows(finalArrows);
     setTimeout(() => setCompleteVisible(true), 180);
     await Promise.all([hapticsService.levelComplete(), audioService.levelComplete()]);
-  }, [claimedRewards, completedLevels, currentLevel, hintsUsed, level.difficulty, lives, mistakes, moveCount, nexaRank, recordLevelCompletion, usedExtraLife]);
+  }, [claimedRewards, completedLevels, currentLevel, dailyDate, hintsUsed, isDailyMode, level.difficulty, lives, mistakes, moveCount, nexaRank, recordDailyChallengeCompletion, recordLevelCompletion, usedExtraLife]);
 
   completeHandlerRef.current = handleComplete;
 
@@ -300,8 +316,8 @@ export default function GameScreen() {
           <ArrowBackIcon color="#1B1E22" size={20} />
         </Pressable>
         <View style={styles.levelCopy}>
-          <Text variant="title" align="center" color="#1B1E22">Level {currentLevel}</Text>
-          <Text variant="caption" align="center" color="#5F656B">{level.difficulty.toUpperCase()} {Math.round(level.difficultyScore)}</Text>
+          <Text variant="title" align="center" color="#1B1E22">{isDailyMode ? 'Daily Challenge' : `Level ${currentLevel}`}</Text>
+          <Text variant="caption" align="center" color="#5F656B">{isDailyMode ? `${formatDayMonth(dailyDate)} - ${getDailyDifficulty(dailyDate).toUpperCase()}` : `${level.difficulty.toUpperCase()} ${Math.round(level.difficultyScore)}`}</Text>
           <View style={styles.hearts} accessibilityLabel={`${lives} lives remaining`}>
             {Array.from({ length: MAX_LIVES_WITH_BOOSTER }, (_, index) => <View key={index} style={[styles.heart, { opacity: index < lives ? 1 : 0.18 }]} />)}
           </View>
@@ -330,7 +346,7 @@ export default function GameScreen() {
       </View>
 
       <PauseModal onRestart={retry} />
-      <CompleteModal visible={completeVisible} summary={completion} onNext={() => router.replace('/game')} onReplay={retry} />
+      <CompleteModal daily={isDailyMode} visible={completeVisible} summary={completion} onNext={() => router.replace(isDailyMode ? '/daily' : '/game')} onReplay={retry} />
       <FailureModal visible={failedVisible} levelNumber={currentLevel} mistakes={mistakes} remaining={arrows.filter((arrow) => arrow.state !== 'removed').length} extraLives={boosters.extraLife} onRetry={retry} onExtraLife={useExtraLife} />
       <BoostersModal visible={boostersVisible} lives={lives} inventory={boosters} onClose={() => setBoostersVisible(false)} onExtraLife={useExtraLife} onUndo={handleUndo} undoDisabled={!undoAvailable} onReveal={useReveal} revealDisabled={!validMoves.length} />
       <NoHintsModal visible={noHintsVisible} onClose={() => setNoHintsVisible(false)} />
@@ -360,10 +376,10 @@ const Tool = ({ label, value, disabled, onPress }: { label: string; value: strin
   </Pressable>
 );
 
-const CompleteModal = ({ visible, summary, onNext, onReplay }: { visible: boolean; summary?: CompletionSummary; onNext: () => void; onReplay: () => void }) => (
+const CompleteModal = ({ daily, visible, summary, onNext, onReplay }: { daily?: boolean; visible: boolean; summary?: CompletionSummary; onNext: () => void; onReplay: () => void }) => (
   <AppModal visible={visible} onClose={() => undefined}>
     <View style={styles.modalStack}>
-      <Text variant="heading1" align="center">Level Complete</Text>
+      <Text variant="heading1" align="center">{daily ? 'Daily Complete' : 'Level Complete'}</Text>
       <View style={styles.starRow}>
         {Array.from({ length: 3 }, (_, index) => (
           <Animated.View key={index} entering={visible ? ZoomIn.delay(index * 130).duration(260) : undefined}>
@@ -373,8 +389,8 @@ const CompleteModal = ({ visible, summary, onNext, onReplay }: { visible: boolea
       </View>
       <Text variant="body" align="center">Moves {summary?.moves ?? 0} - Mistakes {summary?.mistakes ?? 0} - Hints {summary?.hintsUsed ?? 0} - Time {summary?.timeSeconds ?? 0}s</Text>
       <Text variant="title" align="center">{summary?.rewardLabel ?? 'Progress unlocked'}</Text>
-      <Text variant="title" align="center">+{summary?.xpGained ?? 0} XP - Nexa Rank {summary?.nexaRank ?? 1}</Text>
-      <PrimaryButton title="Next" onPress={onNext} />
+      <Text variant="title" align="center">{daily ? `Daily Streak ${summary?.nexaRank ?? 1}` : `+${summary?.xpGained ?? 0} XP - Nexa Rank ${summary?.nexaRank ?? 1}`}</Text>
+      <PrimaryButton title={daily ? 'Daily Home' : 'Next'} onPress={onNext} />
       <SecondaryButton title="Replay" onPress={onReplay} />
       <Button title="Levels" variant="ghost" onPress={() => router.push('/levels')} />
     </View>

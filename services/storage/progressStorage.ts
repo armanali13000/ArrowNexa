@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { STARTING_BOOSTERS, STARTING_HINTS } from '../../constants/gameBalance';
-import { Achievement, BoosterInventory } from '../../engine/types/game';
+import { Achievement, BoosterInventory, Difficulty, Reward } from '../../engine/types/game';
 import { DailyRewardState, defaultDailyRewardState } from '../progression/dailyRewardService';
 import { STORAGE_KEYS } from './keys';
 
@@ -24,10 +24,84 @@ export type ProgressStats = {
   dailyRewardsClaimed: number;
   chapterFinalesCompleted: number;
   chaptersCompleted: number;
+  undoUsed: number;
+  blockedTaps: number;
+  successfulMoves: number;
+  dailyChallengesCompleted: number;
+  perfectDailyChallenges: number;
+  easyCompleted: number;
+  normalCompleted: number;
+  hardCompleted: number;
+  expertCompleted: number;
+};
+
+export type DailyChallengeResult = {
+  date: string;
+  seed: string;
+  generationVersion: number;
+  difficulty: Difficulty;
+  completed: boolean;
+  perfect: boolean;
+  bestStars: number;
+  bestTimeSeconds?: number;
+  bestMistakes?: number;
+  bestHintsUsed?: number;
+  bestMoves?: number;
+  rewardGranted: boolean;
+  perfectRewardGranted: boolean;
+};
+
+export type ChallengeStreakState = {
+  current: number;
+  best: number;
+  lastCompletedDate?: string;
+  claimedMilestones: Record<string, boolean>;
+};
+
+export type WeeklyObjectiveType = 'levels' | 'stars' | 'perfect_levels' | 'daily_challenges' | 'arrows_removed' | 'no_hint_levels';
+
+export type WeeklyObjective = {
+  id: string;
+  type: WeeklyObjectiveType;
+  title: string;
+  target: number;
+  progress: number;
+  completed: boolean;
+};
+
+export type WeeklyChallengeState = {
+  weekId: string;
+  objectives: WeeklyObjective[];
+  rewardClaimed: boolean;
+};
+
+export type PersonalRecords = {
+  fastestLevelSeconds?: number;
+  longestNoHintStreak: number;
+  currentNoHintStreak: number;
+  longestPerfectStreak: number;
+  currentPerfectStreak: number;
+  mostStarsInSession: number;
+  highestDifficultyCompleted?: Difficulty;
+};
+
+export type ActivityDay = {
+  date: string;
+  levelsCompleted: number;
+  starsEarned: number;
+  dailyCompleted: boolean;
+  playTimeSeconds: number;
+};
+
+export type NotificationPreferences = {
+  enabled: boolean;
+  dailyChallengeReminder: boolean;
+  dailyRewardReminder: boolean;
+  reminderHour: number;
 };
 
 export type ProgressData = {
-  version: 3;
+  version: 4;
   currentLevel: number;
   highestUnlockedLevel: number;
   completedLevels: Record<number, number>;
@@ -44,14 +118,21 @@ export type ProgressData = {
   hintsUsed: number;
   totalPlayTimeSeconds: number;
   stats: ProgressStats;
-  achievements: Record<string, Pick<Achievement, 'progress' | 'unlocked' | 'unlockedAt'>>;
+  achievements: Record<string, Pick<Achievement, 'progress' | 'unlocked' | 'unlockedAt' | 'rewardGranted'>>;
   claimedRewards: Record<string, boolean>;
   mechanicTutorialsSeen: Record<string, boolean>;
   dailyReward: DailyRewardState;
+  dailyChallenges: Record<string, DailyChallengeResult>;
+  challengeStreak: ChallengeStreakState;
+  weeklyChallenge: WeeklyChallengeState;
+  personalRecords: PersonalRecords;
+  activity: Record<string, ActivityDay>;
+  unlockedAchievementQueue: string[];
+  notificationPreferences: NotificationPreferences;
 };
 
 export const defaultProgress: ProgressData = {
-  version: 3,
+  version: 4,
   currentLevel: 1,
   highestUnlockedLevel: 1,
   completedLevels: {},
@@ -84,11 +165,38 @@ export const defaultProgress: ProgressData = {
     dailyRewardsClaimed: 0,
     chapterFinalesCompleted: 0,
     chaptersCompleted: 0,
+    undoUsed: 0,
+    blockedTaps: 0,
+    successfulMoves: 0,
+    dailyChallengesCompleted: 0,
+    perfectDailyChallenges: 0,
+    easyCompleted: 0,
+    normalCompleted: 0,
+    hardCompleted: 0,
+    expertCompleted: 0,
   },
   achievements: {},
   claimedRewards: {},
   mechanicTutorialsSeen: {},
   dailyReward: defaultDailyRewardState,
+  dailyChallenges: {},
+  challengeStreak: { current: 0, best: 0, claimedMilestones: {} },
+  weeklyChallenge: { weekId: '', objectives: [], rewardClaimed: false },
+  personalRecords: {
+    longestNoHintStreak: 0,
+    currentNoHintStreak: 0,
+    longestPerfectStreak: 0,
+    currentPerfectStreak: 0,
+    mostStarsInSession: 0,
+  },
+  activity: {},
+  unlockedAchievementQueue: [],
+  notificationPreferences: {
+    enabled: false,
+    dailyChallengeReminder: false,
+    dailyRewardReminder: false,
+    reminderHour: 19,
+  },
 };
 
 const createRecordsFromCompleted = (completedLevels: Record<number, number>) =>
@@ -108,10 +216,11 @@ const createRecordsFromCompleted = (completedLevels: Record<number, number>) =>
 const migrateProgress = (rawProgress: Partial<ProgressData>): ProgressData => {
   const completedLevels = rawProgress.completedLevels ?? defaultProgress.completedLevels;
   const levelRecords = rawProgress.levelRecords ?? createRecordsFromCompleted(completedLevels);
+  const stats = { ...defaultProgress.stats, ...rawProgress.stats };
   return {
     ...defaultProgress,
     ...rawProgress,
-    version: 3,
+    version: 4,
     completedLevels,
     levelRecords,
     xp: rawProgress.xp ?? 0,
@@ -120,11 +229,18 @@ const migrateProgress = (rawProgress: Partial<ProgressData>): ProgressData => {
     completedChapters: rawProgress.completedChapters ?? [],
     hints: rawProgress.hints ?? STARTING_HINTS,
     boosterInventory: { ...defaultProgress.boosterInventory, ...rawProgress.boosterInventory },
-    stats: { ...defaultProgress.stats, ...rawProgress.stats },
+    stats,
     achievements: rawProgress.achievements ?? {},
     claimedRewards: rawProgress.claimedRewards ?? {},
     mechanicTutorialsSeen: rawProgress.mechanicTutorialsSeen ?? {},
     dailyReward: { ...defaultDailyRewardState, ...rawProgress.dailyReward },
+    dailyChallenges: rawProgress.dailyChallenges ?? {},
+    challengeStreak: { ...defaultProgress.challengeStreak, ...rawProgress.challengeStreak, claimedMilestones: { ...rawProgress.challengeStreak?.claimedMilestones } },
+    weeklyChallenge: { ...defaultProgress.weeklyChallenge, ...rawProgress.weeklyChallenge },
+    personalRecords: { ...defaultProgress.personalRecords, ...rawProgress.personalRecords },
+    activity: rawProgress.activity ?? {},
+    unlockedAchievementQueue: rawProgress.unlockedAchievementQueue ?? [],
+    notificationPreferences: { ...defaultProgress.notificationPreferences, ...rawProgress.notificationPreferences },
   };
 };
 

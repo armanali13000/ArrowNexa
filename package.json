@@ -31,6 +31,7 @@
     "typecheck": "tsc --noEmit",
     "test:engine": "node scripts/run-engine-tests.mjs",
     "test:polish:stress": "node scripts/polish-stress-test.mjs",
+    "test:phase8": "node scripts/phase8-retention-tests.mjs",
     "test:generator:bulk": "node scripts/generator-bulk-test.mjs 100",
     "test:generator:500": "node scripts/generator-bulk-test.mjs 500",
     "android": "expo start --android",

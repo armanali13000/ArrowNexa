@@ -4,6 +4,8 @@ export type Difficulty = 'Easy' | 'Normal' | 'Hard' | 'Expert';
 export type LevelState = 'locked' | 'unlocked' | 'completed' | 'perfect';
 export type PuzzleStatus = 'playing' | 'paused' | 'completed' | 'failed';
 export type BoosterType = 'extra_life' | 'undo' | 'reveal' | 'clear_blocker';
+export type AchievementCategory = 'Progression' | 'Skill' | 'Daily' | 'Stars' | 'Streak' | 'Exploration' | 'Mastery';
+export type AchievementTier = 'Bronze' | 'Silver' | 'Gold' | 'Master';
 
 export type GridPoint = {
   row: number;
@@ -133,8 +135,13 @@ export type Achievement = {
   title: string;
   description: string;
   icon: string;
+  category?: AchievementCategory;
+  tier?: AchievementTier;
+  hidden?: boolean;
+  reward?: Reward & { xp?: number };
   progress: number;
   target: number;
   unlocked: boolean;
   unlockedAt?: string;
+  rewardGranted?: boolean;
 };

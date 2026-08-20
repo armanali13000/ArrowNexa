@@ -3,8 +3,9 @@ import { execFileSync } from 'node:child_process';
 import { createRequire } from 'node:module';
 import { rmSync } from 'node:fs';
 import { join } from 'node:path';
+import { tmpdir } from 'node:os';
 
-const outDir = join(process.cwd(), '.tmp-polish-stress');
+const outDir = join(tmpdir(), 'arrownexa-polish-stress');
 const tscBin = join(process.cwd(), 'node_modules', 'typescript', 'bin', 'tsc');
 
 rmSync(outDir, { recursive: true, force: true });

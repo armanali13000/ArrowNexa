@@ -17,6 +17,8 @@ export default function SettingsScreen() {
   const [confirmReset, setConfirmReset] = useState(false);
   const settings = useSettingsStore();
   const resetProgress = useProgressStore((state) => state.resetProgress);
+  const notifications = useProgressStore((state) => state.notificationPreferences);
+  const updateNotificationPreferences = useProgressStore((state) => state.updateNotificationPreferences);
 
   return (
     <AppBackground>
@@ -46,11 +48,17 @@ export default function SettingsScreen() {
         <Section title="Other">
           <Text variant="body">Language</Text>
           <Text variant="bodySmall" color={theme.colors.textSecondary}>English is the Phase 1 placeholder.</Text>
-          <Button title="Notifications  Coming Soon" variant="tool" disabled />
           <Button title="Privacy Policy" variant="tool" onPress={() => router.push('/about')} />
           <Button title="Terms and Conditions" variant="tool" onPress={() => router.push('/about')} />
           <Button title="About" variant="tool" onPress={() => router.push('/about')} />
           <Button title="Reset Progress" variant="ghost" onPress={() => setConfirmReset(true)} />
+        </Section>
+        <Section title="Notifications">
+          <Text variant="bodySmall" color={theme.colors.textSecondary}>Reminders are off by default and stay local. Permission is requested only when scheduling is added and enabled.</Text>
+          <ToggleRow title="Notifications" enabled={notifications.enabled} onToggle={() => updateNotificationPreferences({ enabled: !notifications.enabled })} />
+          <ToggleRow title="Daily Challenge Reminder" enabled={notifications.enabled && notifications.dailyChallengeReminder} onToggle={() => updateNotificationPreferences({ dailyChallengeReminder: !notifications.dailyChallengeReminder })} disabled={!notifications.enabled} />
+          <ToggleRow title="Daily Reward Reminder" enabled={notifications.enabled && notifications.dailyRewardReminder} onToggle={() => updateNotificationPreferences({ dailyRewardReminder: !notifications.dailyRewardReminder })} disabled={!notifications.enabled} />
+          <Text variant="caption" color={theme.colors.textSecondary}>Default reminder time: 7:00 PM</Text>
         </Section>
       </ScrollView>
       <AppModal visible={confirmReset} onClose={() => setConfirmReset(false)}>

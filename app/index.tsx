@@ -13,12 +13,16 @@ import { TOTAL_LEVELS } from '../constants/levels';
 import { useTheme } from '../hooks/useTheme';
 import { loadGameplaySession } from '../services/gameplay/sessionStorage';
 import { getChapterForLevel } from '../services/progression/chapterService';
+import { getDailyDifficulty, getDailyStatus } from '../services/progression/dailyChallengeService';
+import { getLocalDateKey } from '../services/progression/dateService';
+import { ensureWeeklyChallenge } from '../services/progression/weeklyChallengeService';
 import { xpRequiredForRank } from '../services/progression/xpService';
 import { useProgressStore } from '../store/progress/progressStore';
 
 const menu = [
   { title: 'Levels', route: '/levels' },
-  { title: 'Daily Reward', route: '/daily' },
+  { title: 'Daily', route: '/daily' },
+  { title: 'Weekly Goals', route: '/weekly' },
   { title: 'Progress', route: '/progress' },
   { title: 'Achievements', route: '/achievements' },
   { title: 'Statistics', route: '/statistics' },
@@ -33,9 +37,14 @@ export default function HomeScreen() {
   const hints = useProgressStore((state) => state.hints);
   const xp = useProgressStore((state) => state.xp);
   const nexaRank = useProgressStore((state) => state.nexaRank);
+  const progress = useProgressStore();
   const [hasSession, setHasSession] = useState(false);
   const stars = Object.values(completedLevels).reduce((sum, value) => sum + value, 0);
   const chapter = getChapterForLevel(currentLevel);
+  const today = getLocalDateKey();
+  const dailyStatus = getDailyStatus(progress, today);
+  const weekly = ensureWeeklyChallenge(progress);
+  const weeklyPreview = weekly.objectives[0];
   const chapterCompleted = Array.from({ length: chapter.endLevel - chapter.startLevel + 1 }, (_, index) => chapter.startLevel + index).filter((level) => completedLevels[level]).length;
 
   useEffect(() => {
@@ -85,13 +94,29 @@ export default function HomeScreen() {
 
         <PrimaryButton title={hasSession ? 'CONTINUE' : 'PLAY'} accessibilityLabel="Play latest unlocked level" onPress={() => router.push('/game')} style={styles.play} />
 
+        <Card style={styles.dailyCard}>
+          <View>
+            <Text variant="caption">DAILY CHALLENGE</Text>
+            <Text variant="heading2">{getDailyDifficulty(today)}</Text>
+            <Text variant="bodySmall" color={theme.colors.textSecondary}>{dailyStatus} - Streak {progress.challengeStreak.current}</Text>
+          </View>
+          <SecondaryButton title={dailyStatus === 'Not Played' ? 'PLAY' : 'OPEN'} onPress={() => router.push('/daily')} style={styles.dailyButton} />
+        </Card>
+
+        {weeklyPreview ? (
+          <Card style={styles.weeklyPreview}>
+            <Text variant="caption">WEEKLY GOAL</Text>
+            <Text variant="bodySmall">{weeklyPreview.title}</Text>
+            <ProgressBar value={weeklyPreview.progress / weeklyPreview.target} />
+          </Card>
+        ) : null}
+
         <View style={styles.menuGrid}>
           {menu.map((item) => (
             <SecondaryButton
               key={item.title}
-              title={item.route ? item.title : 'Daily Challenge  Coming Soon'}
-              onPress={() => item.route && router.push(item.route)}
-              disabled={!item.route}
+              title={item.title}
+              onPress={() => router.push(item.route)}
               style={styles.menuButton}
             />
           ))}
@@ -140,6 +165,18 @@ const styles = StyleSheet.create({
   },
   play: {
     minHeight: 64,
+  },
+  dailyCard: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: 12,
+  },
+  dailyButton: {
+    minWidth: 96,
+  },
+  weeklyPreview: {
+    gap: 8,
   },
   menuGrid: {
     flexDirection: 'row',

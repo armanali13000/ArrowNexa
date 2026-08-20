@@ -9,20 +9,22 @@ type Props = {
   subtitle?: string;
   enabled: boolean;
   onToggle: () => void;
+  disabled?: boolean;
 };
 
-export const ToggleRow = ({ title, subtitle, enabled, onToggle }: Props) => {
+export const ToggleRow = ({ title, subtitle, enabled, onToggle, disabled }: Props) => {
   const theme = useTheme();
   return (
     <Pressable
       accessibilityRole="switch"
       accessibilityState={{ checked: enabled }}
       accessibilityLabel={title}
+      disabled={disabled}
       onPress={async () => {
         await hapticsService.tap();
         onToggle();
       }}
-      style={styles.row}
+      style={[styles.row, { opacity: disabled ? 0.45 : 1 }]}
     >
       <View style={styles.copy}>
         <Text variant="body">{title}</Text>
