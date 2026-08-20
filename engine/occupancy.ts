@@ -7,7 +7,7 @@ export const cellKey = (point: GridPoint) => `${point.row},${point.col}`;
 export const buildOccupancyMap = (arrows: PuzzleArrow[]): OccupancyMap => {
   const occupancy = new Map<string, string>();
   arrows.forEach((arrow) => {
-    if (arrow.state === 'removed') return;
+    if (arrow.state === 'removed' || arrow.state === 'moving') return;
     arrow.path.forEach((point) => occupancy.set(cellKey(point), arrow.id));
   });
   return occupancy;

@@ -1,6 +1,7 @@
 import { router } from 'expo-router';
 import React, { useMemo, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, View } from 'react-native';
+import Animated, { ZoomIn } from 'react-native-reanimated';
 import Svg, { Path } from 'react-native-svg';
 import { AppBackground } from '../components/layout/AppBackground';
 import { ScreenHeader } from '../components/layout/ScreenHeader';
@@ -12,6 +13,7 @@ import { useTheme } from '../hooks/useTheme';
 import { getChapters } from '../services/progression/chapterService';
 import { calculateTotalStars } from '../services/progression/progressionService';
 import { hapticsService } from '../services/haptics/hapticsService';
+import { audioService } from '../services/audio/audioService';
 import { useProgressStore } from '../store/progress/progressStore';
 
 export default function LevelsScreen() {
@@ -57,25 +59,27 @@ export default function LevelsScreen() {
                   const finale = levelNumber % 50 === 0;
                   const position = nodePosition(index);
                   return (
-                    <Pressable
-                      key={levelNumber}
-                      accessibilityRole="button"
-                      accessibilityLabel={`Level ${levelNumber} ${state}`}
-                      onPress={async () => {
-                        if (state === 'locked') {
-                          await hapticsService.warning();
-                          setNotice(`Complete Level ${Math.max(1, levelNumber - 1)} first.`);
-                          return;
-                        }
-                        router.push({ pathname: '/game', params: { level: String(levelNumber) } });
-                      }}
-                      style={[styles.node, position, { backgroundColor: nodeColor(state), borderColor: finale ? theme.colors.accent : theme.colors.divider }]}
-                    >
-                      {state === 'locked' ? <LockIcon color={theme.colors.textSecondary} size={14} /> : <Text variant="caption" color={state === 'current' ? '#FFFFFF' : theme.colors.textPrimary}>{levelNumber}</Text>}
-                      {completedLevels[levelNumber] ? <View style={styles.nodeStars}>{Array.from({ length: completedLevels[levelNumber] }, (_, star) => <StarIcon key={star} color={theme.colors.accent} size={9} />)}</View> : null}
-                      {finale ? <Text variant="caption" color={theme.colors.accent}>FINAL</Text> : null}
-                      <Text variant="caption" color={theme.colors.textSecondary}>{metadata.difficulty[0]}</Text>
-                    </Pressable>
+                    <Animated.View key={levelNumber} entering={state === 'current' ? ZoomIn.duration(280) : undefined} style={[styles.nodeShell, position]}>
+                      <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel={`Level ${levelNumber} ${state}`}
+                        onPress={async () => {
+                          if (state === 'locked') {
+                            await Promise.all([hapticsService.warning(), audioService.blockedArrow()]);
+                            setNotice(`Complete Level ${Math.max(1, levelNumber - 1)} first.`);
+                            return;
+                          }
+                          await Promise.all([hapticsService.button(), audioService.buttonClick()]);
+                          router.push({ pathname: '/game', params: { level: String(levelNumber) } });
+                        }}
+                        style={[styles.node, { backgroundColor: nodeColor(state), borderColor: finale || state === 'current' ? theme.colors.accent : theme.colors.divider }]}
+                      >
+                        {state === 'locked' ? <LockIcon color={theme.colors.textSecondary} size={14} /> : <Text variant="caption" color={state === 'current' ? '#FFFFFF' : theme.colors.textPrimary}>{levelNumber}</Text>}
+                        {completedLevels[levelNumber] ? <View style={styles.nodeStars}>{Array.from({ length: completedLevels[levelNumber] }, (_, star) => <StarIcon key={star} color={theme.colors.accent} size={9} />)}</View> : null}
+                        {finale ? <Text variant="caption" color={theme.colors.accent}>FINAL</Text> : null}
+                        <Text variant="caption" color={theme.colors.textSecondary}>{metadata.difficulty[0]}</Text>
+                      </Pressable>
+                    </Animated.View>
                   );
                 })}
               </View>
@@ -112,6 +116,7 @@ const styles = StyleSheet.create({
   chapter: { gap: 14 },
   chapterHead: { flexDirection: 'row', justifyContent: 'space-between', gap: 12 },
   map: { height: 520, position: 'relative' },
-  node: { position: 'absolute', width: 54, height: 54, borderRadius: 27, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
+  nodeShell: { position: 'absolute', width: 54, height: 54 },
+  node: { width: 54, height: 54, borderRadius: 27, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
   nodeStars: { position: 'absolute', bottom: -11, flexDirection: 'row', gap: 1 },
 });

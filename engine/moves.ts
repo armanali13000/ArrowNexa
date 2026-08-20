@@ -24,7 +24,7 @@ export const traceExitCells = (arrow: PuzzleArrow, size: { rows: number; cols: n
 
 export const canArrowEscape = (arrows: PuzzleArrow[], size: { rows: number; cols: number }, arrowId: string): EscapeCheck => {
   const arrow = arrows.find((item) => item.id === arrowId);
-  if (!arrow || arrow.state === 'removed' || arrow.state === 'moving') return { canEscape: false, checkedCells: [] };
+  if (!arrow || arrow.state === 'removed' || arrow.state === 'moving' || arrow.state === 'restoring') return { canEscape: false, checkedCells: [] };
 
   const occupancy = buildOccupancyMap(arrows);
   const checkedCells = traceExitCells(arrow, size);
@@ -40,7 +40,7 @@ export const getBlockingArrow = (arrows: PuzzleArrow[], size: { rows: number; co
 
 export const getValidMoves = (arrows: PuzzleArrow[], size: { rows: number; cols: number }) =>
   arrows
-    .filter((arrow) => arrow.state !== 'removed' && arrow.state !== 'moving')
+    .filter((arrow) => arrow.state !== 'removed' && arrow.state !== 'moving' && arrow.state !== 'restoring')
     .filter((arrow) => canArrowEscape(arrows, size, arrow.id).canEscape)
     .map((arrow) => arrow.id);
 

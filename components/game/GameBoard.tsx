@@ -12,9 +12,10 @@ type Props = {
   debug?: boolean;
   onArrowPress: (arrowId: string) => void;
   onEscapeComplete: (arrowId: string) => void;
+  onRestoreComplete?: (arrowId: string) => void;
 };
 
-export const GameBoard = memo(({ level, arrows, hintedArrowIds = [], debug = false, onArrowPress, onEscapeComplete }: Props) => {
+export const GameBoard = memo(({ level, arrows, hintedArrowIds = [], debug = false, onArrowPress, onEscapeComplete, onRestoreComplete }: Props) => {
   const theme = useTheme();
   const [availableWidth, setAvailableWidth] = useState(0);
   const boardSize = Math.max(0, availableWidth);
@@ -73,6 +74,7 @@ export const GameBoard = memo(({ level, arrows, hintedArrowIds = [], debug = fal
                 isHinted={hintedArrowIds.includes(arrow.id)}
                 onPress={onArrowPress}
                 onEscapeComplete={onEscapeComplete}
+                onRestoreComplete={onRestoreComplete}
               />
             ))}
         </Pressable>

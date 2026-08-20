@@ -1,5 +1,5 @@
 export type Direction = 'UP' | 'DOWN' | 'LEFT' | 'RIGHT';
-export type ArrowState = 'normal' | 'selected' | 'blocked' | 'hinted' | 'moving' | 'removed';
+export type ArrowState = 'normal' | 'selected' | 'blocked' | 'hinted' | 'moving' | 'restoring' | 'removed';
 export type Difficulty = 'Easy' | 'Normal' | 'Hard' | 'Expert';
 export type LevelState = 'locked' | 'unlocked' | 'completed' | 'perfect';
 export type PuzzleStatus = 'playing' | 'paused' | 'completed' | 'failed';

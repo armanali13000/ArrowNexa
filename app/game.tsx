@@ -1,6 +1,7 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { BackHandler, Pressable, StyleSheet, View } from 'react-native';
+import Animated, { FadeIn, ZoomIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { GameBoard } from '../components/game/GameBoard';
 import { PauseModal } from '../components/game/GameModals';
@@ -19,6 +20,7 @@ import { useTheme } from '../hooks/useTheme';
 import { economyService } from '../services/economy/economyService';
 import { clearGameplaySession, loadGameplaySession, saveGameplaySession } from '../services/gameplay/sessionStorage';
 import { hapticsService } from '../services/haptics/hapticsService';
+import { audioService } from '../services/audio/audioService';
 import { loadCachedLevel, saveCachedLevel } from '../services/storage/levelCacheStorage';
 import { useGameStore } from '../store/game/gameStore';
 import { useProgressStore } from '../store/progress/progressStore';
@@ -61,7 +63,7 @@ export default function GameScreen() {
   const [freeUndosUsed, setFreeUndosUsed] = useState(0);
   const [moveHistory, setMoveHistory] = useState<string[]>([]);
   const [highlightedArrowIds, setHighlightedArrowIds] = useState<string[]>([]);
-  const [movingArrowId, setMovingArrowId] = useState<string | undefined>();
+  const [movingArrowIds, setMovingArrowIds] = useState<string[]>([]);
   const [failedVisible, setFailedVisible] = useState(false);
   const [completeVisible, setCompleteVisible] = useState(false);
   const [boostersVisible, setBoostersVisible] = useState(false);
@@ -74,7 +76,8 @@ export default function GameScreen() {
 
   const validMoves = useMemo(() => getValidMoves(arrows, level.size), [arrows, level.size]);
   const removedArrowIds = useMemo(() => arrows.filter((arrow) => arrow.state === 'removed').map((arrow) => arrow.id), [arrows]);
-  const undoAvailable = moveHistory.length > 0 && !movingArrowId && !completeVisible && (freeUndosUsed < FREE_UNDOS_PER_LEVEL || boosters.undo > 0);
+  const motionLocked = movingArrowIds.length > 0 || arrows.some((arrow) => arrow.state === 'restoring');
+  const undoAvailable = moveHistory.length > 0 && !motionLocked && !completeVisible && (freeUndosUsed < FREE_UNDOS_PER_LEVEL || boosters.undo > 0);
 
   useEffect(() => {
     let mounted = true;
@@ -141,7 +144,7 @@ export default function GameScreen() {
     setFreeUndosUsed(0);
     setMoveHistory([]);
     setHighlightedArrowIds([]);
-    setMovingArrowId(undefined);
+    setMovingArrowIds([]);
     setFailedVisible(false);
     setCompleteVisible(false);
     setCompletion(undefined);
@@ -155,37 +158,40 @@ export default function GameScreen() {
   }, []);
 
   const handleArrowPress = useCallback(async (arrowId: string) => {
-    if (movingArrowId || completeVisible || failedVisible) return;
+    if (completeVisible || failedVisible) return;
     const target = arrows.find((arrow) => arrow.id === arrowId);
-    if (!target || target.state === 'moving' || target.state === 'removed') return;
+    if (!target || target.state === 'moving' || target.state === 'restoring' || target.state === 'removed' || target.state === 'blocked') return;
 
     const result = canArrowEscape(arrows, level.size, arrowId);
     if (!result.canEscape) {
-      await hapticsService.error();
+      await Promise.all([hapticsService.blocked(), audioService.blockedArrow()]);
       setArrows((current) => current.map((arrow) => (arrow.id === arrowId ? { ...arrow, state: 'blocked' } : arrow)));
       setTimeout(() => restoreBlockedArrow(arrowId), 260);
       setMistakes((count) => count + 1);
       if (currentLevel >= FIRST_LIFE_LOSS_LEVEL) {
         setLives((currentLives) => {
           const nextLives = Math.max(0, currentLives - 1);
-          if (nextLives === 0) setFailedVisible(true);
+          if (nextLives === 0) {
+            setFailedVisible(true);
+            audioService.gameOver().catch(() => undefined);
+          }
           return nextLives;
         });
         await recordLifeLost();
-        await hapticsService.warning();
+        await Promise.all([hapticsService.lifeLost(), audioService.play('lifeLost')]);
       }
       return;
     }
 
-    await hapticsService.success();
+    await Promise.all([hapticsService.arrowSuccess(), audioService.arrowMove()]);
     setHighlightedArrowIds([]);
-    setMovingArrowId(arrowId);
+    setMovingArrowIds((ids) => (ids.includes(arrowId) ? ids : [...ids, arrowId]));
     setMoveCount((count) => count + 1);
     setArrows((current) => current.map((arrow) => (arrow.id === arrowId ? { ...arrow, state: 'moving' } : arrow)));
-  }, [arrows, completeVisible, currentLevel, failedVisible, level.size, movingArrowId, recordLifeLost, restoreBlockedArrow]);
+  }, [arrows, completeVisible, currentLevel, failedVisible, level.size, recordLifeLost, restoreBlockedArrow]);
 
   const handleEscapeComplete = useCallback((arrowId: string) => {
-    setMovingArrowId(undefined);
+    setMovingArrowIds((ids) => ids.filter((id) => id !== arrowId));
     setMoveHistory((history) => [...history, arrowId]);
     setArrows((current) => {
       const next = markArrowRemoved(current, arrowId);
@@ -194,8 +200,12 @@ export default function GameScreen() {
     });
   }, []);
 
+  const handleRestoreComplete = useCallback((arrowId: string) => {
+    setArrows((current) => current.map((arrow) => (arrow.id === arrowId && arrow.state === 'restoring' ? { ...arrow, state: 'normal' } : arrow)));
+  }, []);
+
   const handleHint = useCallback(async () => {
-    if (movingArrowId || completeVisible || failedVisible) return;
+    if (motionLocked || completeVisible || failedVisible) return;
     const recommended = getRecommendedMove({ ...level, arrows }, removedArrowIds) ?? validMoves[0];
     if (!recommended) return;
     const spent = await economyService.spendHint();
@@ -204,10 +214,10 @@ export default function GameScreen() {
       return;
     }
     setHintsUsed((count) => count + 1);
-    await hapticsService.tap();
+    await Promise.all([hapticsService.hint(), audioService.play('hint')]);
     setHighlightedArrowIds([recommended]);
-    setTimeout(() => setHighlightedArrowIds((current) => (current.includes(recommended) ? [] : current)), 1300);
-  }, [arrows, completeVisible, failedVisible, level, movingArrowId, removedArrowIds, validMoves]);
+    setTimeout(() => setHighlightedArrowIds((current) => (current.includes(recommended) ? [] : current)), 2200);
+  }, [arrows, completeVisible, failedVisible, level, motionLocked, removedArrowIds, validMoves]);
 
   const handleUndo = useCallback(async () => {
     if (!undoAvailable) return;
@@ -222,8 +232,8 @@ export default function GameScreen() {
     setHighlightedArrowIds([]);
     setMoveHistory((history) => history.slice(0, -1));
     setMoveCount((count) => Math.max(0, count - 1));
-    setArrows((current) => current.map((arrow) => (arrow.id === arrowId ? { ...arrow, state: 'normal' } : arrow)));
-    await hapticsService.tap();
+    setArrows((current) => current.map((arrow) => (arrow.id === arrowId ? { ...arrow, state: 'restoring' } : arrow)));
+    await Promise.all([hapticsService.undo(), audioService.play('undo')]);
   }, [freeUndosUsed, moveHistory, undoAvailable]);
 
   const useExtraLife = useCallback(async () => {
@@ -234,11 +244,11 @@ export default function GameScreen() {
     setLives((current) => (current === 0 ? 1 : Math.min(MAX_LIVES_WITH_BOOSTER, current + 1)));
     setFailedVisible(false);
     setBoostersVisible(false);
-    await hapticsService.success();
+    await Promise.all([hapticsService.booster(), audioService.play('booster')]);
   }, [lives]);
 
   const useReveal = useCallback(async () => {
-    if (movingArrowId || completeVisible || failedVisible) return;
+    if (motionLocked || completeVisible || failedVisible) return;
     const moves = validMoves.slice(0, REVEAL_COUNT);
     if (!moves.length) return;
     const spent = await economyService.useBooster('reveal');
@@ -246,8 +256,8 @@ export default function GameScreen() {
     setHighlightedArrowIds(moves);
     setBoostersVisible(false);
     setTimeout(() => setHighlightedArrowIds([]), 1600);
-    await hapticsService.tap();
-  }, [completeVisible, failedVisible, movingArrowId, validMoves]);
+    await Promise.all([hapticsService.booster(), audioService.play('booster')]);
+  }, [completeVisible, failedVisible, motionLocked, validMoves]);
 
   const retry = useCallback(async () => {
     await recordRetry();
@@ -276,9 +286,9 @@ export default function GameScreen() {
     await recordLevelCompletion(performance, rewards.rewards, rewards.rewardKeys);
     await clearGameplaySession();
     setCompletion({ stars, moves: moveCount, mistakes, hintsUsed, timeSeconds, rewardLabel: rewards.label, xpGained, nexaRank });
-    setCompleteVisible(true);
     setArrows(finalArrows);
-    await hapticsService.levelComplete();
+    setTimeout(() => setCompleteVisible(true), 180);
+    await Promise.all([hapticsService.levelComplete(), audioService.levelComplete()]);
   }, [claimedRewards, completedLevels, currentLevel, hintsUsed, level.difficulty, lives, mistakes, moveCount, nexaRank, recordLevelCompletion, usedExtraLife]);
 
   completeHandlerRef.current = handleComplete;
@@ -301,7 +311,7 @@ export default function GameScreen() {
         </Pressable>
       </View>
 
-      <View style={styles.boardArea}>
+      <Animated.View entering={FadeIn.duration(220)} style={styles.boardArea}>
         <GameBoard
           level={level}
           arrows={arrows}
@@ -309,13 +319,14 @@ export default function GameScreen() {
           debug={DEBUG_BOARD}
           onArrowPress={handleArrowPress}
           onEscapeComplete={handleEscapeComplete}
+          onRestoreComplete={handleRestoreComplete}
         />
-      </View>
+      </Animated.View>
 
       <View style={styles.footer}>
-        <Tool label="Hint" value={String(hints)} onPress={handleHint} disabled={Boolean(movingArrowId) || completeVisible} />
+        <Tool label="Hint" value={String(hints)} onPress={handleHint} disabled={motionLocked || completeVisible} />
         <Tool label="Undo" value={String(Math.max(0, FREE_UNDOS_PER_LEVEL - freeUndosUsed) + boosters.undo)} onPress={handleUndo} disabled={!undoAvailable} />
-        <Tool label="Boosters" value={`${boosters.extraLife + boosters.reveal + boosters.undo}`} onPress={() => setBoostersVisible(true)} disabled={Boolean(movingArrowId) || completeVisible} />
+        <Tool label="Boosters" value={`${boosters.extraLife + boosters.reveal + boosters.undo}`} onPress={() => setBoostersVisible(true)} disabled={motionLocked || completeVisible} />
       </View>
 
       <PauseModal onRestart={retry} />
@@ -334,7 +345,16 @@ export default function GameScreen() {
 const cloneLevelArrows = (level: GeneratedLevel) => level.arrows.map((arrow) => ({ ...arrow, path: [...arrow.path], state: 'normal' as const }));
 
 const Tool = ({ label, value, disabled, onPress }: { label: string; value: string; disabled?: boolean; onPress: () => void }) => (
-  <Pressable accessibilityRole="button" accessibilityLabel={label} disabled={disabled} onPress={onPress} style={({ pressed }) => [styles.tool, { opacity: disabled ? 0.35 : pressed ? 0.55 : 1 }]}>
+  <Pressable
+    accessibilityRole="button"
+    accessibilityLabel={label}
+    disabled={disabled}
+    onPress={async () => {
+      await Promise.all([hapticsService.button(), audioService.buttonClick()]);
+      onPress();
+    }}
+    style={({ pressed }) => [styles.tool, { opacity: disabled ? 0.35 : pressed ? 0.55 : 1 }]}
+  >
     <Text variant="title" align="center" color="#1B1E22">{label}</Text>
     <Text variant="caption" align="center" color="#72777D">{value}</Text>
   </Pressable>
@@ -344,7 +364,13 @@ const CompleteModal = ({ visible, summary, onNext, onReplay }: { visible: boolea
   <AppModal visible={visible} onClose={() => undefined}>
     <View style={styles.modalStack}>
       <Text variant="heading1" align="center">Level Complete</Text>
-      <View style={styles.starRow}>{Array.from({ length: 3 }, (_, index) => <StarIcon key={index} color={summary && index < summary.stars ? '#FFB84D' : '#DBE5EA'} size={30} />)}</View>
+      <View style={styles.starRow}>
+        {Array.from({ length: 3 }, (_, index) => (
+          <Animated.View key={index} entering={visible ? ZoomIn.delay(index * 130).duration(260) : undefined}>
+            <StarIcon color={summary && index < summary.stars ? '#FFB84D' : '#DBE5EA'} size={30} />
+          </Animated.View>
+        ))}
+      </View>
       <Text variant="body" align="center">Moves {summary?.moves ?? 0} - Mistakes {summary?.mistakes ?? 0} - Hints {summary?.hintsUsed ?? 0} - Time {summary?.timeSeconds ?? 0}s</Text>
       <Text variant="title" align="center">{summary?.rewardLabel ?? 'Progress unlocked'}</Text>
       <Text variant="title" align="center">+{summary?.xpGained ?? 0} XP - Nexa Rank {summary?.nexaRank ?? 1}</Text>

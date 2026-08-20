@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
+import Animated, { ZoomIn } from 'react-native-reanimated';
 import { AppBackground } from '../components/layout/AppBackground';
 import { ScreenHeader } from '../components/layout/ScreenHeader';
 import { Button, PrimaryButton } from '../components/ui/Button';
@@ -8,6 +9,7 @@ import { Text } from '../components/ui/Text';
 import { DAILY_REWARD_SCHEDULE } from '../constants/progression';
 import { claimDailyReward, getDailyClaimStatus } from '../services/progression/dailyRewardService';
 import { hapticsService } from '../services/haptics/hapticsService';
+import { audioService } from '../services/audio/audioService';
 import { useProgressStore } from '../store/progress/progressStore';
 
 export default function DailyRewardsScreen() {
@@ -23,7 +25,7 @@ export default function DailyRewardsScreen() {
       return;
     }
     await claimDailyRewards([...result.rewards, ...result.streakRewards], result.state);
-    await hapticsService.success();
+    await Promise.all([hapticsService.booster(), audioService.play('dailyReward')]);
     setMessage('Daily reward claimed.');
   };
 
@@ -38,11 +40,13 @@ export default function DailyRewardsScreen() {
             {DAILY_REWARD_SCHEDULE.map((day) => {
               const state = day.day < dailyReward.cycleDay ? 'claimed' : day.day === dailyReward.cycleDay && status.available ? 'available' : 'locked';
               return (
-                <Card key={day.day} style={styles.day}>
+                <Animated.View key={day.day} entering={state === 'available' ? ZoomIn.duration(260) : undefined} style={styles.dayWrap}>
+                <Card style={styles.day}>
                   <Text variant="title">Day {day.day}</Text>
                   <Text variant="caption">{state.toUpperCase()}</Text>
                   <Text variant="caption">{day.rewards.map((reward) => reward.type === 'hint' ? `+${reward.amount} Hint` : `+${reward.amount} Booster`).join(', ')}</Text>
                 </Card>
+                </Animated.View>
               );
             })}
           </View>
@@ -59,5 +63,6 @@ const styles = StyleSheet.create({
   content: { padding: 18, gap: 14, paddingBottom: 34 },
   stack: { gap: 14 },
   days: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  day: { width: '47%', minHeight: 104, gap: 6 },
+  dayWrap: { width: '47%' },
+  day: { minHeight: 104, gap: 6 },
 });

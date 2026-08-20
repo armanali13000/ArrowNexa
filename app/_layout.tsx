@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { StyleSheet } from 'react-native';
+import { AppState, StyleSheet } from 'react-native';
 import { useAppBootstrap } from '../hooks/useAppBootstrap';
 import { useTheme } from '../hooks/useTheme';
 import { SplashScreenView } from '../components/layout/SplashScreenView';
@@ -14,6 +14,13 @@ export default function RootLayout() {
 
   useEffect(() => {
     audioService.initialize().catch(() => undefined);
+    const subscription = AppState.addEventListener('change', (state) => {
+      audioService.setActive(state === 'active').catch(() => undefined);
+    });
+    return () => {
+      subscription.remove();
+      audioService.stopMusic().catch(() => undefined);
+    };
   }, []);
 
   return (
