@@ -6,13 +6,16 @@ import { GameBoard } from '../components/game/GameBoard';
 import { LevelCompleteModal, PauseModal } from '../components/game/GameModals';
 import { ArrowBackIcon, GearIcon } from '../components/ui/Icons';
 import { Text } from '../components/ui/Text';
-import { denseReferenceLevel } from '../engine/board';
+import { createLevel } from '../engine/board';
 import { canArrowEscape, getValidMoves, isBoardComplete, markArrowRemoved } from '../engine/moves';
-import { PuzzleArrow } from '../engine/types/game';
+import { getRecommendedMove } from '../engine/solver/hint';
+import { GeneratedLevel, PuzzleArrow } from '../engine/types/game';
 import { useTheme } from '../hooks/useTheme';
 import { hapticsService } from '../services/haptics/hapticsService';
+import { loadCachedLevel, saveCachedLevel } from '../services/storage/levelCacheStorage';
 import { useGameStore } from '../store/game/gameStore';
 import { useProgressStore } from '../store/progress/progressStore';
+import { GENERATION_VERSION } from '../engine/levels/levelConfig';
 
 const DEBUG_BOARD = false;
 
@@ -21,11 +24,30 @@ export default function GameScreen() {
   const currentLevel = useProgressStore((state) => state.currentLevel);
   const setPauseVisible = useGameStore((state) => state.setPauseVisible);
   const setCompleteVisible = useGameStore((state) => state.setCompleteVisible);
-  const [arrows, setArrows] = useState<PuzzleArrow[]>(() => denseReferenceLevel.arrows.map((arrow) => ({ ...arrow, path: [...arrow.path] })));
+  const [level, setLevel] = useState<GeneratedLevel>(() => createLevel(currentLevel));
+  const [arrows, setArrows] = useState<PuzzleArrow[]>(() => level.arrows.map((arrow) => ({ ...arrow, path: [...arrow.path] })));
   const [moveCount, setMoveCount] = useState(0);
   const [hintedArrowId, setHintedArrowId] = useState<string | undefined>();
 
-  const validMoves = useMemo(() => getValidMoves(arrows, denseReferenceLevel.size), [arrows]);
+  const validMoves = useMemo(() => getValidMoves(arrows, level.size), [arrows, level.size]);
+
+  useEffect(() => {
+    let mounted = true;
+    const prepare = async () => {
+      const cached = await loadCachedLevel(currentLevel, GENERATION_VERSION);
+      const nextLevel = cached ?? createLevel(currentLevel);
+      if (!cached) await saveCachedLevel(nextLevel);
+      if (!mounted) return;
+      setLevel(nextLevel);
+      setArrows(nextLevel.arrows.map((arrow) => ({ ...arrow, path: [...arrow.path] })));
+      setMoveCount(0);
+      setHintedArrowId(undefined);
+    };
+    prepare().catch(() => undefined);
+    return () => {
+      mounted = false;
+    };
+  }, [currentLevel]);
 
   useEffect(() => {
     const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
@@ -44,7 +66,7 @@ export default function GameScreen() {
       const target = arrows.find((arrow) => arrow.id === arrowId);
       if (!target || target.state === 'moving' || target.state === 'removed') return;
 
-      const result = canArrowEscape(arrows, denseReferenceLevel.size, arrowId);
+      const result = canArrowEscape(arrows, level.size, arrowId);
       if (!result.canEscape) {
         await hapticsService.error();
         setArrows((current) => current.map((arrow) => (arrow.id === arrowId ? { ...arrow, state: 'blocked' } : arrow)));
@@ -57,7 +79,7 @@ export default function GameScreen() {
       setMoveCount((count) => count + 1);
       setArrows((current) => current.map((arrow) => (arrow.id === arrowId ? { ...arrow, state: 'moving' } : arrow)));
     },
-    [arrows, restoreArrow],
+    [arrows, level.size, restoreArrow],
   );
 
   const handleEscapeComplete = useCallback(
@@ -74,15 +96,16 @@ export default function GameScreen() {
   );
 
   const handleHint = useCallback(async () => {
-    const [firstMove] = validMoves;
-    if (!firstMove) {
+    const removedArrowIds = arrows.filter((arrow) => arrow.state === 'removed').map((arrow) => arrow.id);
+    const recommended = getRecommendedMove({ ...level, arrows }, removedArrowIds) ?? validMoves[0];
+    if (!recommended) {
       await hapticsService.error();
       return;
     }
     await hapticsService.tap();
-    setHintedArrowId(firstMove);
-    setTimeout(() => setHintedArrowId((current) => (current === firstMove ? undefined : current)), 1200);
-  }, [validMoves]);
+    setHintedArrowId(recommended);
+    setTimeout(() => setHintedArrowId((current) => (current === recommended ? undefined : current)), 1200);
+  }, [arrows, level, validMoves]);
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -92,7 +115,7 @@ export default function GameScreen() {
         </Pressable>
         <View style={styles.levelCopy}>
           <Text variant="title" align="center" color="#1B1E22">Level {currentLevel}</Text>
-          <Text variant="caption" align="center" color="#5F656B">{denseReferenceLevel.difficulty.toUpperCase()}</Text>
+          <Text variant="caption" align="center" color="#5F656B">{level.difficulty.toUpperCase()} {Math.round(level.difficultyScore)}</Text>
           <View style={styles.hearts} accessibilityLabel="Lives 3">
             <View style={styles.heart} />
             <View style={styles.heart} />
@@ -106,7 +129,7 @@ export default function GameScreen() {
 
       <View style={styles.boardArea}>
         <GameBoard
-          level={denseReferenceLevel}
+          level={level}
           arrows={arrows}
           hintedArrowId={hintedArrowId}
           debug={DEBUG_BOARD}

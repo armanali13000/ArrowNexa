@@ -3,6 +3,7 @@ export type ArrowState = 'normal' | 'selected' | 'blocked' | 'hinted' | 'moving'
 export type Difficulty = 'Easy' | 'Normal' | 'Hard' | 'Expert';
 export type LevelState = 'locked' | 'unlocked' | 'completed' | 'perfect';
 export type PuzzleStatus = 'playing' | 'paused' | 'completed' | 'failed';
+export type BoosterType = 'extra_life' | 'undo' | 'reveal' | 'clear_blocker';
 
 export type GridPoint = {
   row: number;
@@ -39,6 +40,82 @@ export type EscapeCheck = {
   canEscape: boolean;
   blockerId?: string;
   checkedCells: GridPoint[];
+};
+
+export type LevelGenerationConfig = {
+  rows: number;
+  cols: number;
+  targetArrowCount: number;
+  minPathLength: number;
+  maxPathLength: number;
+  maxTurnsPerArrow: number;
+  targetDensity: { min: number; max: number };
+  difficulty: Difficulty;
+  targetScore: number;
+  branchingTarget?: number;
+  minimumSolutionDepth?: number;
+  maximumSolutionDepth?: number;
+  seed: string;
+};
+
+export type DifficultyMetrics = {
+  arrowCount: number;
+  occupiedCells: number;
+  density: number;
+  solutionDepth: number;
+  initialValidMoves: number;
+  averageValidMoves: number;
+  dependencyDepth: number;
+  branchingScore: number;
+  forcedMoveRatio: number;
+  averagePathLength: number;
+  averageTurns: number;
+  complexityScore: number;
+};
+
+export type SolverResult = {
+  solvable: boolean;
+  solution?: string[];
+  exploredStates: number;
+  solutionLength?: number;
+  branchingScore?: number;
+  maxDepth?: number;
+  averageValidMoves?: number;
+  forcedMoveRatio?: number;
+};
+
+export type GeneratedLevel = PuzzleLevel & {
+  levelNumber: number;
+  generationVersion: number;
+  seed: string;
+  difficultyScore: number;
+  metrics: DifficultyMetrics;
+  generationAttempts: number;
+  generationDurationMs: number;
+};
+
+export type BoosterInventory = {
+  extraLife: number;
+  undo: number;
+  reveal: number;
+  clearBlocker: number;
+};
+
+export type Reward =
+  | { type: 'hint'; amount: number }
+  | { type: 'booster'; booster: BoosterType; amount: number };
+
+export type LevelPerformance = {
+  levelNumber: number;
+  completed: boolean;
+  stars: number;
+  moves: number;
+  mistakes: number;
+  hintsUsed: number;
+  livesRemaining: number;
+  timeSeconds: number;
+  difficulty: Difficulty;
+  usedExtraLife: boolean;
 };
 
 export type ArrowPieceData = PuzzleArrow;

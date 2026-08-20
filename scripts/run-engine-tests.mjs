@@ -29,6 +29,9 @@ execFileSync(
     'engine/occupancy.ts',
     'engine/types/game.ts',
     'engine/levels/testLevels.ts',
+    'engine/levels/levelFactory.ts',
+    'engine/levels/levelConfig.ts',
+    'engine/generator/validation.ts',
   ],
   { stdio: 'inherit' },
 );
@@ -36,6 +39,8 @@ execFileSync(
 const require = createRequire(import.meta.url);
 const { canArrowEscape, getBlockingArrow, getValidMoves, isBoardComplete, markArrowRemoved } = require(join(outDir, 'engine/moves.js'));
 const { phaseTwoTestLevels } = require(join(outDir, 'engine/levels/testLevels.js'));
+const { createLevel } = require(join(outDir, 'engine/levels/levelFactory.js'));
+const { validateLevelGeometry } = require(join(outDir, 'engine/generator/validation.js'));
 
 const arrow = (id, path, direction, state = 'normal') => ({
   id,
@@ -78,5 +83,37 @@ for (const level of phaseTwoTestLevels) {
   assert.equal(isBoardComplete(arrows), true, `${level.id} should complete after solution order`);
 }
 
+const generated120a = createLevel(120);
+const generated120b = createLevel(120);
+const generated121 = createLevel(121);
+assert.deepEqual(generated120a.arrows, generated120b.arrows, 'same level seed should produce identical arrows');
+assert.notDeepEqual(generated120a.arrows, generated121.arrows, 'different levels should generally differ');
+assert.equal(validateLevelGeometry(generated120a), true, 'generated level geometry should be valid');
+assert.equal(solveGenerated(generated120a), true, 'generated level should be solvable');
+
+const easy = createLevel(5);
+const hard = createLevel(360);
+const expert = createLevel(480);
+assert.equal(easy.metrics.complexityScore < 76, true, 'early easy level should not classify like Expert');
+assert.equal(expert.metrics.complexityScore > easy.metrics.complexityScore, true, 'late level should be harder than early level');
+assert.equal(hard.metrics.density >= easy.metrics.density, true, 'later boards should generally be denser');
+
+const cache = new Map();
+cache.set(cacheKey(generated120a), JSON.stringify(generated120a));
+assert.deepEqual(JSON.parse(cache.get(cacheKey(generated120a))), generated120a, 'cached level should load identically');
+
 console.log('Engine tests passed');
 rmSync(outDir, { recursive: true, force: true });
+
+function solveGenerated(level) {
+  let arrows = level.arrows.map((item) => ({ ...item, path: item.path.map((point) => ({ ...point })) }));
+  for (const arrowId of level.solutionOrder) {
+    if (!canArrowEscape(arrows, level.size, arrowId).canEscape) return false;
+    arrows = markArrowRemoved(arrows, arrowId);
+  }
+  return isBoardComplete(arrows);
+}
+
+function cacheKey(level) {
+  return `${level.generationVersion}:${level.levelNumber}`;
+}
