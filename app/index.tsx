@@ -59,7 +59,7 @@ export default function HomeScreen() {
           <View style={styles.brandCopy}>
             <Text variant="display">ArrowNexa</Text>
             <Text variant="title" color={theme.colors.textSecondary}>Find the Way Out</Text>
-            <Text variant="caption" color={theme.colors.textSecondary}>Armanix Studio</Text>
+            <Text variant="caption" color={theme.colors.textSecondary}>Armanix Apps</Text>
           </View>
         </Animated.View>
 

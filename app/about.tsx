@@ -11,13 +11,14 @@ export default function AboutScreen() {
   const theme = useTheme();
   return (
     <AppBackground>
-      <ScreenHeader title="About" subtitle="Armanix Studio" />
+      <ScreenHeader title="About" subtitle="Armanix Apps" />
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <Card style={styles.hero}>
           <BrandLogo size={112} />
           <Text variant="display" align="center">ArrowNexa</Text>
           <Text variant="title" color={theme.colors.textSecondary} align="center">Find the Way Out</Text>
-          <Text variant="body" align="center">Developer: Armanix Studio</Text>
+          <Text variant="body" align="center">Armanix Apps</Text>
+          <Text variant="bodySmall" color={theme.colors.textSecondary} align="center">Developed by Arman</Text>
         </Card>
         <Card style={styles.stack}>
           <Text variant="heading2">Version</Text>
@@ -34,7 +35,8 @@ export default function AboutScreen() {
         </Card>
         <Card style={styles.stack}>
           <Text variant="heading2">Contact</Text>
-          <Text variant="bodySmall" color={theme.colors.textSecondary}>Developer: Armanix Studio</Text>
+          <Text variant="bodySmall" color={theme.colors.textSecondary}>Armanix Apps</Text>
+          <Text variant="bodySmall" color={theme.colors.textSecondary}>Developed by Arman</Text>
         </Card>
       </ScrollView>
     </AppBackground>
