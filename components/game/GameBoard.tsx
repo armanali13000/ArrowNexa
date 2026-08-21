@@ -23,11 +23,25 @@ export const GameBoard = memo(({ level, arrows, hintedArrowIds = [], debug = fal
   const innerSize = Math.max(0, boardSize - boardPadding * 2);
   const cellSize = innerSize / level.size.cols;
   const gridLines = useMemo(() => Array.from({ length: level.size.cols + 1 }, (_, index) => index), [level.size.cols]);
+  const pickArrowAt = (x: number, y: number) => {
+    const candidates = arrows
+      .filter((arrow) => arrow.state !== 'removed' && arrow.state !== 'moving' && arrow.state !== 'restoring')
+      .map((arrow) => ({ arrow, distance: distanceToArrow(arrow, x, y, cellSize, boardPadding) }))
+      .sort((left, right) => left.distance - right.distance);
+    const nearest = candidates[0];
+    if (!nearest) return;
+    if (nearest.distance <= Math.max(24, cellSize * 0.48)) onArrowPress(nearest.arrow.id);
+  };
 
   return (
     <View style={styles.wrapper} onLayout={(event) => setAvailableWidth(event.nativeEvent.layout.width)}>
       {boardSize > 0 ? (
-        <Pressable accessibilityRole="button" accessibilityLabel={`${level.title} puzzle board`} style={[styles.board, { width: boardSize, height: boardSize }]}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`${level.title} puzzle board`}
+          onPress={(event) => pickArrowAt(event.nativeEvent.locationX, event.nativeEvent.locationY)}
+          style={[styles.board, { width: boardSize, height: boardSize }]}
+        >
           <Svg width={boardSize} height={boardSize} viewBox={`0 0 ${boardSize} ${boardSize}`}>
             <Rect x="0" y="0" width={boardSize} height={boardSize} rx="4" fill="#FFFFFF" opacity={0} />
             {debug
@@ -72,7 +86,6 @@ export const GameBoard = memo(({ level, arrows, hintedArrowIds = [], debug = fal
                 theme={theme}
                 debug={debug}
                 isHinted={hintedArrowIds.includes(arrow.id)}
-                onPress={onArrowPress}
                 onEscapeComplete={onEscapeComplete}
                 onRestoreComplete={onRestoreComplete}
               />
@@ -84,6 +97,31 @@ export const GameBoard = memo(({ level, arrows, hintedArrowIds = [], debug = fal
 });
 
 GameBoard.displayName = 'GameBoard';
+
+const pointToPixel = (point: { row: number; col: number }, cellSize: number, boardPadding: number) => ({
+  x: boardPadding + point.col * cellSize + cellSize / 2,
+  y: boardPadding + point.row * cellSize + cellSize / 2,
+});
+
+const distanceToArrow = (arrow: PuzzleArrow, x: number, y: number, cellSize: number, boardPadding: number) => {
+  const points = arrow.path.map((point) => pointToPixel(point, cellSize, boardPadding));
+  if (points.length === 1) return Math.hypot(x - points[0].x, y - points[0].y);
+  let minDistance = Number.POSITIVE_INFINITY;
+  for (let index = 1; index < points.length; index += 1) {
+    minDistance = Math.min(minDistance, distanceToSegment({ x, y }, points[index - 1], points[index]));
+  }
+  return minDistance;
+};
+
+const distanceToSegment = (point: { x: number; y: number }, start: { x: number; y: number }, end: { x: number; y: number }) => {
+  const dx = end.x - start.x;
+  const dy = end.y - start.y;
+  const lengthSquared = dx * dx + dy * dy;
+  if (lengthSquared === 0) return Math.hypot(point.x - start.x, point.y - start.y);
+  const t = Math.max(0, Math.min(1, ((point.x - start.x) * dx + (point.y - start.y) * dy) / lengthSquared));
+  const projection = { x: start.x + t * dx, y: start.y + t * dy };
+  return Math.hypot(point.x - projection.x, point.y - projection.y);
+};
 
 const styles = StyleSheet.create({
   wrapper: {

@@ -1,6 +1,6 @@
 import { Difficulty, LevelGenerationConfig } from '../types/game';
 
-export const GENERATION_VERSION = 5;
+export const GENERATION_VERSION = 6;
 
 export const DIFFICULTY_THRESHOLDS: Array<{ max: number; difficulty: Difficulty }> = [
   { max: 25, difficulty: 'Easy' },

@@ -23,13 +23,20 @@ export const getArrowFacingDirection = (arrow: PuzzleArrow): Direction => {
 };
 
 export const traceExitCells = (arrow: PuzzleArrow, size: { rows: number; cols: number }) => {
-  const head = arrow.path[arrow.path.length - 1];
   const facingDirection = getArrowFacingDirection(arrow);
+  const occupiedCells = new Set<string>();
   const cells: GridPoint[] = [];
-  let cursor = nextPoint(head, facingDirection);
-  while (isInside(cursor, size)) {
-    cells.push(cursor);
-    cursor = nextPoint(cursor, facingDirection);
+  let translated = arrow.path.map((point) => ({ ...point }));
+
+  while (translated.some((point) => isInside(point, size))) {
+    translated = translated.map((point) => nextPoint(point, facingDirection));
+    translated.forEach((point) => {
+      if (!isInside(point, size)) return;
+      const key = `${point.row}:${point.col}`;
+      if (occupiedCells.has(key)) return;
+      occupiedCells.add(key);
+      cells.push(point);
+    });
   }
   return cells;
 };

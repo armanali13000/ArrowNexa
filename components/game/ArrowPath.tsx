@@ -14,12 +14,11 @@ type Props = {
   theme: Theme;
   debug?: boolean;
   isHinted: boolean;
-  onPress: (arrowId: string) => void;
   onEscapeComplete: (arrowId: string) => void;
   onRestoreComplete?: (arrowId: string) => void;
 };
 
-export const ArrowPath = memo(({ arrow, boardSize, cellSize, boardPadding, theme, debug, isHinted, onPress, onEscapeComplete, onRestoreComplete }: Props) => {
+export const ArrowPath = memo(({ arrow, boardSize, cellSize, boardPadding, theme, debug, isHinted, onEscapeComplete, onRestoreComplete }: Props) => {
   const strokeWidth = getArrowStrokeWidth(cellSize);
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
@@ -56,11 +55,14 @@ export const ArrowPath = memo(({ arrow, boardSize, cellSize, boardPadding, theme
     if (arrow.state === 'moving') {
       escapeReportedRef.current = false;
       const travel = Math.abs(geometry.exit.x) + Math.abs(geometry.exit.y);
-      const duration = Math.min(560, Math.max(360, travel * 0.9));
+      const duration = Math.min(1050, Math.max(720, travel * 1.25));
       pulse.value = withSequence(withTiming(1.02, { duration: 80 }), withTiming(1, { duration: 100 }));
-      translateX.value = withTiming(geometry.exit.x, { duration, easing: Easing.out(Easing.quad) });
-      translateY.value = withTiming(geometry.exit.y, { duration, easing: Easing.out(Easing.quad) });
-      opacity.value = withTiming(1, { duration }, () => runOnJS(reportEscape)(arrow.id));
+      translateX.value = withTiming(geometry.exit.x, { duration, easing: Easing.inOut(Easing.cubic) });
+      translateY.value = withTiming(geometry.exit.y, { duration, easing: Easing.inOut(Easing.cubic) });
+      opacity.value = withSequence(
+        withTiming(1, { duration: Math.floor(duration * 0.72) }),
+        withTiming(0, { duration: Math.floor(duration * 0.28), easing: Easing.out(Easing.quad) }, () => runOnJS(reportEscape)(arrow.id)),
+      );
       return;
     }
 
@@ -114,13 +116,13 @@ export const ArrowPath = memo(({ arrow, boardSize, cellSize, boardPadding, theme
 
   return (
     <Animated.View pointerEvents="box-none" style={[StyleSheet.absoluteFill, animatedStyle]}>
-      <Svg width={boardSize} height={boardSize} viewBox={`0 0 ${boardSize} ${boardSize}`} pointerEvents="box-none">
-        <Path d={geometry.shaftPath} fill="none" stroke="transparent" strokeWidth={touchStrokeWidth} strokeLinecap="round" strokeLinejoin="round" onPress={() => onPress(arrow.id)} />
-        <Path d={geometry.headPath} fill="transparent" stroke="transparent" strokeWidth={touchStrokeWidth * 0.5} strokeLinecap="round" strokeLinejoin="round" onPress={() => onPress(arrow.id)} />
+      <Svg width={boardSize} height={boardSize} viewBox={`0 0 ${boardSize} ${boardSize}`} pointerEvents="none">
+        <Path d={geometry.shaftPath} fill="none" stroke="transparent" strokeWidth={touchStrokeWidth} strokeLinecap="round" strokeLinejoin="round" />
+        <Path d={geometry.headPath} fill="transparent" stroke="transparent" strokeWidth={touchStrokeWidth * 0.5} strokeLinecap="round" strokeLinejoin="round" />
 
         {glow ? <Path d={geometry.shaftPath} fill="none" stroke={color} strokeWidth={strokeWidth + 7} strokeLinecap="round" strokeLinejoin="round" opacity={0.12} /> : null}
         <Path d={geometry.shaftPath} fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" />
-        <Path d={geometry.headPath} fill={color} stroke={color} strokeWidth={strokeWidth * 0.35} strokeLinecap="round" strokeLinejoin="round" onPress={() => onPress(arrow.id)} />
+        <Path d={geometry.headPath} fill={color} stroke={color} strokeWidth={strokeWidth * 0.35} strokeLinecap="round" strokeLinejoin="round" />
 
         {debug ? (
           <SvgText x={boardPadding + geometry.label.col * cellSize + 4} y={boardPadding + geometry.label.row * cellSize + 14} fill={theme.colors.secondary} fontSize="8">

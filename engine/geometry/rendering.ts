@@ -25,7 +25,7 @@ const pointBetween = (from: PixelPoint, to: PixelPoint, amount: number): PixelPo
   };
 };
 
-export const getArrowStrokeWidth = (cellSize: number) => Math.max(3.2, Math.min(6.6, cellSize * 0.13));
+export const getArrowStrokeWidth = (cellSize: number) => Math.max(3.6, Math.min(7.4, cellSize * 0.145));
 
 export const getVisualDirectionFromPath = (path: GridPoint[], fallback: Direction): Direction => {
   if (path.length < 2) return fallback;
@@ -68,19 +68,20 @@ export const createArrowHeadPath = (path: GridPoint[], direction: Direction, cel
 
 export const createArrowHeadFillPath = (path: GridPoint[], direction: Direction, cellSize: number, boardPadding: number, strokeWidth = getArrowStrokeWidth(cellSize)) => {
   const tip = gridToPixel(path[path.length - 1], cellSize, boardPadding);
-  const length = Math.max(strokeWidth * 2.55, cellSize * 0.24);
-  const spread = Math.max(strokeWidth * 1.75, cellSize * 0.16);
+  const length = Math.max(strokeWidth * 2.35, cellSize * 0.23);
+  const spread = Math.max(strokeWidth * 1.55, cellSize * 0.145);
+  const forward = strokeWidth * 0.72;
 
   if (direction === 'UP') {
-    return `M ${format(tip.x)} ${format(tip.y - strokeWidth * 0.2)} L ${format(tip.x - spread)} ${format(tip.y + length)} L ${format(tip.x + spread)} ${format(tip.y + length)} Z`;
+    return `M ${format(tip.x)} ${format(tip.y - forward)} L ${format(tip.x - spread)} ${format(tip.y + length)} L ${format(tip.x + spread)} ${format(tip.y + length)} Z`;
   }
   if (direction === 'DOWN') {
-    return `M ${format(tip.x)} ${format(tip.y + strokeWidth * 0.2)} L ${format(tip.x - spread)} ${format(tip.y - length)} L ${format(tip.x + spread)} ${format(tip.y - length)} Z`;
+    return `M ${format(tip.x)} ${format(tip.y + forward)} L ${format(tip.x - spread)} ${format(tip.y - length)} L ${format(tip.x + spread)} ${format(tip.y - length)} Z`;
   }
   if (direction === 'LEFT') {
-    return `M ${format(tip.x - strokeWidth * 0.2)} ${format(tip.y)} L ${format(tip.x + length)} ${format(tip.y - spread)} L ${format(tip.x + length)} ${format(tip.y + spread)} Z`;
+    return `M ${format(tip.x - forward)} ${format(tip.y)} L ${format(tip.x + length)} ${format(tip.y - spread)} L ${format(tip.x + length)} ${format(tip.y + spread)} Z`;
   }
-  return `M ${format(tip.x + strokeWidth * 0.2)} ${format(tip.y)} L ${format(tip.x - length)} ${format(tip.y - spread)} L ${format(tip.x - length)} ${format(tip.y + spread)} Z`;
+  return `M ${format(tip.x + forward)} ${format(tip.y)} L ${format(tip.x - length)} ${format(tip.y - spread)} L ${format(tip.x - length)} ${format(tip.y + spread)} Z`;
 };
 
 export const createArrowHeadStrokePaths = (path: GridPoint[], direction: Direction, cellSize: number, boardPadding: number, strokeWidth = getArrowStrokeWidth(cellSize)) => {

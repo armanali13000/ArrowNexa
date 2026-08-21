@@ -85,6 +85,7 @@ export default function GameScreen() {
 
   const validMoves = useMemo(() => getValidMoves(arrows, level.size), [arrows, level.size]);
   const removedArrowIds = useMemo(() => arrows.filter((arrow) => arrow.state === 'removed').map((arrow) => arrow.id), [arrows]);
+  const remainingArrows = arrows.filter((arrow) => arrow.state !== 'removed').length;
   const motionLocked = movingArrowIds.length > 0 || arrows.some((arrow) => arrow.state === 'restoring');
   const undoAvailable = moveHistory.length > 0 && !motionLocked && !completeVisible && (freeUndosUsed < FREE_UNDOS_PER_LEVEL || boosters.undo > 0);
 
@@ -319,9 +320,14 @@ export default function GameScreen() {
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.topBar}>
-        <Pressable accessibilityRole="button" accessibilityLabel="Back" onPress={() => router.back()} style={styles.iconButton}>
-          <ArrowBackIcon color="#1B1E22" size={20} />
-        </Pressable>
+        <View style={styles.leftControls}>
+          <Pressable accessibilityRole="button" accessibilityLabel="Back" onPress={() => router.back()} style={styles.iconButton}>
+            <ArrowBackIcon color="#1B1E22" size={20} />
+          </Pressable>
+          <View style={styles.counterPill} accessibilityLabel={`${remainingArrows} arrows remaining`}>
+            <Text variant="caption" color="#061344">{remainingArrows}</Text>
+          </View>
+        </View>
         <View style={styles.levelCopy}>
           <Text variant="title" align="center" color="#1B1E22">{isDailyMode ? 'Daily Challenge' : `Level ${currentLevel}`}</Text>
           <Text variant="caption" align="center" color="#5F656B">{isDailyMode ? `${formatDayMonth(dailyDate)} - ${getDailyDifficulty(dailyDate).toUpperCase()}` : level.difficulty.toUpperCase()}</Text>
@@ -444,6 +450,8 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#FCFBF8' },
   topBar: { minHeight: 108, paddingHorizontal: 18, paddingTop: 4, alignItems: 'center', flexDirection: 'row' },
   iconButton: { width: 42, height: 42, alignItems: 'center', justifyContent: 'center' },
+  leftControls: { width: 58, alignItems: 'flex-start', gap: 8 },
+  counterPill: { minWidth: 48, minHeight: 30, borderRadius: 8, backgroundColor: '#F3F5F7', alignItems: 'center', justifyContent: 'center' },
   levelCopy: { flex: 1, alignItems: 'center', gap: 4 },
   hearts: { flexDirection: 'row', gap: 7, paddingTop: 4 },
   boardArea: { flex: 1, justifyContent: 'center', paddingHorizontal: 4 },
