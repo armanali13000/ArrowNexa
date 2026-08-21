@@ -1,30 +1,24 @@
 import React from 'react';
-import { View } from 'react-native';
-import Svg, { Circle, Path } from 'react-native-svg';
-import { useTheme } from '../../hooks/useTheme';
+import { Image, StyleSheet, View } from 'react-native';
 
 type Props = {
   size?: number;
 };
 
 export const BrandLogo = ({ size = 92 }: Props) => {
-  const theme = useTheme();
   return (
-    <View accessible accessibilityLabel="ArrowNexa logo">
-      <Svg width={size} height={size} viewBox="0 0 96 96">
-        <Circle cx="48" cy="48" r="43" fill={theme.colors.surface} />
-        <Circle cx="48" cy="48" r="39" fill={theme.colors.boardBackground} />
-        <Path
-          d="M25 66V30l46 36V30"
-          fill="none"
-          stroke={theme.colors.primary}
-          strokeWidth="10"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <Path d="M65 30h14v14" fill="none" stroke={theme.colors.secondary} strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" />
-        <Path d="M25 66h16v-16" fill="none" stroke={theme.colors.accent} strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" />
-      </Svg>
+    <View accessible accessibilityLabel="ArrowNexa logo" style={[styles.frame, { width: size, height: size, borderRadius: Math.max(18, size * 0.12) }]}>
+      <Image source={require('../../assets/logo.png')} style={styles.image} resizeMode="cover" />
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  frame: {
+    overflow: 'hidden',
+  },
+  image: {
+    width: '100%',
+    height: '100%',
+  },
+});

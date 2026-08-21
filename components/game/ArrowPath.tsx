@@ -1,9 +1,9 @@
-import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { StyleSheet } from 'react-native';
 import Animated, { Easing, runOnJS, useAnimatedStyle, useSharedValue, withSequence, withTiming } from 'react-native-reanimated';
 import Svg, { Path, Text as SvgText } from 'react-native-svg';
 import { Theme } from '../../constants/theme';
-import { createArrowHeadFillPath, createArrowSvgPath, getArrowStrokeWidth, getEscapeTranslation, getVisualDirectionFromPath } from '../../engine/geometry/rendering';
+import { createArrowHeadFillPath, createArrowSvgPath, getArrowStrokeWidth, getEscapeTranslation, getSnakeEscapeGeometry, getVisualDirectionFromPath } from '../../engine/geometry/rendering';
 import { PuzzleArrow } from '../../engine/types/game';
 
 type Props = {
@@ -25,8 +25,10 @@ export const ArrowPath = memo(({ arrow, boardSize, cellSize, boardPadding, theme
   const opacity = useSharedValue(1);
   const shake = useSharedValue(0);
   const pulse = useSharedValue(1);
+  const [snakeProgress, setSnakeProgress] = useState(0);
   const escapeReportedRef = useRef(false);
   const restoreReportedRef = useRef(false);
+  const frameRef = useRef<number | undefined>(undefined);
   const visualDirection = getVisualDirectionFromPath(arrow.path, arrow.direction);
 
   const reportEscape = useCallback((arrowId: string) => {
@@ -42,28 +44,50 @@ export const ArrowPath = memo(({ arrow, boardSize, cellSize, boardPadding, theme
   }, [onRestoreComplete]);
 
   const geometry = useMemo(
-    () => ({
-      shaftPath: createArrowSvgPath(arrow.path, cellSize, boardPadding),
-      headPath: createArrowHeadFillPath(arrow.path, visualDirection, cellSize, boardPadding, strokeWidth),
-      exit: getEscapeTranslation(arrow.path, visualDirection, cellSize, boardPadding, boardSize),
-      label: arrow.path[0],
-    }),
-    [arrow.direction, arrow.path, boardPadding, boardSize, cellSize, strokeWidth, visualDirection],
+    () => {
+      const staticGeometry = {
+        shaftPath: createArrowSvgPath(arrow.path, cellSize, boardPadding),
+        headPath: createArrowHeadFillPath(arrow.path, visualDirection, cellSize, boardPadding, strokeWidth),
+        exit: getEscapeTranslation(arrow.path, visualDirection, cellSize, boardPadding, boardSize),
+        label: arrow.path[0],
+        maxProgress: 0,
+      };
+      if (arrow.state !== 'moving') return staticGeometry;
+      return {
+        ...staticGeometry,
+        ...getSnakeEscapeGeometry(arrow.path, visualDirection, snakeProgress, cellSize, boardPadding, boardSize, strokeWidth),
+      };
+    },
+    [arrow.direction, arrow.path, arrow.state, boardPadding, boardSize, cellSize, snakeProgress, strokeWidth, visualDirection],
   );
 
   useEffect(() => {
     if (arrow.state === 'moving') {
       escapeReportedRef.current = false;
-      const travel = Math.abs(geometry.exit.x) + Math.abs(geometry.exit.y);
-      const duration = Math.min(1050, Math.max(720, travel * 1.25));
+      const maxProgress = getSnakeEscapeGeometry(arrow.path, visualDirection, 0, cellSize, boardPadding, boardSize, strokeWidth).maxProgress;
+      const duration = Math.min(1350, Math.max(850, maxProgress * 1.45));
+      const startedAt = Date.now();
       pulse.value = withSequence(withTiming(1.02, { duration: 80 }), withTiming(1, { duration: 100 }));
-      translateX.value = withTiming(geometry.exit.x, { duration, easing: Easing.inOut(Easing.cubic) });
-      translateY.value = withTiming(geometry.exit.y, { duration, easing: Easing.inOut(Easing.cubic) });
-      opacity.value = withSequence(
-        withTiming(1, { duration: Math.floor(duration * 0.72) }),
-        withTiming(0, { duration: Math.floor(duration * 0.28), easing: Easing.out(Easing.quad) }, () => runOnJS(reportEscape)(arrow.id)),
-      );
-      return;
+
+      const tick = () => {
+        const elapsed = Date.now() - startedAt;
+        const linear = Math.min(1, elapsed / duration);
+        const eased = linear < 0.5 ? 2 * linear * linear : 1 - Math.pow(-2 * linear + 2, 2) / 2;
+        setSnakeProgress(maxProgress * eased);
+        if (linear >= 1) {
+          setSnakeProgress(maxProgress);
+          reportEscape(arrow.id);
+          return;
+        }
+        frameRef.current = requestAnimationFrame(tick);
+      };
+
+      setSnakeProgress(0);
+      frameRef.current = requestAnimationFrame(tick);
+      return () => {
+        if (frameRef.current !== undefined) cancelAnimationFrame(frameRef.current);
+        frameRef.current = undefined;
+      };
     }
 
     if (arrow.state === 'restoring') {
@@ -78,12 +102,17 @@ export const ArrowPath = memo(({ arrow, boardSize, cellSize, boardPadding, theme
     }
 
     if (arrow.state === 'normal') {
+      setSnakeProgress(0);
       translateX.value = withTiming(0, { duration: 90 });
       translateY.value = withTiming(0, { duration: 90 });
       opacity.value = withTiming(1, { duration: 90 });
       pulse.value = withTiming(1, { duration: 90 });
     }
-  }, [arrow.id, arrow.state, geometry.exit.x, geometry.exit.y, opacity, pulse, reportEscape, reportRestore, translateX, translateY]);
+    return () => {
+      if (frameRef.current !== undefined) cancelAnimationFrame(frameRef.current);
+      frameRef.current = undefined;
+    };
+  }, [arrow.id, arrow.path, arrow.state, boardPadding, boardSize, cellSize, opacity, pulse, reportEscape, reportRestore, strokeWidth, translateX, translateY, visualDirection]);
 
   useEffect(() => {
     if (arrow.state === 'blocked') {
@@ -105,14 +134,14 @@ export const ArrowPath = memo(({ arrow, boardSize, cellSize, boardPadding, theme
 
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,
-    transform: [{ translateX: translateX.value + shake.value }, { translateY: translateY.value }, { scale: pulse.value }],
+    transform: [{ translateX: (arrow.state === 'moving' ? 0 : translateX.value) + shake.value }, { translateY: arrow.state === 'moving' ? 0 : translateY.value }, { scale: pulse.value }],
   }));
 
   if (arrow.state === 'removed') return null;
 
-  const color = arrow.state === 'blocked' ? '#E53935' : arrow.state === 'moving' ? '#0F76C8' : isHinted || arrow.state === 'hinted' ? theme.colors.accent : '#061344';
+  const color = arrow.state === 'blocked' ? '#E53935' : arrow.state === 'moving' ? '#159BE8' : isHinted || arrow.state === 'hinted' ? theme.colors.accent : '#061344';
   const touchStrokeWidth = Math.max(22, cellSize * 0.76);
-  const glow = isHinted || arrow.state === 'hinted';
+  const glow = arrow.state === 'moving' || isHinted || arrow.state === 'hinted';
 
   return (
     <Animated.View pointerEvents="box-none" style={[StyleSheet.absoluteFill, animatedStyle]}>
@@ -120,7 +149,7 @@ export const ArrowPath = memo(({ arrow, boardSize, cellSize, boardPadding, theme
         <Path d={geometry.shaftPath} fill="none" stroke="transparent" strokeWidth={touchStrokeWidth} strokeLinecap="round" strokeLinejoin="round" />
         <Path d={geometry.headPath} fill="transparent" stroke="transparent" strokeWidth={touchStrokeWidth * 0.5} strokeLinecap="round" strokeLinejoin="round" />
 
-        {glow ? <Path d={geometry.shaftPath} fill="none" stroke={color} strokeWidth={strokeWidth + 7} strokeLinecap="round" strokeLinejoin="round" opacity={0.12} /> : null}
+        {glow ? <Path d={geometry.shaftPath} fill="none" stroke={color} strokeWidth={strokeWidth + 10} strokeLinecap="round" strokeLinejoin="round" opacity={arrow.state === 'moving' ? 0.28 : 0.12} /> : null}
         <Path d={geometry.shaftPath} fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" />
         <Path d={geometry.headPath} fill={color} stroke={color} strokeWidth={strokeWidth * 0.35} strokeLinecap="round" strokeLinejoin="round" />
 

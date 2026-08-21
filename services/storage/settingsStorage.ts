@@ -6,6 +6,8 @@ export type SettingsData = {
   version: 1;
   musicEnabled: boolean;
   soundEnabled: boolean;
+  musicVolume: number;
+  soundVolume: number;
   hapticsEnabled: boolean;
   animationsEnabled: boolean;
   themeMode: ThemeMode;
@@ -16,6 +18,8 @@ export const defaultSettings: SettingsData = {
   version: 1,
   musicEnabled: true,
   soundEnabled: true,
+  musicVolume: 1,
+  soundVolume: 1,
   hapticsEnabled: true,
   animationsEnabled: true,
   themeMode: 'system',

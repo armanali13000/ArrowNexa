@@ -44,8 +44,8 @@ export const Button = ({ title, onPress, variant = 'primary', disabled, loading,
         onPressOut={() => {
           if (useSettingsStore.getState().animationsEnabled) scale.value = withTiming(1, { duration: 105 });
         }}
-        onPress={async () => {
-          await Promise.all([hapticsService.button(), audioService.buttonClick()]);
+        onPress={() => {
+          void Promise.all([hapticsService.button(), audioService.buttonClick()]).catch(() => undefined);
           onPress?.();
         }}
         style={({ pressed }) => [

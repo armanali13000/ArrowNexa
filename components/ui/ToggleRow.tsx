@@ -20,8 +20,8 @@ export const ToggleRow = ({ title, subtitle, enabled, onToggle, disabled }: Prop
       accessibilityState={{ checked: enabled }}
       accessibilityLabel={title}
       disabled={disabled}
-      onPress={async () => {
-        await hapticsService.tap();
+      onPress={() => {
+        void hapticsService.tap().catch(() => undefined);
         onToggle();
       }}
       style={[styles.row, { opacity: disabled ? 0.45 : 1 }]}

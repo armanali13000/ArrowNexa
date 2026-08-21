@@ -15,6 +15,63 @@ const format = (value: number) => value.toFixed(2);
 
 const distance = (a: PixelPoint, b: PixelPoint) => Math.hypot(a.x - b.x, a.y - b.y);
 
+const polylineLength = (points: PixelPoint[]) => {
+  let total = 0;
+  for (let index = 1; index < points.length; index += 1) {
+    total += distance(points[index - 1], points[index]);
+  }
+  return total;
+};
+
+const pointAtDistance = (points: PixelPoint[], targetDistance: number) => {
+  let traveled = 0;
+  for (let index = 1; index < points.length; index += 1) {
+    const start = points[index - 1];
+    const end = points[index];
+    const segmentLength = distance(start, end);
+    if (traveled + segmentLength >= targetDistance) {
+      const ratio = segmentLength === 0 ? 0 : (targetDistance - traveled) / segmentLength;
+      return {
+        point: {
+          x: start.x + (end.x - start.x) * ratio,
+          y: start.y + (end.y - start.y) * ratio,
+        },
+        direction: directionBetween(start, end),
+      };
+    }
+    traveled += segmentLength;
+  }
+  const fallbackStart = points[Math.max(0, points.length - 2)];
+  const fallbackEnd = points[points.length - 1];
+  return { point: fallbackEnd, direction: directionBetween(fallbackStart, fallbackEnd) };
+};
+
+const directionBetween = (start: PixelPoint, end: PixelPoint): Direction => {
+  if (Math.abs(end.x - start.x) >= Math.abs(end.y - start.y)) return end.x >= start.x ? 'RIGHT' : 'LEFT';
+  return end.y >= start.y ? 'DOWN' : 'UP';
+};
+
+const slicePolyline = (points: PixelPoint[], startDistance: number, endDistance: number) => {
+  const totalLength = polylineLength(points);
+  const start = Math.max(0, Math.min(totalLength, startDistance));
+  const end = Math.max(start, Math.min(totalLength, endDistance));
+  const sliced: PixelPoint[] = [pointAtDistance(points, start).point];
+  let traveled = 0;
+
+  for (let index = 1; index < points.length; index += 1) {
+    const segmentStart = points[index - 1];
+    const segmentEnd = points[index];
+    const segmentLength = distance(segmentStart, segmentEnd);
+    const segmentStartDistance = traveled;
+    const segmentEndDistance = traveled + segmentLength;
+    if (segmentEndDistance > start && segmentEndDistance < end) sliced.push(segmentEnd);
+    traveled = segmentEndDistance;
+  }
+
+  sliced.push(pointAtDistance(points, end).point);
+  return sliced.filter((point, index, items) => index === 0 || distance(point, items[index - 1]) > 0.1);
+};
+
 const pointBetween = (from: PixelPoint, to: PixelPoint, amount: number): PixelPoint => {
   const segmentLength = distance(from, to);
   if (segmentLength === 0) return from;
@@ -40,6 +97,10 @@ export const getVisualDirectionFromPath = (path: GridPoint[], fallback: Directio
 
 export const createArrowSvgPath = (path: GridPoint[], cellSize: number, boardPadding: number) => {
   const points = path.map((point) => gridToPixel(point, cellSize, boardPadding));
+  return createPixelSvgPath(points, cellSize);
+};
+
+const createPixelSvgPath = (points: PixelPoint[], cellSize: number) => {
   if (points.length <= 1) return '';
   if (points.length === 2) return `M ${format(points[0].x)} ${format(points[0].y)} L ${format(points[1].x)} ${format(points[1].y)}`;
 
@@ -68,6 +129,10 @@ export const createArrowHeadPath = (path: GridPoint[], direction: Direction, cel
 
 export const createArrowHeadFillPath = (path: GridPoint[], direction: Direction, cellSize: number, boardPadding: number, strokeWidth = getArrowStrokeWidth(cellSize)) => {
   const tip = gridToPixel(path[path.length - 1], cellSize, boardPadding);
+  return createArrowHeadFillPathAt(tip, direction, cellSize, strokeWidth);
+};
+
+export const createArrowHeadFillPathAt = (tip: PixelPoint, direction: Direction, cellSize: number, strokeWidth = getArrowStrokeWidth(cellSize)) => {
   const length = Math.max(strokeWidth * 2.35, cellSize * 0.23);
   const spread = Math.max(strokeWidth * 1.55, cellSize * 0.145);
   const forward = strokeWidth * 0.72;
@@ -82,6 +147,41 @@ export const createArrowHeadFillPath = (path: GridPoint[], direction: Direction,
     return `M ${format(tip.x - forward)} ${format(tip.y)} L ${format(tip.x + length)} ${format(tip.y - spread)} L ${format(tip.x + length)} ${format(tip.y + spread)} Z`;
   }
   return `M ${format(tip.x + forward)} ${format(tip.y)} L ${format(tip.x - length)} ${format(tip.y - spread)} L ${format(tip.x - length)} ${format(tip.y + spread)} Z`;
+};
+
+export const getSnakeEscapeGeometry = (
+  path: GridPoint[],
+  direction: Direction,
+  progress: number,
+  cellSize: number,
+  boardPadding: number,
+  boardSize: number,
+  strokeWidth = getArrowStrokeWidth(cellSize),
+) => {
+  const originalPoints = path.map((point) => gridToPixel(point, cellSize, boardPadding));
+  const head = originalPoints[originalPoints.length - 1];
+  const bodyLength = Math.max(cellSize, polylineLength(originalPoints));
+  const outsideDistance = bodyLength + boardSize + cellSize * 2;
+  const outsidePoint =
+    direction === 'RIGHT'
+      ? { x: head.x + outsideDistance, y: head.y }
+      : direction === 'LEFT'
+        ? { x: head.x - outsideDistance, y: head.y }
+        : direction === 'DOWN'
+          ? { x: head.x, y: head.y + outsideDistance }
+          : { x: head.x, y: head.y - outsideDistance };
+  const route = [...originalPoints, outsidePoint];
+  const routeLength = polylineLength(route);
+  const maxProgress = Math.max(0, routeLength - bodyLength);
+  const clampedProgress = Math.max(0, Math.min(maxProgress, progress));
+  const visiblePoints = slicePolyline(route, clampedProgress, clampedProgress + bodyLength);
+  const headSample = pointAtDistance(route, clampedProgress + bodyLength);
+
+  return {
+    shaftPath: createPixelSvgPath(visiblePoints, cellSize),
+    headPath: createArrowHeadFillPathAt(headSample.point, headSample.direction, cellSize, strokeWidth),
+    maxProgress,
+  };
 };
 
 export const createArrowHeadStrokePaths = (path: GridPoint[], direction: Direction, cellSize: number, boardPadding: number, strokeWidth = getArrowStrokeWidth(cellSize)) => {

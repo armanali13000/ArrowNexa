@@ -32,10 +32,13 @@ const getEffectPlayer = (soundId: SoundId) => {
   const definition = soundRegistry[soundId];
   if (!definition || definition.category === 'music' || !hasSource(soundId)) return undefined;
   const cached = effectPlayers.get(soundId);
-  if (cached) return cached;
+  if (cached) {
+    cached.volume = definition.volume * useSettingsStore.getState().soundVolume;
+    return cached;
+  }
   try {
     const player = createAudioPlayer(definition.source, { downloadFirst: true, keepAudioSessionActive: true });
-    player.volume = definition.volume;
+    player.volume = definition.volume * useSettingsStore.getState().soundVolume;
     effectPlayers.set(soundId, player);
     return player;
   } catch (error) {
@@ -49,9 +52,8 @@ export const audioService = {
     if (initialized) return;
     initialized = true;
     try {
-      await setAudioModeAsync({ playsInSilentMode: false, shouldPlayInBackground: false, interruptionMode: 'mixWithOthers' });
+      await setAudioModeAsync({ playsInSilentMode: true, shouldPlayInBackground: false, interruptionMode: 'mixWithOthers' });
       await setIsAudioActiveAsync(true);
-      await preloadAll();
     } catch (error) {
       console.error('[AudioManager] Failed to initialize audio', error);
     }
@@ -61,8 +63,9 @@ export const audioService = {
     const player = getEffectPlayer(soundId);
     if (!player) return;
     try {
-      await player.seekTo(0);
-      player.play();
+      void player.seekTo(0).then(() => player.play()).catch((error) => {
+        console.error(`[AudioManager] Failed to play SFX: ${soundId}`, error);
+      });
     } catch (error) {
       console.error(`[AudioManager] Failed to play SFX: ${soundId}`, error);
     }
@@ -77,7 +80,6 @@ export const audioService = {
       try {
         const definition = soundRegistry[soundId];
         musicPlayer = createAudioPlayer(definition.source, { downloadFirst: true, preferredForwardBufferDuration: 20 });
-        musicPlayer.volume = definition.volume;
         musicPlayer.loop = true;
         currentMusicId = soundId;
       } catch (error) {
@@ -86,10 +88,17 @@ export const audioService = {
       }
     }
     try {
+      musicPlayer.volume = soundRegistry[soundId].volume * useSettingsStore.getState().musicVolume;
       musicPlayer.play();
     } catch (error) {
       console.error(`[AudioManager] Failed to play music: ${soundId}`, error);
     }
+  },
+  refreshVolumes: () => {
+    effectPlayers.forEach((player, soundId) => {
+      player.volume = soundRegistry[soundId].volume * useSettingsStore.getState().soundVolume;
+    });
+    if (musicPlayer && currentMusicId) musicPlayer.volume = soundRegistry[currentMusicId].volume * useSettingsStore.getState().musicVolume;
   },
   stopMusic: async () => {
     musicPlayer?.pause();
@@ -119,3 +128,5 @@ export const audioService = {
   gameOver: async () => audioService.play('gameOver'),
   backgroundMusic: async () => audioService.startMusic('menuMusic'),
 };
+
+void preloadAll();

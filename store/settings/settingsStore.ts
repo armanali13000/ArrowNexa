@@ -20,6 +20,8 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
       version: 1,
       musicEnabled: next.musicEnabled,
       soundEnabled: next.soundEnabled,
+      musicVolume: next.musicVolume,
+      soundVolume: next.soundVolume,
       hapticsEnabled: next.hapticsEnabled,
       animationsEnabled: next.animationsEnabled,
       themeMode: next.themeMode,

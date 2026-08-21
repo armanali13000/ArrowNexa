@@ -27,6 +27,24 @@ export const LockIcon = ({ size = 18, color }: IconProps) => (
   <Svg width={size} height={size} viewBox="0 0 24 24"><Rect x="5" y="10" width="14" height="10" rx="3" fill="none" stroke={color} strokeWidth="2" /><Path d="M8 10V7a4 4 0 0 1 8 0v3" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" /></Svg>
 );
 
+export const HintIcon = ({ size = 22, color }: IconProps) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24">
+    <Path d="M9 18h6M10 22h4M8.5 15.5c-1.4-1.1-2.3-2.8-2.3-4.7a5.8 5.8 0 1 1 9.3 4.7c-.8.6-1.1 1.2-1.2 2h-4.6c-.1-.8-.4-1.4-1.2-2z" fill="none" stroke={color} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+  </Svg>
+);
+
+export const UndoIcon = ({ size = 22, color }: IconProps) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24">
+    <Path d="M9 7H4v5M5 11a7 7 0 1 0 2-5" fill="none" stroke={color} strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round" />
+  </Svg>
+);
+
+export const BoosterIcon = ({ size = 22, color }: IconProps) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24">
+    <Path d="M4 20 16.5 7.5M14 5l5 5M13 6l5-2 2 2-2 5M5 15l4 4" fill="none" stroke={color} strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" />
+  </Svg>
+);
+
 export const HeartIcon = ({ size = 18, color, filled = true }: IconProps & { filled?: boolean }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24">
     <Path

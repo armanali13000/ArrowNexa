@@ -1,6 +1,6 @@
 import React, { memo, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import Svg, { Line, Rect } from 'react-native-svg';
+import Svg, { Circle, Line, Rect } from 'react-native-svg';
 import { PuzzleArrow, PuzzleLevel } from '../../engine/types/game';
 import { useTheme } from '../../hooks/useTheme';
 import { ArrowPath } from './ArrowPath';
@@ -23,6 +23,15 @@ export const GameBoard = memo(({ level, arrows, hintedArrowIds = [], debug = fal
   const innerSize = Math.max(0, boardSize - boardPadding * 2);
   const cellSize = innerSize / level.size.cols;
   const gridLines = useMemo(() => Array.from({ length: level.size.cols + 1 }, (_, index) => index), [level.size.cols]);
+  const trackDots = useMemo(() => {
+    const occupied = new Set<string>();
+    arrows.forEach((arrow) => {
+      if (arrow.state === 'removed') return;
+      arrow.path.forEach((point) => occupied.add(`${point.row}:${point.col}`));
+    });
+    return Array.from({ length: level.size.rows * level.size.cols }, (_, index) => ({ row: Math.floor(index / level.size.cols), col: index % level.size.cols }))
+      .filter((point) => !occupied.has(`${point.row}:${point.col}`));
+  }, [arrows, level.size.cols, level.size.rows]);
   const pickArrowAt = (x: number, y: number) => {
     const candidates = arrows
       .filter((arrow) => arrow.state !== 'removed' && arrow.state !== 'moving' && arrow.state !== 'restoring')
@@ -44,6 +53,16 @@ export const GameBoard = memo(({ level, arrows, hintedArrowIds = [], debug = fal
         >
           <Svg width={boardSize} height={boardSize} viewBox={`0 0 ${boardSize} ${boardSize}`}>
             <Rect x="0" y="0" width={boardSize} height={boardSize} rx="4" fill="#FFFFFF" opacity={0} />
+            {trackDots.map((dot) => (
+              <Circle
+                key={`${dot.row}-${dot.col}`}
+                cx={boardPadding + dot.col * cellSize + cellSize / 2}
+                cy={boardPadding + dot.row * cellSize + cellSize / 2}
+                r={Math.max(2.1, cellSize * 0.06)}
+                fill="#B8BEC4"
+                opacity={0.6}
+              />
+            ))}
             {debug
               ? gridLines.map((line) => (
                   <Line

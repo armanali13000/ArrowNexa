@@ -28,6 +28,12 @@ export default function SettingsScreen() {
         <Section title="Audio">
           <ToggleRow title="Music" enabled={settings.musicEnabled} onToggle={async () => { await settings.updateSetting('musicEnabled', !settings.musicEnabled); await audioService.syncMusicWithSettings(); }} />
           <ToggleRow title="Sound Effects" enabled={settings.soundEnabled} onToggle={() => settings.updateSetting('soundEnabled', !settings.soundEnabled)} />
+          <VolumePicker title="Music Volume" value={settings.musicVolume} onChange={async (value) => { await settings.updateSetting('musicVolume', value); audioService.refreshVolumes(); }} />
+          <VolumePicker title="Sound Volume" value={settings.soundVolume} onChange={async (value) => { await settings.updateSetting('soundVolume', value); audioService.refreshVolumes(); }} />
+          <View style={styles.actions}>
+            <Button title="Test Sound" variant="tool" onPress={() => audioService.play('levelComplete')} />
+            <Button title="Restart Music" variant="tool" onPress={() => audioService.startMusic('menuMusic')} />
+          </View>
         </Section>
         <Section title="Gameplay">
           <ToggleRow title="Haptics" enabled={settings.hapticsEnabled} onToggle={() => settings.updateSetting('hapticsEnabled', !settings.hapticsEnabled)} />
@@ -52,6 +58,16 @@ export default function SettingsScreen() {
           <Button title="Privacy Policy" variant="tool" onPress={() => router.push('/about')} />
           <Button title="Terms and Conditions" variant="tool" onPress={() => router.push('/about')} />
           <Button title="About" variant="tool" onPress={() => router.push('/about')} />
+          <Button title="Restore Settings Defaults" variant="tool" onPress={async () => {
+            await settings.updateSetting('musicEnabled', true);
+            await settings.updateSetting('soundEnabled', true);
+            await settings.updateSetting('musicVolume', 1);
+            await settings.updateSetting('soundVolume', 1);
+            await settings.updateSetting('hapticsEnabled', true);
+            await settings.updateSetting('animationsEnabled', true);
+            await settings.updateSetting('themeMode', 'system');
+            await audioService.syncMusicWithSettings();
+          }} />
           <Button title="Reset Progress" variant="ghost" onPress={() => setConfirmReset(true)} />
         </Section>
         <Section title="Notifications">
@@ -81,6 +97,33 @@ const Section = ({ title, children }: { title: string; children: React.ReactNode
   </Card>
 );
 
+const VolumePicker = ({ title, value, onChange }: { title: string; value: number; onChange: (value: number) => void }) => {
+  const theme = useTheme();
+  const options = [
+    { label: '50%', value: 0.5 },
+    { label: '75%', value: 0.75 },
+    { label: '100%', value: 1 },
+  ];
+  return (
+    <View style={styles.volumeGroup}>
+      <Text variant="body">{title}</Text>
+      <View style={styles.segment}>
+        {options.map((option) => (
+          <Button
+            key={option.label}
+            title={option.label}
+            variant={Math.abs(value - option.value) < 0.01 ? 'primary' : 'tool'}
+            onPress={() => onChange(option.value)}
+            style={styles.segmentButton}
+            accessibilityLabel={`${title} ${option.label}`}
+          />
+        ))}
+      </View>
+      <Text variant="caption" color={theme.colors.textSecondary}>{Math.round(value * 100)}%</Text>
+    </View>
+  );
+};
+
 const styles = StyleSheet.create({
   content: {
     padding: 18,
@@ -96,6 +139,13 @@ const styles = StyleSheet.create({
   },
   segmentButton: {
     flex: 1,
+  },
+  actions: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  volumeGroup: {
+    gap: 8,
   },
   modalStack: {
     gap: 14,
