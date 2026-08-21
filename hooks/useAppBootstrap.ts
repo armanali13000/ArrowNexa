@@ -9,7 +9,8 @@ export const useAppBootstrap = () => {
 
   useEffect(() => {
     let mounted = true;
-    Promise.all([hydrateSettings(), hydrateProgress()]).finally(() => {
+    const minimumSplashTime = new Promise((resolve) => setTimeout(resolve, 1400));
+    Promise.all([hydrateSettings(), hydrateProgress(), minimumSplashTime]).finally(() => {
       if (mounted) setReady(true);
     });
     return () => {

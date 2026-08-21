@@ -48,7 +48,8 @@ export default function GameScreen() {
   const isDailyMode = params.mode === 'daily';
   const dailyDate = typeof params.date === 'string' ? params.date : getLocalDateKey();
   const recommendedLevel = useProgressStore((state) => state.currentLevel);
-  const currentLevel = Math.max(1, Math.min(500, Number(params.level) || recommendedLevel));
+  const routeLevel = Number(params.level);
+  const [currentLevel, setCurrentLevel] = useState(() => Math.max(1, Math.min(500, routeLevel || recommendedLevel)));
   const completedLevels = useProgressStore((state) => state.completedLevels);
   const nexaRank = useProgressStore((state) => state.nexaRank);
   const hints = useProgressStore((state) => state.hints);
@@ -88,6 +89,10 @@ export default function GameScreen() {
   const remainingArrows = arrows.filter((arrow) => arrow.state !== 'removed').length;
   const motionLocked = movingArrowIds.length > 0 || arrows.some((arrow) => arrow.state === 'restoring');
   const undoAvailable = moveHistory.length > 0 && !motionLocked && !completeVisible && (freeUndosUsed < FREE_UNDOS_PER_LEVEL || boosters.undo > 0);
+
+  useEffect(() => {
+    if (Number.isFinite(routeLevel) && routeLevel > 0) setCurrentLevel(Math.max(1, Math.min(500, routeLevel)));
+  }, [routeLevel]);
 
   const resetAttempt = useCallback((nextLevel = level) => {
     setArrows(cloneLevelArrows(nextLevel));
