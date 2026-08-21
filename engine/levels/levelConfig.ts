@@ -1,6 +1,6 @@
 import { Difficulty, LevelGenerationConfig } from '../types/game';
 
-export const GENERATION_VERSION = 1;
+export const GENERATION_VERSION = 5;
 
 export const DIFFICULTY_THRESHOLDS: Array<{ max: number; difficulty: Difficulty }> = [
   { max: 25, difficulty: 'Easy' },
@@ -29,11 +29,11 @@ export const createGenerationConfig = (levelNumber: number, seed: string): Level
     return {
       rows: 8,
       cols: 8,
-      targetArrowCount: early ? Math.min(14, 4 + levelNumber) : 10 + Math.round(score / 4),
+      targetArrowCount: levelNumber === 1 ? 6 : levelNumber === 2 ? 10 : levelNumber <= 5 ? 12 + levelNumber : 18,
       minPathLength: 2,
-      maxPathLength: early ? (levelNumber <= 3 ? 3 : 4) : 4,
-      maxTurnsPerArrow: early ? (levelNumber <= 3 ? 0 : 1) : 1,
-      targetDensity: { min: early ? 0.12 : 0.25, max: early ? 0.36 : 0.42 },
+      maxPathLength: early ? (levelNumber <= 2 ? 5 : 8) : 8,
+      maxTurnsPerArrow: early ? (levelNumber <= 2 ? 1 : 3) : 3,
+      targetDensity: { min: early ? 0.24 : 0.34, max: early ? 0.48 : 0.56 },
       difficulty,
       targetScore: score,
       seed,
@@ -41,13 +41,13 @@ export const createGenerationConfig = (levelNumber: number, seed: string): Level
   }
   if (difficulty === 'Normal') {
     return {
-      rows: score < 38 ? 9 : 10,
-      cols: score < 38 ? 9 : 10,
-      targetArrowCount: 18 + Math.round((score - 26) * 0.55),
+      rows: 11,
+      cols: 11,
+      targetArrowCount: 28,
       minPathLength: 2,
-      maxPathLength: 6,
-      maxTurnsPerArrow: 2,
-      targetDensity: { min: 0.35, max: 0.53 },
+      maxPathLength: 9,
+      maxTurnsPerArrow: 3,
+      targetDensity: { min: 0.5, max: 0.74 },
       difficulty,
       targetScore: score,
       seed,
@@ -55,26 +55,26 @@ export const createGenerationConfig = (levelNumber: number, seed: string): Level
   }
   if (difficulty === 'Hard') {
     return {
-      rows: score < 64 ? 11 : 12,
-      cols: score < 64 ? 11 : 12,
-      targetArrowCount: 30 + Math.round((score - 51) * 0.9),
+      rows: score < 64 ? 14 : 15,
+      cols: score < 64 ? 14 : 15,
+      targetArrowCount: 42 + Math.round((score - 51) * 0.28),
       minPathLength: 3,
-      maxPathLength: 8,
-      maxTurnsPerArrow: 3,
-      targetDensity: { min: 0.45, max: 0.62 },
+      maxPathLength: 11,
+      maxTurnsPerArrow: 4,
+      targetDensity: { min: 0.5, max: 0.72 },
       difficulty,
       targetScore: score,
       seed,
     };
   }
   return {
-    rows: score < 88 ? 13 : 14,
-    cols: score < 88 ? 13 : 14,
-    targetArrowCount: 45 + Math.round((score - 76) * 1.15),
+    rows: score < 88 ? 16 : 17,
+    cols: score < 88 ? 16 : 17,
+    targetArrowCount: 56 + Math.round((score - 76) * 0.28),
     minPathLength: 3,
-    maxPathLength: 10,
+    maxPathLength: 13,
     maxTurnsPerArrow: 4,
-    targetDensity: { min: 0.5, max: 0.7 },
+    targetDensity: { min: 0.5, max: 0.72 },
     difficulty,
     targetScore: score,
     seed,

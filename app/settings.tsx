@@ -9,6 +9,7 @@ import { Card } from '../components/ui/Card';
 import { Text } from '../components/ui/Text';
 import { ToggleRow } from '../components/ui/ToggleRow';
 import { useTheme } from '../hooks/useTheme';
+import { audioService } from '../services/audio/audioService';
 import { useProgressStore } from '../store/progress/progressStore';
 import { useSettingsStore } from '../store/settings/settingsStore';
 
@@ -25,7 +26,7 @@ export default function SettingsScreen() {
       <ScreenHeader title="Settings" subtitle="Preferences persist locally" />
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <Section title="Audio">
-          <ToggleRow title="Music" enabled={settings.musicEnabled} onToggle={() => settings.updateSetting('musicEnabled', !settings.musicEnabled)} />
+          <ToggleRow title="Music" enabled={settings.musicEnabled} onToggle={async () => { await settings.updateSetting('musicEnabled', !settings.musicEnabled); await audioService.syncMusicWithSettings(); }} />
           <ToggleRow title="Sound Effects" enabled={settings.soundEnabled} onToggle={() => settings.updateSetting('soundEnabled', !settings.soundEnabled)} />
         </Section>
         <Section title="Gameplay">

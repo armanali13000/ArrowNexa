@@ -7,7 +7,7 @@ import { GameBoard } from '../components/game/GameBoard';
 import { PauseModal } from '../components/game/GameModals';
 import { AppModal } from '../components/ui/AppModal';
 import { Button, PrimaryButton, SecondaryButton } from '../components/ui/Button';
-import { ArrowBackIcon, GearIcon, StarIcon } from '../components/ui/Icons';
+import { ArrowBackIcon, GearIcon, HeartIcon, StarIcon } from '../components/ui/Icons';
 import { Text } from '../components/ui/Text';
 import { DEFAULT_LIVES, FIRST_LIFE_LOSS_LEVEL, FREE_UNDOS_PER_LEVEL, MAX_LIVES_WITH_BOOSTER, REVEAL_COUNT } from '../constants/gameBalance';
 import { createLevel } from '../engine/board';
@@ -81,6 +81,7 @@ export default function GameScreen() {
   const startedAtRef = useRef(Date.now());
   const completionHandledRef = useRef(false);
   const completeHandlerRef = useRef<(finalArrows: PuzzleArrow[]) => void>(() => undefined);
+  const lockedArrowIdsRef = useRef(new Set<string>());
 
   const validMoves = useMemo(() => getValidMoves(arrows, level.size), [arrows, level.size]);
   const removedArrowIds = useMemo(() => arrows.filter((arrow) => arrow.state === 'removed').map((arrow) => arrow.id), [arrows]);
@@ -154,6 +155,7 @@ export default function GameScreen() {
     setMoveHistory([]);
     setHighlightedArrowIds([]);
     setMovingArrowIds([]);
+    lockedArrowIdsRef.current.clear();
     setFailedVisible(false);
     setCompleteVisible(false);
     setCompletion(undefined);
@@ -167,15 +169,16 @@ export default function GameScreen() {
   }, []);
 
   const handleArrowPress = useCallback(async (arrowId: string) => {
-    if (completeVisible || failedVisible) return;
+    if (completeVisible || failedVisible || movingArrowIds.length > 0 || lockedArrowIdsRef.current.has(arrowId)) return;
     const target = arrows.find((arrow) => arrow.id === arrowId);
     if (!target || target.state === 'moving' || target.state === 'restoring' || target.state === 'removed' || target.state === 'blocked') return;
+    lockedArrowIdsRef.current.add(arrowId);
 
     const result = canArrowEscape(arrows, level.size, arrowId);
     if (!result.canEscape) {
       await Promise.all([hapticsService.blocked(), audioService.blockedArrow()]);
       setArrows((current) => current.map((arrow) => (arrow.id === arrowId ? { ...arrow, state: 'blocked' } : arrow)));
-      setTimeout(() => restoreBlockedArrow(arrowId), 260);
+      setTimeout(() => restoreBlockedArrow(arrowId), 520);
       setMistakes((count) => count + 1);
       if (currentLevel >= FIRST_LIFE_LOSS_LEVEL) {
         setLives((currentLives) => {
@@ -190,6 +193,7 @@ export default function GameScreen() {
         await Promise.all([hapticsService.lifeLost(), audioService.play('lifeLost')]);
       }
       await recordBlockedTap();
+      lockedArrowIdsRef.current.delete(arrowId);
       return;
     }
 
@@ -198,9 +202,10 @@ export default function GameScreen() {
     setMovingArrowIds((ids) => (ids.includes(arrowId) ? ids : [...ids, arrowId]));
     setMoveCount((count) => count + 1);
     setArrows((current) => current.map((arrow) => (arrow.id === arrowId ? { ...arrow, state: 'moving' } : arrow)));
-  }, [arrows, completeVisible, currentLevel, failedVisible, level.size, recordBlockedTap, recordLifeLost, restoreBlockedArrow]);
+  }, [arrows, completeVisible, currentLevel, failedVisible, level.size, movingArrowIds.length, recordBlockedTap, recordLifeLost, restoreBlockedArrow]);
 
   const handleEscapeComplete = useCallback((arrowId: string) => {
+    lockedArrowIdsRef.current.delete(arrowId);
     setMovingArrowIds((ids) => ids.filter((id) => id !== arrowId));
     setMoveHistory((history) => [...history, arrowId]);
     setArrows((current) => {
@@ -212,6 +217,7 @@ export default function GameScreen() {
 
   const handleRestoreComplete = useCallback((arrowId: string) => {
     setArrows((current) => current.map((arrow) => (arrow.id === arrowId && arrow.state === 'restoring' ? { ...arrow, state: 'normal' } : arrow)));
+    lockedArrowIdsRef.current.delete(arrowId);
   }, []);
 
   const handleHint = useCallback(async () => {
@@ -272,6 +278,7 @@ export default function GameScreen() {
 
   const retry = useCallback(async () => {
     await recordRetry();
+    lockedArrowIdsRef.current.clear();
     resetAttempt();
   }, [recordRetry, resetAttempt]);
 
@@ -317,9 +324,11 @@ export default function GameScreen() {
         </Pressable>
         <View style={styles.levelCopy}>
           <Text variant="title" align="center" color="#1B1E22">{isDailyMode ? 'Daily Challenge' : `Level ${currentLevel}`}</Text>
-          <Text variant="caption" align="center" color="#5F656B">{isDailyMode ? `${formatDayMonth(dailyDate)} - ${getDailyDifficulty(dailyDate).toUpperCase()}` : `${level.difficulty.toUpperCase()} ${Math.round(level.difficultyScore)}`}</Text>
+          <Text variant="caption" align="center" color="#5F656B">{isDailyMode ? `${formatDayMonth(dailyDate)} - ${getDailyDifficulty(dailyDate).toUpperCase()}` : level.difficulty.toUpperCase()}</Text>
           <View style={styles.hearts} accessibilityLabel={`${lives} lives remaining`}>
-            {Array.from({ length: MAX_LIVES_WITH_BOOSTER }, (_, index) => <View key={index} style={[styles.heart, { opacity: index < lives ? 1 : 0.18 }]} />)}
+            {Array.from({ length: MAX_LIVES_WITH_BOOSTER }, (_, index) => (
+              <HeartIcon key={index} color="#D9514E" size={14} filled={index < lives} />
+            ))}
           </View>
         </View>
         <Pressable accessibilityRole="button" accessibilityLabel="Pause menu" onPress={() => setPauseVisible(true)} style={styles.iconButton}>
@@ -437,9 +446,8 @@ const styles = StyleSheet.create({
   iconButton: { width: 42, height: 42, alignItems: 'center', justifyContent: 'center' },
   levelCopy: { flex: 1, alignItems: 'center', gap: 4 },
   hearts: { flexDirection: 'row', gap: 7, paddingTop: 4 },
-  heart: { width: 10, height: 10, borderRadius: 5, backgroundColor: '#D9514E', transform: [{ rotate: '45deg' }] },
-  boardArea: { flex: 1, justifyContent: 'center', paddingHorizontal: 8 },
-  footer: { minHeight: 92, paddingHorizontal: 24, paddingBottom: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  boardArea: { flex: 1, justifyContent: 'center', paddingHorizontal: 4 },
+  footer: { minHeight: 78, paddingHorizontal: 24, paddingBottom: 8, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   tool: { minWidth: 78, minHeight: 52, alignItems: 'center', justifyContent: 'center', gap: 2 },
   modalStack: { gap: 14 },
   starRow: { flexDirection: 'row', justifyContent: 'center', gap: 8 },

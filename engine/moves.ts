@@ -11,13 +11,25 @@ const nextPoint = (point: GridPoint, direction: Direction): GridPoint => {
 const isInside = (point: GridPoint, size: { rows: number; cols: number }) =>
   point.row >= 0 && point.row < size.rows && point.col >= 0 && point.col < size.cols;
 
+export const getArrowFacingDirection = (arrow: PuzzleArrow): Direction => {
+  if (arrow.path.length < 2) return arrow.direction;
+  const previous = arrow.path[arrow.path.length - 2];
+  const head = arrow.path[arrow.path.length - 1];
+  if (head.col > previous.col) return 'RIGHT';
+  if (head.col < previous.col) return 'LEFT';
+  if (head.row > previous.row) return 'DOWN';
+  if (head.row < previous.row) return 'UP';
+  return arrow.direction;
+};
+
 export const traceExitCells = (arrow: PuzzleArrow, size: { rows: number; cols: number }) => {
   const head = arrow.path[arrow.path.length - 1];
+  const facingDirection = getArrowFacingDirection(arrow);
   const cells: GridPoint[] = [];
-  let cursor = nextPoint(head, arrow.direction);
+  let cursor = nextPoint(head, facingDirection);
   while (isInside(cursor, size)) {
     cells.push(cursor);
-    cursor = nextPoint(cursor, arrow.direction);
+    cursor = nextPoint(cursor, facingDirection);
   }
   return cells;
 };

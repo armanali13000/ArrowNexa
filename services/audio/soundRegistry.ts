@@ -13,7 +13,8 @@ export type SoundId =
   | 'levelComplete'
   | 'gameOver'
   | 'dailyReward'
-  | 'backgroundLoop';
+  | 'menuMusic'
+  | 'gameplayMusic';
 
 type SoundCategory = 'ui' | 'gameplay' | 'reward' | 'music';
 
@@ -25,20 +26,19 @@ export type SoundDefinition = {
   source: AudioSource;
 };
 
-const placeholder = null;
-
 export const soundRegistry: Record<SoundId, SoundDefinition> = {
-  tap: { id: 'tap', category: 'ui', volume: 0.45, source: placeholder },
-  arrowMove: { id: 'arrowMove', category: 'gameplay', volume: 0.55, source: placeholder },
-  arrowBlocked: { id: 'arrowBlocked', category: 'gameplay', volume: 0.55, source: placeholder },
-  lifeLost: { id: 'lifeLost', category: 'gameplay', volume: 0.58, source: placeholder },
-  hint: { id: 'hint', category: 'ui', volume: 0.5, source: placeholder },
-  undo: { id: 'undo', category: 'ui', volume: 0.5, source: placeholder },
-  booster: { id: 'booster', category: 'ui', volume: 0.62, source: placeholder },
-  star: { id: 'star', category: 'reward', volume: 0.52, source: placeholder },
-  rankUp: { id: 'rankUp', category: 'reward', volume: 0.7, source: placeholder },
-  levelComplete: { id: 'levelComplete', category: 'reward', volume: 0.75, source: placeholder },
-  gameOver: { id: 'gameOver', category: 'gameplay', volume: 0.7, source: placeholder },
-  dailyReward: { id: 'dailyReward', category: 'reward', volume: 0.65, source: placeholder },
-  backgroundLoop: { id: 'backgroundLoop', category: 'music', volume: 0.18, loop: true, source: placeholder },
+  tap: { id: 'tap', category: 'ui', volume: 0.38, source: require('../../assets/sounds/tap.wav') },
+  arrowMove: { id: 'arrowMove', category: 'gameplay', volume: 0.5, source: require('../../assets/sounds/arrow_escape.wav') },
+  arrowBlocked: { id: 'arrowBlocked', category: 'gameplay', volume: 0.46, source: require('../../assets/sounds/blocked.wav') },
+  lifeLost: { id: 'lifeLost', category: 'gameplay', volume: 0.52, source: require('../../assets/sounds/life_lost.wav') },
+  hint: { id: 'hint', category: 'ui', volume: 0.44, source: require('../../assets/sounds/hint.wav') },
+  undo: { id: 'undo', category: 'ui', volume: 0.42, source: require('../../assets/sounds/undo.wav') },
+  booster: { id: 'booster', category: 'ui', volume: 0.5, source: require('../../assets/sounds/booster.wav') },
+  star: { id: 'star', category: 'reward', volume: 0.44, source: require('../../assets/sounds/star.wav') },
+  rankUp: { id: 'rankUp', category: 'reward', volume: 0.56, source: require('../../assets/sounds/rank_up.wav') },
+  levelComplete: { id: 'levelComplete', category: 'reward', volume: 0.62, source: require('../../assets/sounds/level_complete.wav') },
+  gameOver: { id: 'gameOver', category: 'gameplay', volume: 0.56, source: require('../../assets/sounds/game_over.wav') },
+  dailyReward: { id: 'dailyReward', category: 'reward', volume: 0.52, source: require('../../assets/sounds/daily_reward.wav') },
+  menuMusic: { id: 'menuMusic', category: 'music', volume: 0.14, loop: true, source: require('../../assets/sounds/menu_music.wav') },
+  gameplayMusic: { id: 'gameplayMusic', category: 'music', volume: 0.12, loop: true, source: require('../../assets/sounds/game_music.wav') },
 };

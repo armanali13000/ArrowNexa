@@ -3,7 +3,7 @@ import { GeneratedLevel } from '../types/game';
 import { createFallbackLevel } from './fallbackLevels';
 import { createGenerationConfig, createLevelSeed } from './levelConfig';
 
-export const MAX_GENERATION_ATTEMPTS = 8;
+export const MAX_GENERATION_ATTEMPTS = 18;
 
 export const createLevel = (levelNumber: number): GeneratedLevel => {
   for (let attempt = 0; attempt < MAX_GENERATION_ATTEMPTS; attempt += 1) {
@@ -11,7 +11,7 @@ export const createLevel = (levelNumber: number): GeneratedLevel => {
     const config = createGenerationConfig(levelNumber, seed);
     const level = generateLevelFromConfig(config, levelNumber, attempt);
     if (!level) continue;
-    const densityOk = level.metrics.density >= config.targetDensity.min * 0.45 && level.metrics.density <= config.targetDensity.max + 0.25;
+    const densityOk = level.metrics.density >= config.targetDensity.min * 0.76 && level.metrics.density <= config.targetDensity.max + 0.18;
     if (densityOk) return level;
   }
   const seed = createLevelSeed(levelNumber, MAX_GENERATION_ATTEMPTS);

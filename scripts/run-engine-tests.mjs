@@ -110,7 +110,8 @@ const hard = createLevel(360);
 const expert = createLevel(480);
 assert.equal(easy.metrics.complexityScore < 76, true, 'early easy level should not classify like Expert');
 assert.equal(expert.metrics.complexityScore > easy.metrics.complexityScore, true, 'late level should be harder than early level');
-assert.equal(hard.metrics.density >= easy.metrics.density, true, 'later boards should generally be denser');
+assert.equal(hard.metrics.arrowCount > easy.metrics.arrowCount, true, 'later boards should contain substantially more arrows');
+assert.equal(hard.metrics.complexityScore > easy.metrics.complexityScore, true, 'later boards should be more complex');
 
 const cache = new Map();
 cache.set(cacheKey(generated120a), JSON.stringify(generated120a));

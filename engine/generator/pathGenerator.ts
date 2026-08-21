@@ -33,6 +33,20 @@ const borderHeads = (rows: number, cols: number) => {
   return heads;
 };
 
+const headCandidates = (config: LevelGenerationConfig, random: SeededRandom) => {
+  if (config.targetArrowCount <= 6) return borderHeads(config.rows, config.cols);
+  const heads = [...borderHeads(config.rows, config.cols)];
+  const inset = config.difficulty === 'Easy' ? 1 : 2;
+  for (let row = inset; row < config.rows - inset; row += 1) {
+    for (let col = inset; col < config.cols - inset; col += 1) {
+      for (const direction of directions) {
+        heads.push({ head: { row, col }, direction });
+      }
+    }
+  }
+  return random.shuffle(heads);
+};
+
 export const countTurns = (path: GridPoint[]) => {
   let turns = 0;
   for (let index = 2; index < path.length; index += 1) {
@@ -47,19 +61,21 @@ export const countTurns = (path: GridPoint[]) => {
 };
 
 export const generatePathCandidate = (config: LevelGenerationConfig, random: SeededRandom, occupied: Set<string>) => {
-  const headChoice = random.pick(borderHeads(config.rows, config.cols));
-  const targetLength = random.int(config.minPathLength, config.maxPathLength);
+  const headChoice = random.pick(headCandidates(config, random));
+  if (occupied.has(cellKey(headChoice.head))) return undefined;
+  const longPathBias = config.difficulty === 'Hard' || config.difficulty === 'Expert' ? 0.45 : config.difficulty === 'Normal' ? 0.3 : 0.16;
+  const targetLength = random.chance(longPathBias)
+    ? random.int(Math.max(config.minPathLength, Math.floor(config.maxPathLength * 0.62)), config.maxPathLength)
+    : random.int(config.minPathLength, Math.max(config.minPathLength, Math.floor(config.maxPathLength * 0.72)));
   const pathFromHead: GridPoint[] = [headChoice.head];
   const used = new Set<string>([cellKey(headChoice.head)]);
   let travelDirection = opposite[headChoice.direction];
   let turns = 0;
 
   while (pathFromHead.length < targetLength) {
-    const canTurn = turns < config.maxTurnsPerArrow && random.chance(0.36 + config.maxTurnsPerArrow * 0.06);
-    const options = random.shuffle(directions.filter((direction) => direction !== opposite[travelDirection]));
-    if (canTurn) {
-      options.sort((left) => (left === travelDirection ? 1 : -1));
-    }
+    const canTurn = pathFromHead.length > 1 && turns < config.maxTurnsPerArrow && random.chance(0.32 + config.maxTurnsPerArrow * 0.09);
+    const turnOptions = random.shuffle(directions.filter((direction) => direction !== travelDirection && direction !== opposite[travelDirection]));
+    const options = canTurn ? random.shuffle([...turnOptions, travelDirection]) : [travelDirection, ...turnOptions];
 
     let nextPoint: GridPoint | undefined;
     let nextDirection = travelDirection;

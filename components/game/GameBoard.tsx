@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import Svg, { Line, Rect } from 'react-native-svg';
 import { PuzzleArrow, PuzzleLevel } from '../../engine/types/game';
 import { useTheme } from '../../hooks/useTheme';
-import { ArrowPiece } from './ArrowPiece';
+import { ArrowPath } from './ArrowPath';
 
 type Props = {
   level: PuzzleLevel;
@@ -29,7 +29,7 @@ export const GameBoard = memo(({ level, arrows, hintedArrowIds = [], debug = fal
       {boardSize > 0 ? (
         <Pressable accessibilityRole="button" accessibilityLabel={`${level.title} puzzle board`} style={[styles.board, { width: boardSize, height: boardSize }]}>
           <Svg width={boardSize} height={boardSize} viewBox={`0 0 ${boardSize} ${boardSize}`}>
-            <Rect x="0" y="0" width={boardSize} height={boardSize} rx="4" fill="#FCFBF8" stroke="#ECE7DE" strokeWidth="1" />
+            <Rect x="0" y="0" width={boardSize} height={boardSize} rx="4" fill="#FFFFFF" opacity={0} />
             {debug
               ? gridLines.map((line) => (
                   <Line
@@ -63,7 +63,7 @@ export const GameBoard = memo(({ level, arrows, hintedArrowIds = [], debug = fal
             .slice()
             .sort((left, right) => (left.order ?? 0) - (right.order ?? 0) || left.id.localeCompare(right.id))
             .map((arrow) => (
-              <ArrowPiece
+              <ArrowPath
                 key={arrow.id}
                 arrow={arrow}
                 boardSize={boardSize}
@@ -91,8 +91,8 @@ const styles = StyleSheet.create({
     aspectRatio: 1,
   },
   board: {
-    backgroundColor: '#FCFBF8',
+    backgroundColor: 'transparent',
     borderRadius: 4,
-    overflow: 'hidden',
+    overflow: 'visible',
   },
 });

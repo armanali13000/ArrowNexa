@@ -26,3 +26,16 @@ export const BoltIcon = ({ size = 20, color }: IconProps) => (
 export const LockIcon = ({ size = 18, color }: IconProps) => (
   <Svg width={size} height={size} viewBox="0 0 24 24"><Rect x="5" y="10" width="14" height="10" rx="3" fill="none" stroke={color} strokeWidth="2" /><Path d="M8 10V7a4 4 0 0 1 8 0v3" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" /></Svg>
 );
+
+export const HeartIcon = ({ size = 18, color, filled = true }: IconProps & { filled?: boolean }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24">
+    <Path
+      d="M12 20.5s-7.5-4.4-9.4-9A5.2 5.2 0 0 1 12 6a5.2 5.2 0 0 1 9.4 5.5c-1.9 4.6-9.4 9-9.4 9z"
+      fill={filled ? color : 'none'}
+      stroke={color}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </Svg>
+);

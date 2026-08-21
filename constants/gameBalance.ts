@@ -12,7 +12,7 @@ export const STARTING_BOOSTERS = {
   clearBlocker: 0,
 } as const;
 
-export const FIRST_LIFE_LOSS_LEVEL = 3;
+export const FIRST_LIFE_LOSS_LEVEL = 1;
 export const REVEAL_COUNT = 3;
 
 export const STAR_RULES = {

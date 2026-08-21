@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Stack } from 'expo-router';
+import { Stack, usePathname } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { AppState, StyleSheet } from 'react-native';
@@ -12,6 +12,7 @@ import { ErrorBoundary } from '../components/layout/ErrorBoundary';
 export default function RootLayout() {
   const ready = useAppBootstrap();
   const theme = useTheme();
+  const pathname = usePathname();
 
   useEffect(() => {
     audioService.initialize().catch(() => undefined);
@@ -23,6 +24,11 @@ export default function RootLayout() {
       audioService.stopMusic().catch(() => undefined);
     };
   }, []);
+
+  useEffect(() => {
+    if (!ready) return;
+    audioService.startMusic(pathname === '/game' ? 'gameplayMusic' : 'menuMusic').catch(() => undefined);
+  }, [pathname, ready]);
 
   return (
     <GestureHandlerRootView style={styles.root}>
