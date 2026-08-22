@@ -12,6 +12,7 @@ export type SettingsData = {
   animationsEnabled: boolean;
   themeMode: ThemeMode;
   language: string;
+  languageConfigured: boolean;
 };
 
 export const defaultSettings: SettingsData = {
@@ -24,6 +25,7 @@ export const defaultSettings: SettingsData = {
   animationsEnabled: true,
   themeMode: 'system',
   language: 'English',
+  languageConfigured: false,
 };
 
 export const loadSettings = async (): Promise<SettingsData> => {

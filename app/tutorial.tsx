@@ -8,6 +8,7 @@ import { Text } from '../components/ui/Text';
 import { createArrowHeadPath, createArrowSvgPath } from '../engine/geometry/rendering';
 import { ArrowPieceData } from '../engine/types/game';
 import { useTheme } from '../hooks/useTheme';
+import { useAppCopy } from '../hooks/useAppCopy';
 
 const steps = [
   'Every arrow has an exit direction.',
@@ -28,16 +29,17 @@ const tutorialArrow: ArrowPieceData = {
 
 export default function TutorialScreen() {
   const theme = useTheme();
+  const { t } = useAppCopy();
   const cellSize = 44;
   const size = cellSize * 4;
   const linePath = createArrowSvgPath(tutorialArrow.path, cellSize, 0);
   const headPath = createArrowHeadPath(tutorialArrow.path, tutorialArrow.direction, cellSize, 0);
   return (
     <AppBackground>
-      <ScreenHeader title="How to Play" subtitle="A quick path-clearing guide" />
+      <ScreenHeader title={t('How to Play')} subtitle={t('A quick path-clearing guide')} />
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <Card style={styles.visualCard}>
-          <Text variant="heading2">Exit Paths</Text>
+          <Text variant="heading2">{t('Exit Paths')}</Text>
           <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
             <Rect x="0" y="0" width={size} height={size} rx="16" fill={theme.colors.boardBackground} />
             {Array.from({ length: 5 }, (_, index) => (
@@ -55,7 +57,7 @@ export default function TutorialScreen() {
             <View style={[styles.stepIndex, { backgroundColor: theme.colors.primary }]}>
               <Text variant="caption" color="#FFFFFF">{index + 1}</Text>
             </View>
-            <Text variant="body">{step}</Text>
+            <Text variant="body">{t(step)}</Text>
           </Card>
         ))}
       </ScrollView>

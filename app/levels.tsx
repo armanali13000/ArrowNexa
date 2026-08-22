@@ -15,9 +15,11 @@ import { calculateTotalStars } from '../services/progression/progressionService'
 import { hapticsService } from '../services/haptics/hapticsService';
 import { audioService } from '../services/audio/audioService';
 import { useProgressStore } from '../store/progress/progressStore';
+import { useAppCopy } from '../hooks/useAppCopy';
 
 export default function LevelsScreen() {
   const theme = useTheme();
+  const { copy, t } = useAppCopy();
   const highestUnlockedLevel = useProgressStore((state) => state.highestUnlockedLevel);
   const completedLevels = useProgressStore((state) => state.completedLevels);
   const [notice, setNotice] = useState<string | undefined>();
@@ -27,7 +29,7 @@ export default function LevelsScreen() {
 
   return (
     <AppBackground>
-      <ScreenHeader title="Level Map" subtitle={`${totalStars} / 1500 stars`} />
+      <ScreenHeader title={t('Level Map')} subtitle={`${totalStars} / 1500 ${t('stars')}`} />
       {notice ? <Text variant="caption" align="center" color={theme.colors.warning}>{notice}</Text> : null}
       <FlatList
         data={chapters}
@@ -44,7 +46,7 @@ export default function LevelsScreen() {
             <Card style={styles.chapter}>
               <View style={styles.chapterHead}>
                 <View>
-                  <Text variant="heading2">Chapter {item.chapter}</Text>
+                  <Text variant="heading2">{copy.chapter} {item.chapter}</Text>
                   <Text variant="title" color={theme.colors.textSecondary}>{item.name}</Text>
                 </View>
                 <Text variant="caption" color={theme.colors.textSecondary}>{completed}/50 - {stars}/150</Text>
@@ -62,11 +64,11 @@ export default function LevelsScreen() {
                     <Animated.View key={levelNumber} entering={state === 'current' ? ZoomIn.duration(280) : undefined} style={[styles.nodeShell, position]}>
                       <Pressable
                         accessibilityRole="button"
-                        accessibilityLabel={`Level ${levelNumber} ${state}`}
+                        accessibilityLabel={`${copy.level} ${levelNumber} ${t(state)}`}
                         onPress={async () => {
                           if (state === 'locked') {
                             await Promise.all([hapticsService.warning(), audioService.blockedArrow()]);
-                            setNotice(`Complete Level ${Math.max(1, levelNumber - 1)} first.`);
+                            setNotice(`${t('Complete Level')} ${Math.max(1, levelNumber - 1)} ${t('first.')}`);
                             return;
                           }
                           await Promise.all([hapticsService.button(), audioService.buttonClick()]);
@@ -76,8 +78,8 @@ export default function LevelsScreen() {
                       >
                         {state === 'locked' ? <LockIcon color={theme.colors.textSecondary} size={14} /> : <Text variant="caption" color={state === 'current' ? '#FFFFFF' : theme.colors.textPrimary}>{levelNumber}</Text>}
                         {completedLevels[levelNumber] ? <View style={styles.nodeStars}>{Array.from({ length: completedLevels[levelNumber] }, (_, star) => <StarIcon key={star} color={theme.colors.accent} size={9} />)}</View> : null}
-                        {finale ? <Text variant="caption" color={theme.colors.accent}>FINAL</Text> : null}
-                        <Text variant="caption" color={theme.colors.textSecondary}>{metadata.difficulty[0]}</Text>
+                        {finale ? <Text variant="caption" color={theme.colors.accent}>{t('FINAL')}</Text> : null}
+                        <Text variant="caption" color={theme.colors.textSecondary}>{t(metadata.difficulty)[0]}</Text>
                       </Pressable>
                     </Animated.View>
                   );

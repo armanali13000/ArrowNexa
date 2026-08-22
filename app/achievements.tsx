@@ -10,11 +10,13 @@ import { achievementCatalog, achievementCategories } from '../constants/achievem
 import { AchievementCategory } from '../engine/types/game';
 import { useTheme } from '../hooks/useTheme';
 import { useProgressStore } from '../store/progress/progressStore';
+import { useAppCopy } from '../hooks/useAppCopy';
 
 type Filter = 'All' | AchievementCategory;
 
 export default function AchievementsScreen() {
   const theme = useTheme();
+  const { t } = useAppCopy();
   const progressMap = useProgressStore((state) => state.achievements);
   const [filter, setFilter] = useState<Filter>('All');
   const unlockedCount = achievementCatalog.filter((achievement) => progressMap[achievement.id]?.unlocked).length;
@@ -25,11 +27,11 @@ export default function AchievementsScreen() {
 
   return (
     <AppBackground>
-      <ScreenHeader title="Achievements" subtitle={`${unlockedCount} / ${achievementCatalog.length}`} />
+      <ScreenHeader title={t('Achievements')} subtitle={`${unlockedCount} / ${achievementCatalog.length}`} />
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filters}>
           {achievementCategories.map((category) => (
-            <Button key={category} title={category} variant={filter === category ? 'primary' : 'tool'} onPress={() => setFilter(category)} style={styles.filterButton} />
+            <Button key={category} title={t(category)} variant={filter === category ? 'primary' : 'tool'} onPress={() => setFilter(category)} style={styles.filterButton} />
           ))}
         </ScrollView>
         {visibleAchievements.map((achievement) => {
@@ -44,14 +46,14 @@ export default function AchievementsScreen() {
               </View>
               <View style={styles.achievementCopy}>
                 <View style={styles.row}>
-                  <Text variant="title">{hidden ? '???' : achievement.title}</Text>
-                  <Text variant="caption" color={unlocked ? theme.colors.primary : theme.colors.textSecondary}>{achievement.tier ?? achievement.category}</Text>
+                  <Text variant="title">{hidden ? '???' : t(achievement.title)}</Text>
+                  <Text variant="caption" color={unlocked ? theme.colors.primary : theme.colors.textSecondary}>{t(achievement.tier ?? achievement.category ?? '')}</Text>
                 </View>
-                <Text variant="bodySmall" color={theme.colors.textSecondary}>{hidden ? 'Secret achievement.' : achievement.description}</Text>
+                <Text variant="bodySmall" color={theme.colors.textSecondary}>{hidden ? t('Secret achievement.') : t(achievement.description)}</Text>
                 <ProgressBar value={value / achievement.target} />
                 <View style={styles.row}>
                   <Text variant="caption" color={theme.colors.textSecondary}>{value} / {achievement.target}</Text>
-                  <Text variant="caption" color={theme.colors.textSecondary}>{stored?.rewardGranted ? 'Reward granted' : achievement.reward ? 'Reward on unlock' : ''}</Text>
+                  <Text variant="caption" color={theme.colors.textSecondary}>{stored?.rewardGranted ? t('Reward granted') : achievement.reward ? t('Reward on unlock') : ''}</Text>
                 </View>
               </View>
             </Card>

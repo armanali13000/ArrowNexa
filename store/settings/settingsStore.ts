@@ -26,6 +26,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
       animationsEnabled: next.animationsEnabled,
       themeMode: next.themeMode,
       language: next.language,
+      languageConfigured: next.languageConfigured,
     };
     set(settings);
     await saveSettings(settings);

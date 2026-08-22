@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Stack, usePathname } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -9,16 +9,23 @@ import { SplashScreenView } from '../components/layout/SplashScreenView';
 import { audioService } from '../services/audio/audioService';
 import { ErrorBoundary } from '../components/layout/ErrorBoundary';
 import { reminderService } from '../services/notifications/reminderService';
+import { LanguageOnboarding } from '../components/settings/LanguageOnboarding';
+import { useSettingsStore } from '../store/settings/settingsStore';
 
 export default function RootLayout() {
   const ready = useAppBootstrap();
   const theme = useTheme();
   const pathname = usePathname();
+  const languageConfigured = useSettingsStore((state) => state.languageConfigured);
+  const [notificationReady, setNotificationReady] = useState(false);
 
   useEffect(() => {
     audioService.initialize().catch(() => undefined);
     const removeNotificationTapListener = reminderService.handleNotificationTap();
-    reminderService.requestPermissionOnFirstLaunch().then(() => reminderService.syncFromPreferences()).catch(() => undefined);
+    reminderService.requestPermissionOnFirstLaunch()
+      .then(() => reminderService.syncFromPreferences())
+      .catch(() => undefined)
+      .finally(() => setNotificationReady(true));
     const subscription = AppState.addEventListener('change', (state) => {
       audioService.setActive(state === 'active').catch(() => undefined);
       if (state === 'background') reminderService.syncFromPreferences().catch(() => undefined);
@@ -39,10 +46,12 @@ export default function RootLayout() {
     <GestureHandlerRootView style={styles.root}>
       <ErrorBoundary>
         <StatusBar style={theme.colors.background === '#10151A' ? 'light' : 'dark'} />
-        {ready ? (
-          <Stack screenOptions={{ headerShown: false, animation: 'fade_from_bottom' }} />
-        ) : (
+        {!ready || !notificationReady ? (
           <SplashScreenView />
+        ) : !languageConfigured ? (
+          <LanguageOnboarding />
+        ) : (
+          <Stack screenOptions={{ headerShown: false, animation: 'fade_from_bottom' }} />
         )}
       </ErrorBoundary>
     </GestureHandlerRootView>

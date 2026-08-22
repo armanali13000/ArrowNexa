@@ -7,9 +7,11 @@ import { Text } from '../components/ui/Text';
 import { calculateTotalStars } from '../services/progression/progressionService';
 import { addDays, getLocalDateKey } from '../services/progression/dateService';
 import { useProgressStore } from '../store/progress/progressStore';
+import { useAppCopy } from '../hooks/useAppCopy';
 
 export default function StatisticsScreen() {
   const progress = useProgressStore();
+  const { t } = useAppCopy();
   const completed = Object.keys(progress.completedLevels).length;
   const totalStars = calculateTotalStars(progress.completedLevels);
   const perfect = Object.values(progress.completedLevels).filter((stars) => stars === 3).length;
@@ -25,58 +27,58 @@ export default function StatisticsScreen() {
   const previousWeekLevels = previousWeek.reduce((sum, day) => sum + day.levelsCompleted, 0);
   const thisWeekStars = thisWeek.reduce((sum, day) => sum + day.starsEarned, 0);
   const insights = [
-    thisWeekLevels > 0 ? `You completed ${thisWeekLevels} levels this week.` : undefined,
-    previousWeek.length && thisWeekLevels > previousWeekLevels ? `You completed ${thisWeekLevels - previousWeekLevels} more levels than last week.` : undefined,
-    thisWeekStars > 0 ? `You earned ${thisWeekStars} stars this week.` : undefined,
-    progress.personalRecords.longestNoHintStreak > 0 ? `Your longest no-hint streak is ${progress.personalRecords.longestNoHintStreak} levels.` : undefined,
+    thisWeekLevels > 0 ? `${t('You completed')} ${thisWeekLevels} ${t('levels this week.')}` : undefined,
+    previousWeek.length && thisWeekLevels > previousWeekLevels ? `${t('You completed')} ${thisWeekLevels - previousWeekLevels} ${t('more levels than last week.')}` : undefined,
+    thisWeekStars > 0 ? `${t('You earned')} ${thisWeekStars} ${t('stars this week.')}` : undefined,
+    progress.personalRecords.longestNoHintStreak > 0 ? `${t('Your longest no-hint streak is')} ${progress.personalRecords.longestNoHintStreak} ${t('levels.')}` : undefined,
   ].filter(Boolean);
 
   const overall: Array<[string, string | number]> = [
-    ['Levels Completed', completed],
-    ['Total Stars', totalStars],
-    ['Perfect Levels', perfect],
-    ['Nexa Rank', progress.nexaRank],
-    ['Total XP', progress.xp],
-    ['Accuracy', `${accuracy}%`],
-    ['Perfect Rate', `${perfectRate}%`],
-    ['Hint Usage', `${hintRate}%`],
+    [t('Levels Completed'), completed],
+    [t('Total Stars'), totalStars],
+    [t('Perfect Levels'), perfect],
+    [t('Nexa Rank'), progress.nexaRank],
+    [t('Total XP'), progress.xp],
+    [t('Accuracy'), `${accuracy}%`],
+    [t('Perfect Rate'), `${perfectRate}%`],
+    [t('Hint Usage'), `${hintRate}%`],
   ];
   const gameplay: Array<[string, string | number]> = [
-    ['Arrows Removed', progress.totalArrowsCleared],
-    ['Total Moves', progress.stats.totalMoves],
-    ['Mistakes', progress.stats.totalMistakes],
-    ['Blocked Taps', progress.stats.blockedTaps],
-    ['Lives Lost', progress.stats.totalLivesLost],
-    ['Hints Used', progress.hintsUsed],
-    ['Undo Used', progress.stats.undoUsed],
-    ['Boosters Used', progress.stats.boostersUsed],
+    [t('Arrows Removed'), progress.totalArrowsCleared],
+    [t('Total Moves'), progress.stats.totalMoves],
+    [t('Mistakes'), progress.stats.totalMistakes],
+    [t('Blocked Taps'), progress.stats.blockedTaps],
+    [t('Lives Lost'), progress.stats.totalLivesLost],
+    [t('Hints Used'), progress.hintsUsed],
+    [t('Undo Used'), progress.stats.undoUsed],
+    [t('Boosters Used'), progress.stats.boostersUsed],
   ];
   const records: Array<[string, string | number]> = [
-    ['Fastest Level', progress.personalRecords.fastestLevelSeconds ? `${progress.personalRecords.fastestLevelSeconds}s` : '-'],
-    ['Longest No-Hint Streak', progress.personalRecords.longestNoHintStreak],
-    ['Longest Perfect Streak', progress.personalRecords.longestPerfectStreak],
-    ['Best Daily Streak', progress.challengeStreak.best],
-    ['Most Stars in Session', progress.personalRecords.mostStarsInSession],
-    ['Highest Difficulty', progress.personalRecords.highestDifficultyCompleted ?? '-'],
+    [t('Fastest Level'), progress.personalRecords.fastestLevelSeconds ? `${progress.personalRecords.fastestLevelSeconds}s` : '-'],
+    [t('Longest No-Hint Streak'), progress.personalRecords.longestNoHintStreak],
+    [t('Longest Perfect Streak'), progress.personalRecords.longestPerfectStreak],
+    [t('Best Daily Streak'), progress.challengeStreak.best],
+    [t('Most Stars in Session'), progress.personalRecords.mostStarsInSession],
+    [t('Highest Difficulty'), progress.personalRecords.highestDifficultyCompleted ? t(progress.personalRecords.highestDifficultyCompleted) : '-'],
   ];
 
   return (
     <AppBackground>
-      <ScreenHeader title="Statistics" subtitle="Local performance dashboard" />
+      <ScreenHeader title={t('Statistics')} subtitle={t('Local performance dashboard')} />
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <Section title="Overall" stats={overall} />
-        <Section title="Gameplay" stats={gameplay} />
-        <Section title="Difficulty" stats={[
-          ['Easy Completed', progress.stats.easyCompleted],
-          ['Normal Completed', progress.stats.normalCompleted],
-          ['Hard Completed', progress.stats.hardCompleted],
-          ['Expert Completed', progress.stats.expertCompleted],
-          ['Daily Complete', progress.stats.dailyChallengesCompleted],
-          ['Perfect Daily', progress.stats.perfectDailyChallenges],
+        <Section title={t('Overall')} stats={overall} />
+        <Section title={t('Gameplay')} stats={gameplay} />
+        <Section title={t('Difficulty')} stats={[
+          [t('Easy Completed'), progress.stats.easyCompleted],
+          [t('Normal Completed'), progress.stats.normalCompleted],
+          [t('Hard Completed'), progress.stats.hardCompleted],
+          [t('Expert Completed'), progress.stats.expertCompleted],
+          [t('Daily Complete'), progress.stats.dailyChallengesCompleted],
+          [t('Perfect Daily'), progress.stats.perfectDailyChallenges],
         ]} />
-        <Section title="Personal Bests" stats={records} />
+        <Section title={t('Personal Bests')} stats={records} />
         <Card style={styles.stack}>
-          <Text variant="heading2">Activity</Text>
+          <Text variant="heading2">{t('Activity')}</Text>
           <View style={styles.activityGrid}>
             {activityDays.map((date) => {
               const day = progress.activity[date];
@@ -86,8 +88,8 @@ export default function StatisticsScreen() {
           </View>
         </Card>
         <Card style={styles.stack}>
-          <Text variant="heading2">Your Progress</Text>
-          {insights.length ? insights.map((insight) => <Text key={insight} variant="bodySmall">{insight}</Text>) : <Text variant="bodySmall">Play a few levels this week to build insights.</Text>}
+          <Text variant="heading2">{t('Your Progress')}</Text>
+          {insights.length ? insights.map((insight) => <Text key={insight} variant="bodySmall">{insight}</Text>) : <Text variant="bodySmall">{t('Play a few levels this week to build insights.')}</Text>}
         </Card>
       </ScrollView>
     </AppBackground>

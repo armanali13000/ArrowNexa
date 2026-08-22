@@ -2,10 +2,14 @@ import { generateLevelFromConfig } from '../generator/generateLevel';
 import { GeneratedLevel } from '../types/game';
 import { createFallbackLevel } from './fallbackLevels';
 import { createGenerationConfig, createLevelSeed } from './levelConfig';
+import { createThemedLevel, isThemedLevelNumber } from './themedLevels';
 
 export const MAX_GENERATION_ATTEMPTS = 18;
 
 export const createLevel = (levelNumber: number): GeneratedLevel => {
+  const themed = createThemedLevel(levelNumber, createLevelSeed(levelNumber, 0));
+  if (themed) return themed;
+
   for (let attempt = 0; attempt < MAX_GENERATION_ATTEMPTS; attempt += 1) {
     const seed = createLevelSeed(levelNumber, attempt);
     const config = createGenerationConfig(levelNumber, seed);
@@ -27,5 +31,6 @@ export const createLevelMetadata = (levelNumber: number) => {
     difficulty: config.difficulty,
     estimatedScore: score,
     seed: config.seed,
+    themed: isThemedLevelNumber(levelNumber),
   };
 };

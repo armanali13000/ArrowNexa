@@ -16,9 +16,11 @@ import { ensureWeeklyChallenge } from '../services/progression/weeklyChallengeSe
 import { audioService } from '../services/audio/audioService';
 import { hapticsService } from '../services/haptics/hapticsService';
 import { useProgressStore } from '../store/progress/progressStore';
+import { useAppCopy } from '../hooks/useAppCopy';
 
 export default function DailyScreen() {
   const progress = useProgressStore();
+  const { copy, t } = useAppCopy();
   const claimDailyRewards = useProgressStore((state) => state.claimDailyRewards);
   const [message, setMessage] = useState<string | undefined>();
   const today = getLocalDateKey();
@@ -31,40 +33,40 @@ export default function DailyScreen() {
   const claim = async () => {
     const result = claimDailyReward(progress.dailyReward);
     if (!result.claimed) {
-      setMessage(result.state.lastKnownDate && result.state.lastKnownDate > (progress.dailyReward.lastKnownDate ?? '') ? 'Come back tomorrow.' : 'Reward already claimed today.');
+      setMessage(result.state.lastKnownDate && result.state.lastKnownDate > (progress.dailyReward.lastKnownDate ?? '') ? t('Come back tomorrow.') : t('Reward already claimed today.'));
       return;
     }
     await claimDailyRewards([...result.rewards, ...result.streakRewards], result.state);
     await Promise.all([hapticsService.booster(), audioService.play('dailyReward')]);
-    setMessage('Daily reward claimed.');
+    setMessage(t('Daily reward claimed.'));
   };
 
   return (
     <AppBackground>
-      <ScreenHeader title="Daily Challenge" subtitle={`${formatDayMonth(today)} - ${getDailyDifficulty(today)}`} />
+      <ScreenHeader title={copy.dailyChallenge} subtitle={`${formatDayMonth(today)} - ${t(getDailyDifficulty(today))}`} />
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <Card style={styles.stack}>
           <View style={styles.row}>
             <View>
-              <Text variant="caption">TODAY</Text>
-              <Text variant="heading1">{dailyStatus}</Text>
-              <Text variant="bodySmall">Challenge Streak {progress.challengeStreak.current} - Best {progress.challengeStreak.best}</Text>
+              <Text variant="caption">{t('TODAY')}</Text>
+              <Text variant="heading1">{t(dailyStatus)}</Text>
+              <Text variant="bodySmall">{t('Challenge Streak')} {progress.challengeStreak.current} - {t('Best')} {progress.challengeStreak.best}</Text>
             </View>
             <View style={styles.badge}>
-              <Text variant="title" color="#FFFFFF">{getDailyDifficulty(today).toUpperCase()}</Text>
+              <Text variant="title" color="#FFFFFF">{t(getDailyDifficulty(today)).toUpperCase()}</Text>
             </View>
           </View>
-          <Text variant="bodySmall">Best: {todayResult?.bestStars ?? 0} stars - {todayResult?.bestTimeSeconds ? `${todayResult.bestTimeSeconds}s` : 'No time yet'}</Text>
+          <Text variant="bodySmall">{t('Best')}: {todayResult?.bestStars ?? 0} {t('stars')} - {todayResult?.bestTimeSeconds ? `${todayResult.bestTimeSeconds}s` : t('No time yet')}</Text>
           <PrimaryButton
-            title={dailyStatus === 'Not Played' ? 'PLAY' : todayResult?.completed ? 'REPLAY' : 'CONTINUE'}
+            title={dailyStatus === 'Not Played' ? copy.play : todayResult?.completed ? t('REPLAY') : copy.continue}
             onPress={() => router.push({ pathname: '/game', params: { mode: 'daily', date: today } })}
           />
         </Card>
 
         <Card style={styles.stack}>
           <View style={styles.row}>
-            <Text variant="heading2">Daily History</Text>
-            <Text variant="caption">{progress.stats.dailyChallengesCompleted} complete</Text>
+            <Text variant="heading2">{t('Daily History')}</Text>
+            <Text variant="caption">{progress.stats.dailyChallengesCompleted} {copy.complete}</Text>
           </View>
           <View style={styles.calendar}>
             {history.map((date) => {
@@ -84,13 +86,13 @@ export default function DailyScreen() {
 
         <Card style={styles.stack}>
           <View style={styles.row}>
-            <Text variant="heading2">Weekly Goals</Text>
-            <SecondaryButton title="Open" onPress={() => router.push('/weekly')} style={styles.smallButton} />
+            <Text variant="heading2">{t('Weekly Goals')}</Text>
+            <SecondaryButton title={copy.open} onPress={() => router.push('/weekly')} style={styles.smallButton} />
           </View>
           {weekly.objectives.map((objective) => (
             <View key={objective.id} style={styles.objective}>
               <View style={styles.row}>
-                <Text variant="bodySmall">{objective.title}</Text>
+                <Text variant="bodySmall">{t(objective.title)}</Text>
                 <Text variant="caption">{objective.progress} / {objective.target}</Text>
               </View>
               <ProgressBar value={objective.progress / objective.target} />
@@ -99,24 +101,24 @@ export default function DailyScreen() {
         </Card>
 
         <Card style={styles.stack}>
-          <Text variant="heading2">Daily Rewards</Text>
-          <Text variant="bodySmall">Claim once per local calendar day. Device clock rollback will not grant duplicates.</Text>
+          <Text variant="heading2">{t('Daily Rewards')}</Text>
+          <Text variant="bodySmall">{t('Claim once per local calendar day. Device clock rollback will not grant duplicates.')}</Text>
           <View style={styles.days}>
             {DAILY_REWARD_SCHEDULE.map((day) => {
               const state = day.day < progress.dailyReward.cycleDay ? 'claimed' : day.day === progress.dailyReward.cycleDay && dailyRewardStatus.available ? 'available' : 'locked';
               return (
                 <Animated.View key={day.day} entering={state === 'available' ? ZoomIn.duration(260) : undefined} style={styles.rewardDayWrap}>
                   <Card style={styles.rewardDay}>
-                    <Text variant="title">Day {day.day}</Text>
-                    <Text variant="caption">{state.toUpperCase()}</Text>
-                    <Text variant="caption">{day.rewards.map((reward) => reward.type === 'hint' ? `+${reward.amount} Hint` : `+${reward.amount} Booster`).join(', ')}</Text>
+                    <Text variant="title">{t('Day')} {day.day}</Text>
+                    <Text variant="caption">{t(state.toUpperCase())}</Text>
+                    <Text variant="caption">{day.rewards.map((reward) => reward.type === 'hint' ? `+${reward.amount} ${t('Hint')}` : `+${reward.amount} ${t('Booster')}`).join(', ')}</Text>
                   </Card>
                 </Animated.View>
               );
             })}
           </View>
           {message ? <Text variant="bodySmall" align="center">{message}</Text> : null}
-          <PrimaryButton title="CLAIM LOGIN REWARD" disabled={!dailyRewardStatus.available} onPress={claim} />
+          <PrimaryButton title={t('CLAIM LOGIN REWARD')} disabled={!dailyRewardStatus.available} onPress={claim} />
         </Card>
 
         {process.env.NODE_ENV !== 'production' ? <Button title="Dev: Replay Today" variant="ghost" onPress={() => router.push({ pathname: '/game', params: { mode: 'daily', date: today } })} /> : null}

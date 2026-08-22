@@ -12,26 +12,18 @@ import { Text } from '../components/ui/Text';
 import { TOTAL_LEVELS } from '../constants/levels';
 import { useTheme } from '../hooks/useTheme';
 import { loadGameplaySession } from '../services/gameplay/sessionStorage';
+import { getAppCopy, getUiText } from '../services/i18n/appCopy';
 import { getChapterForLevel } from '../services/progression/chapterService';
 import { getDailyDifficulty, getDailyStatus } from '../services/progression/dailyChallengeService';
 import { getLocalDateKey } from '../services/progression/dateService';
 import { ensureWeeklyChallenge } from '../services/progression/weeklyChallengeService';
 import { xpRequiredForRank } from '../services/progression/xpService';
 import { useProgressStore } from '../store/progress/progressStore';
-
-const menu = [
-  { title: 'Levels', route: '/levels' },
-  { title: 'Daily', route: '/daily' },
-  { title: 'Weekly Goals', route: '/weekly' },
-  { title: 'Progress', route: '/progress' },
-  { title: 'Achievements', route: '/achievements' },
-  { title: 'Statistics', route: '/statistics' },
-  { title: 'How to Play', route: '/tutorial' },
-  { title: 'Settings', route: '/settings' },
-] as const;
+import { useSettingsStore } from '../store/settings/settingsStore';
 
 export default function HomeScreen() {
   const theme = useTheme();
+  const language = useSettingsStore((state) => state.language);
   const currentLevel = useProgressStore((state) => state.currentLevel);
   const completedLevels = useProgressStore((state) => state.completedLevels);
   const hints = useProgressStore((state) => state.hints);
@@ -45,6 +37,18 @@ export default function HomeScreen() {
   const dailyStatus = getDailyStatus(progress, today);
   const weekly = ensureWeeklyChallenge(progress);
   const weeklyPreview = weekly.objectives[0];
+  const copy = getAppCopy(language);
+  const t = (text: string) => getUiText(language, text);
+  const menu = [
+    { title: copy.menuLevels, route: '/levels' },
+    { title: copy.menuDaily, route: '/daily' },
+    { title: copy.menuWeeklyGoals, route: '/weekly' },
+    { title: copy.menuProgress, route: '/progress' },
+    { title: copy.menuAchievements, route: '/achievements' },
+    { title: copy.menuStatistics, route: '/statistics' },
+    { title: copy.menuHowToPlay, route: '/tutorial' },
+    { title: copy.menuSettings, route: '/settings' },
+  ] as const;
   const chapterCompleted = Array.from({ length: chapter.endLevel - chapter.startLevel + 1 }, (_, index) => chapter.startLevel + index).filter((level) => completedLevels[level]).length;
 
   useEffect(() => {
@@ -58,17 +62,16 @@ export default function HomeScreen() {
           <BrandLogo />
           <View style={styles.brandCopy}>
             <Text variant="display">ArrowNexa</Text>
-            <Text variant="title" color={theme.colors.textSecondary}>Find the Way Out</Text>
-            <Text variant="caption" color={theme.colors.textSecondary}>Armanix Apps</Text>
+            <Text variant="title" color={theme.colors.textSecondary}>{copy.homeSubtitle}</Text>
           </View>
         </Animated.View>
 
         <Card>
           <View style={styles.row}>
             <View>
-              <Text variant="caption" color={theme.colors.textSecondary}>Current Level</Text>
-              <Text variant="heading1">Level {currentLevel}</Text>
-              <Text variant="caption" color={theme.colors.textSecondary}>Nexa Rank {nexaRank} - {xp} / {xpRequiredForRank(nexaRank)} XP</Text>
+              <Text variant="caption" color={theme.colors.textSecondary}>{copy.currentLevel}</Text>
+              <Text variant="heading1">{copy.level} {currentLevel}</Text>
+              <Text variant="caption" color={theme.colors.textSecondary}>{copy.nexaRank} {nexaRank} - {xp} / {xpRequiredForRank(nexaRank)} XP</Text>
             </View>
             <View style={styles.wallet}>
               <View style={styles.walletItem}><StarIcon color={theme.colors.accent} /><Text variant="title">{stars}</Text></View>
@@ -76,37 +79,37 @@ export default function HomeScreen() {
             </View>
           </View>
           <View style={styles.progressCopy}>
-            <Text variant="bodySmall" color={theme.colors.textSecondary}>Difficulty: Normal</Text>
-            <Text variant="bodySmall" color={theme.colors.textSecondary}>Progress: {currentLevel} / {TOTAL_LEVELS}</Text>
+            <Text variant="bodySmall" color={theme.colors.textSecondary}>{copy.difficulty}: {t('Normal')}</Text>
+            <Text variant="bodySmall" color={theme.colors.textSecondary}>{copy.progress}: {currentLevel} / {TOTAL_LEVELS}</Text>
           </View>
           <ProgressBar value={currentLevel / TOTAL_LEVELS} />
         </Card>
 
         <Card>
-          <Text variant="heading2">Chapter {chapter.chapter}</Text>
+          <Text variant="heading2">{copy.chapter} {chapter.chapter}</Text>
           <Text variant="title" color={theme.colors.textSecondary}>{chapter.name}</Text>
           <View style={styles.progressCopy}>
-            <Text variant="bodySmall" color={theme.colors.textSecondary}>Level {currentLevel} / {chapter.endLevel}</Text>
-            <Text variant="bodySmall" color={theme.colors.textSecondary}>{chapterCompleted} / 50 complete</Text>
+            <Text variant="bodySmall" color={theme.colors.textSecondary}>{copy.level} {currentLevel} / {chapter.endLevel}</Text>
+            <Text variant="bodySmall" color={theme.colors.textSecondary}>{chapterCompleted} / 50 {copy.complete}</Text>
           </View>
           <ProgressBar value={chapterCompleted / 50} />
         </Card>
 
-        <PrimaryButton title={hasSession ? 'CONTINUE' : 'PLAY'} accessibilityLabel="Play latest unlocked level" onPress={() => router.push('/game')} style={styles.play} />
+        <PrimaryButton title={hasSession ? copy.continue : copy.play} accessibilityLabel={t('Play latest unlocked level')} onPress={() => router.push('/game')} style={styles.play} />
 
         <Card style={styles.dailyCard}>
           <View>
-            <Text variant="caption">DAILY CHALLENGE</Text>
-            <Text variant="heading2">{getDailyDifficulty(today)}</Text>
-            <Text variant="bodySmall" color={theme.colors.textSecondary}>{dailyStatus} - Streak {progress.challengeStreak.current}</Text>
+            <Text variant="caption">{copy.dailyChallenge}</Text>
+            <Text variant="heading2">{t(getDailyDifficulty(today))}</Text>
+            <Text variant="bodySmall" color={theme.colors.textSecondary}>{t(dailyStatus)} - {t('Streak')} {progress.challengeStreak.current}</Text>
           </View>
-          <SecondaryButton title={dailyStatus === 'Not Played' ? 'PLAY' : 'OPEN'} onPress={() => router.push('/daily')} style={styles.dailyButton} />
+          <SecondaryButton title={dailyStatus === 'Not Played' ? copy.play : copy.open} onPress={() => router.push('/daily')} style={styles.dailyButton} />
         </Card>
 
         {weeklyPreview ? (
           <Card style={styles.weeklyPreview}>
-            <Text variant="caption">WEEKLY GOAL</Text>
-            <Text variant="bodySmall">{weeklyPreview.title}</Text>
+            <Text variant="caption">{copy.weeklyGoal}</Text>
+            <Text variant="bodySmall">{t(weeklyPreview.title)}</Text>
             <ProgressBar value={weeklyPreview.progress / weeklyPreview.target} />
           </Card>
         ) : null}
@@ -121,7 +124,7 @@ export default function HomeScreen() {
             />
           ))}
         </View>
-        <Button title="About ArrowNexa" variant="ghost" onPress={() => router.push('/about')} />
+        <Button title={`${copy.about} ArrowNexa`} variant="ghost" onPress={() => router.push('/about')} />
       </ScrollView>
     </AppBackground>
   );

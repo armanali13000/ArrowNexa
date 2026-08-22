@@ -17,6 +17,7 @@ import { calculateStars } from '../engine/rewards/stars';
 import { getRecommendedMove } from '../engine/solver/hint';
 import { GeneratedLevel, LevelPerformance, PuzzleArrow } from '../engine/types/game';
 import { useTheme } from '../hooks/useTheme';
+import { useAppCopy } from '../hooks/useAppCopy';
 import { economyService } from '../services/economy/economyService';
 import { clearGameplaySession, loadGameplaySession, saveGameplaySession } from '../services/gameplay/sessionStorage';
 import { hapticsService } from '../services/haptics/hapticsService';
@@ -44,7 +45,7 @@ const prebuildGeneratedLevel = (levelNumber: number) => {
   if (levelNumber < 1 || levelNumber > 500 || generatedLevelCache.has(levelNumber)) return;
   setTimeout(() => {
     if (!generatedLevelCache.has(levelNumber)) generatedLevelCache.set(levelNumber, createLevel(levelNumber));
-  }, 450);
+  }, 16);
 };
 
 type CompletionSummary = {
@@ -60,6 +61,7 @@ type CompletionSummary = {
 
 export default function GameScreen() {
   const theme = useTheme();
+  const { copy, t } = useAppCopy();
   const params = useLocalSearchParams<{ level?: string; mode?: string; date?: string }>();
   const isDailyMode = params.mode === 'daily';
   const dailyDate = typeof params.date === 'string' ? params.date : getLocalDateKey();
@@ -98,6 +100,7 @@ export default function GameScreen() {
   const startedAtRef = useRef(Date.now());
   const completionHandledRef = useRef(false);
   const completeHandlerRef = useRef<(finalArrows: PuzzleArrow[]) => void>(() => undefined);
+  const skipNextLevelEffectRef = useRef(false);
   const lockedArrowIdsRef = useRef(new Set<string>());
 
   const validMoves = useMemo(() => getValidMoves(arrows, level.size), [arrows, level.size]);
@@ -130,12 +133,19 @@ export default function GameScreen() {
   }, [level]);
 
   useEffect(() => {
+    if (skipNextLevelEffectRef.current) {
+      skipNextLevelEffectRef.current = false;
+      return;
+    }
     let mounted = true;
     const nextLevel = isDailyMode ? createDailyChallengeLevel(dailyDate) : getGeneratedLevel(currentLevel);
     setLevel(nextLevel);
     resetAttempt(nextLevel);
     if (isDailyMode) recordDailyChallengeStarted(dailyDate).catch(() => undefined);
-    else saveCachedLevel(nextLevel).catch(() => undefined);
+    else {
+      saveCachedLevel(nextLevel).catch(() => undefined);
+      prebuildGeneratedLevel(currentLevel + 1);
+    }
 
     const restoreSession = async () => {
       if (isDailyMode) return;
@@ -304,10 +314,11 @@ export default function GameScreen() {
     }
     const nextLevelNumber = Math.min(500, currentLevel + 1);
     const nextLevel = getGeneratedLevel(nextLevelNumber);
+    skipNextLevelEffectRef.current = true;
+    clearGameplaySession().catch(() => undefined);
     setCurrentLevel(nextLevelNumber);
     setLevel(nextLevel);
     resetAttempt(nextLevel);
-    router.replace(`/game?level=${nextLevelNumber}`);
     saveCachedLevel(nextLevel).catch(() => undefined);
     prebuildGeneratedLevel(nextLevelNumber + 1);
   }, [currentLevel, isDailyMode, resetAttempt]);
@@ -342,7 +353,7 @@ export default function GameScreen() {
       difficulty: level.difficulty,
       usedExtraLife,
     };
-    setCompletion({ stars, moves: moveCount, mistakes, hintsUsed, timeSeconds, rewardLabel: rewards?.label ?? 'Daily progress saved', xpGained: isDailyMode ? 0 : xpGained, nexaRank });
+    setCompletion({ stars, moves: moveCount, mistakes, hintsUsed, timeSeconds, rewardLabel: rewards?.label ?? t('Daily progress saved'), xpGained: isDailyMode ? 0 : xpGained, nexaRank });
     setArrows(finalArrows);
     setCompleteVisible(true);
     void Promise.all([hapticsService.levelComplete(), audioService.levelComplete()]).catch(() => undefined);
@@ -369,23 +380,23 @@ export default function GameScreen() {
     <SafeAreaView style={styles.safe}>
       <View style={styles.topBar}>
         <View style={styles.leftControls}>
-          <Pressable accessibilityRole="button" accessibilityLabel="Back" onPress={() => router.back()} style={styles.iconButton}>
+          <Pressable accessibilityRole="button" accessibilityLabel={t('Back')} onPress={() => router.back()} style={styles.iconButton}>
             <ArrowBackIcon color="#1B1E22" size={20} />
           </Pressable>
-          <View style={styles.counterPill} accessibilityLabel={`${remainingArrows} arrows remaining`}>
+          <View style={styles.counterPill} accessibilityLabel={`${remainingArrows} ${t('arrows remaining')}`}>
             <Text variant="caption" color="#061344">{remainingArrows}</Text>
           </View>
         </View>
         <View style={styles.levelCopy}>
-          <Text variant="title" align="center" color="#1B1E22">{isDailyMode ? 'Daily Challenge' : `Level ${currentLevel}`}</Text>
-          <Text variant="caption" align="center" color="#5F656B">{isDailyMode ? `${formatDayMonth(dailyDate)} - ${getDailyDifficulty(dailyDate).toUpperCase()}` : level.difficulty.toUpperCase()}</Text>
-          <View style={styles.hearts} accessibilityLabel={`${lives} lives remaining`}>
+          <Text variant="title" align="center" color="#1B1E22">{isDailyMode ? copy.dailyChallenge : `${copy.level} ${currentLevel}`}</Text>
+          <Text variant="caption" align="center" color="#5F656B">{isDailyMode ? `${formatDayMonth(dailyDate)} - ${t(getDailyDifficulty(dailyDate)).toUpperCase()}` : t(level.difficulty).toUpperCase()}</Text>
+          <View style={styles.hearts} accessibilityLabel={`${lives} ${t('lives remaining')}`}>
             {Array.from({ length: MAX_LIVES_WITH_BOOSTER }, (_, index) => (
               <HeartIcon key={index} color="#D9514E" size={14} filled={index < lives} />
             ))}
           </View>
         </View>
-        <Pressable accessibilityRole="button" accessibilityLabel="Pause menu" onPress={() => setPauseVisible(true)} style={styles.iconButton}>
+        <Pressable accessibilityRole="button" accessibilityLabel={t('Pause menu')} onPress={() => setPauseVisible(true)} style={styles.iconButton}>
           <PauseIcon color="#1B1E22" size={20} />
         </Pressable>
       </View>
@@ -403,16 +414,16 @@ export default function GameScreen() {
       </Animated.View>
 
       <View style={styles.footer}>
-        <Tool icon={<HintIcon color="#1498E5" />} label="Hint" value={String(hints)} onPress={handleHint} disabled={motionLocked || completeVisible} />
-        <Tool icon={<UndoIcon color="#1498E5" />} label="Undo" value={String(Math.max(0, FREE_UNDOS_PER_LEVEL - freeUndosUsed) + boosters.undo)} onPress={handleUndo} disabled={!undoAvailable} />
-        <Tool icon={<BoosterIcon color="#1498E5" />} label="Boosters" value={`${boosters.extraLife + boosters.reveal + boosters.undo}`} onPress={() => setBoostersVisible(true)} disabled={motionLocked || completeVisible} />
+        <Tool icon={<HintIcon color="#1498E5" />} label={t('Hint')} value={String(hints)} onPress={handleHint} disabled={motionLocked || completeVisible} />
+        <Tool icon={<UndoIcon color="#1498E5" />} label={t('Undo')} value={String(Math.max(0, FREE_UNDOS_PER_LEVEL - freeUndosUsed) + boosters.undo)} onPress={handleUndo} disabled={!undoAvailable} />
+        <Tool icon={<BoosterIcon color="#1498E5" />} label={t('Boosters')} value={`${boosters.extraLife + boosters.reveal + boosters.undo}`} onPress={() => setBoostersVisible(true)} disabled={motionLocked || completeVisible} />
       </View>
 
       <PauseModal onRestart={retry} />
-      <CompleteModal daily={isDailyMode} visible={completeVisible} summary={completion} onNext={handleNextLevel} onReplay={retry} />
-      <FailureModal visible={failedVisible} levelNumber={currentLevel} mistakes={mistakes} remaining={arrows.filter((arrow) => arrow.state !== 'removed').length} extraLives={boosters.extraLife} onRetry={retry} onExtraLife={useExtraLife} />
-      <BoostersModal visible={boostersVisible} lives={lives} inventory={boosters} onClose={() => setBoostersVisible(false)} onExtraLife={useExtraLife} onUndo={handleUndo} undoDisabled={!undoAvailable} onReveal={useReveal} revealDisabled={!validMoves.length} />
-      <NoHintsModal visible={noHintsVisible} onClose={() => setNoHintsVisible(false)} />
+      <CompleteModal daily={isDailyMode} visible={completeVisible} summary={completion} onNext={handleNextLevel} onReplay={retry} t={t} copy={copy} />
+      <FailureModal visible={failedVisible} levelNumber={currentLevel} mistakes={mistakes} remaining={arrows.filter((arrow) => arrow.state !== 'removed').length} extraLives={boosters.extraLife} onRetry={retry} onExtraLife={useExtraLife} t={t} copy={copy} />
+      <BoostersModal visible={boostersVisible} lives={lives} inventory={boosters} onClose={() => setBoostersVisible(false)} onExtraLife={useExtraLife} onUndo={handleUndo} undoDisabled={!undoAvailable} onReveal={useReveal} revealDisabled={!validMoves.length} t={t} />
+      <NoHintsModal visible={noHintsVisible} onClose={() => setNoHintsVisible(false)} t={t} />
     </SafeAreaView>
   );
 
@@ -440,10 +451,10 @@ const Tool = ({ icon, label, value, disabled, onPress }: { icon: React.ReactNode
   </Pressable>
 );
 
-const CompleteModal = ({ daily, visible, summary, onNext, onReplay }: { daily?: boolean; visible: boolean; summary?: CompletionSummary; onNext: () => void; onReplay: () => void }) => (
+const CompleteModal = ({ daily, visible, summary, onNext, onReplay, t, copy }: { daily?: boolean; visible: boolean; summary?: CompletionSummary; onNext: () => void; onReplay: () => void; t: (text: string) => string; copy: ReturnType<typeof useAppCopy>['copy'] }) => (
   <AppModal visible={visible} onClose={() => undefined}>
     <View style={styles.modalStack}>
-      <Text variant="heading1" align="center">{daily ? 'Daily Complete' : 'Level Complete'}</Text>
+      <Text variant="heading1" align="center">{daily ? t('Daily Complete') : t('Level Complete')}</Text>
       <View style={styles.starRow}>
         {Array.from({ length: 3 }, (_, index) => (
           <Animated.View key={index} entering={visible ? ZoomIn.delay(index * 130).duration(260) : undefined}>
@@ -451,46 +462,46 @@ const CompleteModal = ({ daily, visible, summary, onNext, onReplay }: { daily?: 
           </Animated.View>
         ))}
       </View>
-      <Text variant="body" align="center">Moves {summary?.moves ?? 0} - Mistakes {summary?.mistakes ?? 0} - Hints {summary?.hintsUsed ?? 0} - Time {summary?.timeSeconds ?? 0}s</Text>
-      <Text variant="title" align="center">{summary?.rewardLabel ?? 'Progress unlocked'}</Text>
-      <Text variant="title" align="center">{daily ? `Daily Streak ${summary?.nexaRank ?? 1}` : `+${summary?.xpGained ?? 0} XP - Nexa Rank ${summary?.nexaRank ?? 1}`}</Text>
-      <PrimaryButton title={daily ? 'Daily Home' : 'Next'} onPress={onNext} />
-      <SecondaryButton title="Replay" onPress={onReplay} />
-      <Button title="Levels" variant="ghost" onPress={() => router.push('/levels')} />
+      <Text variant="body" align="center">{t('Moves')} {summary?.moves ?? 0} - {t('Mistakes')} {summary?.mistakes ?? 0} - {t('Hints')} {summary?.hintsUsed ?? 0} - {t('Time')} {summary?.timeSeconds ?? 0}s</Text>
+      <Text variant="title" align="center">{summary?.rewardLabel ?? t('Progress unlocked')}</Text>
+      <Text variant="title" align="center">{daily ? `${t('Daily Streak')} ${summary?.nexaRank ?? 1}` : `+${summary?.xpGained ?? 0} XP - ${copy.nexaRank} ${summary?.nexaRank ?? 1}`}</Text>
+      <PrimaryButton title={daily ? t('Daily Home') : t('Next')} onPress={onNext} />
+      <SecondaryButton title={t('Replay')} onPress={onReplay} />
+      <Button title={t('Levels')} variant="ghost" onPress={() => router.push('/levels')} />
     </View>
   </AppModal>
 );
 
-const FailureModal = ({ visible, levelNumber, mistakes, remaining, extraLives, onRetry, onExtraLife }: { visible: boolean; levelNumber: number; mistakes: number; remaining: number; extraLives: number; onRetry: () => void; onExtraLife: () => void }) => (
+const FailureModal = ({ visible, levelNumber, mistakes, remaining, extraLives, onRetry, onExtraLife, t, copy }: { visible: boolean; levelNumber: number; mistakes: number; remaining: number; extraLives: number; onRetry: () => void; onExtraLife: () => void; t: (text: string) => string; copy: ReturnType<typeof useAppCopy>['copy'] }) => (
   <AppModal visible={visible} onClose={() => undefined}>
     <View style={styles.modalStack}>
-      <Text variant="heading1" align="center">Out of Lives</Text>
-      <Text variant="body" align="center">Level {levelNumber} - Mistakes {mistakes} - {remaining} arrows remaining</Text>
-      <PrimaryButton title="Retry" onPress={onRetry} />
-      <SecondaryButton title={`Extra Life x${extraLives}`} disabled={extraLives <= 0} onPress={onExtraLife} />
-      <Button title="Levels" variant="ghost" onPress={() => router.push('/levels')} />
+      <Text variant="heading1" align="center">{t('Out of Lives')}</Text>
+      <Text variant="body" align="center">{copy.level} {levelNumber} - {t('Mistakes')} {mistakes} - {remaining} {t('arrows remaining')}</Text>
+      <PrimaryButton title={t('Retry')} onPress={onRetry} />
+      <SecondaryButton title={`${t('Extra Life')} x${extraLives}`} disabled={extraLives <= 0} onPress={onExtraLife} />
+      <Button title={t('Levels')} variant="ghost" onPress={() => router.push('/levels')} />
     </View>
   </AppModal>
 );
 
-const BoostersModal = ({ visible, lives, inventory, onClose, onExtraLife, onUndo, undoDisabled, onReveal, revealDisabled }: { visible: boolean; lives: number; inventory: { extraLife: number; undo: number; reveal: number; clearBlocker: number }; onClose: () => void; onExtraLife: () => void; onUndo: () => void; undoDisabled: boolean; onReveal: () => void; revealDisabled: boolean }) => (
+const BoostersModal = ({ visible, lives, inventory, onClose, onExtraLife, onUndo, undoDisabled, onReveal, revealDisabled, t }: { visible: boolean; lives: number; inventory: { extraLife: number; undo: number; reveal: number; clearBlocker: number }; onClose: () => void; onExtraLife: () => void; onUndo: () => void; undoDisabled: boolean; onReveal: () => void; revealDisabled: boolean; t: (text: string) => string }) => (
   <AppModal visible={visible} onClose={onClose}>
     <View style={styles.modalStack}>
-      <Text variant="heading2" align="center">Boosters</Text>
-      <Button title={`Extra Life x${inventory.extraLife}`} variant="tool" disabled={inventory.extraLife <= 0 || lives >= MAX_LIVES_WITH_BOOSTER} onPress={onExtraLife} />
-      <Button title={`Undo x${inventory.undo}`} variant="tool" disabled={inventory.undo <= 0 || undoDisabled} onPress={onUndo} />
-      <Button title={`Reveal x${inventory.reveal}`} variant="tool" disabled={inventory.reveal <= 0 || revealDisabled} onPress={onReveal} />
-      <Button title="Close" variant="ghost" onPress={onClose} />
+      <Text variant="heading2" align="center">{t('Boosters')}</Text>
+      <Button title={`${t('Extra Life')} x${inventory.extraLife}`} variant="tool" disabled={inventory.extraLife <= 0 || lives >= MAX_LIVES_WITH_BOOSTER} onPress={onExtraLife} />
+      <Button title={`${t('Undo')} x${inventory.undo}`} variant="tool" disabled={inventory.undo <= 0 || undoDisabled} onPress={onUndo} />
+      <Button title={`${t('Reveal')} x${inventory.reveal}`} variant="tool" disabled={inventory.reveal <= 0 || revealDisabled} onPress={onReveal} />
+      <Button title={t('Close')} variant="ghost" onPress={onClose} />
     </View>
   </AppModal>
 );
 
-const NoHintsModal = ({ visible, onClose }: { visible: boolean; onClose: () => void }) => (
+const NoHintsModal = ({ visible, onClose, t }: { visible: boolean; onClose: () => void; t: (text: string) => string }) => (
   <AppModal visible={visible} onClose={onClose}>
     <View style={styles.modalStack}>
-      <Text variant="heading2" align="center">No Hints Left</Text>
-      <Text variant="body" align="center">Earn hints through perfect clears, milestones, and every fifth completed level.</Text>
-      <PrimaryButton title="Continue Playing" onPress={onClose} />
+      <Text variant="heading2" align="center">{t('No Hints Left')}</Text>
+      <Text variant="body" align="center">{t('Earn hints through perfect clears, milestones, and every fifth completed level.')}</Text>
+      <PrimaryButton title={t('Continue Playing')} onPress={onClose} />
     </View>
   </AppModal>
 );

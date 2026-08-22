@@ -1,6 +1,6 @@
 import { Difficulty } from '../engine/types/game';
 
-export const DEFAULT_LIVES = 3;
+export const DEFAULT_LIVES = 4;
 export const MAX_LIVES_WITH_BOOSTER = 4;
 export const FREE_UNDOS_PER_LEVEL = 1;
 export const STARTING_HINTS = 5;

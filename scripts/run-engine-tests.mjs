@@ -110,8 +110,15 @@ assert.notDeepEqual(generated120a.arrows, generated121.arrows, 'different levels
 assert.equal(validateLevelGeometry(generated120a), true, 'generated level geometry should be valid');
 assert.equal(solveGenerated(generated120a), true, 'generated level should be solvable');
 
+for (const levelNumber of [35, 60, 85, 110, 150, 175]) {
+  const themed = createLevel(levelNumber);
+  assert.equal(themed.id.startsWith('theme-'), true, `level ${levelNumber} should use a themed object layout`);
+  assert.equal(validateLevelGeometry(themed), true, `themed level ${levelNumber} geometry should be valid`);
+  assert.equal(solveGenerated(themed), true, `themed level ${levelNumber} should be solvable`);
+}
+
 const easy = createLevel(5);
-const hard = createLevel(360);
+const hard = createLevel(361);
 const expert = createLevel(480);
 assert.equal(easy.difficulty, 'Easy', 'early easy level should keep Easy difficulty classification');
 assert.equal(expert.metrics.complexityScore > easy.metrics.complexityScore, true, 'late level should be harder than early level');
