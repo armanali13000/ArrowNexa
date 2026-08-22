@@ -8,6 +8,7 @@ import { useTheme } from '../hooks/useTheme';
 import { SplashScreenView } from '../components/layout/SplashScreenView';
 import { audioService } from '../services/audio/audioService';
 import { ErrorBoundary } from '../components/layout/ErrorBoundary';
+import { reminderService } from '../services/notifications/reminderService';
 
 export default function RootLayout() {
   const ready = useAppBootstrap();
@@ -16,10 +17,14 @@ export default function RootLayout() {
 
   useEffect(() => {
     audioService.initialize().catch(() => undefined);
+    const removeNotificationTapListener = reminderService.handleNotificationTap();
+    reminderService.requestPermissionOnFirstLaunch().then(() => reminderService.syncFromPreferences()).catch(() => undefined);
     const subscription = AppState.addEventListener('change', (state) => {
       audioService.setActive(state === 'active').catch(() => undefined);
+      if (state === 'background') reminderService.syncFromPreferences().catch(() => undefined);
     });
     return () => {
+      removeNotificationTapListener();
       subscription.remove();
       audioService.stopMusic().catch(() => undefined);
     };

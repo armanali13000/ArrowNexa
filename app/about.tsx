@@ -26,8 +26,9 @@ export default function AboutScreen() {
         </Card>
         <Card style={styles.stack}>
           <Text variant="heading2">Privacy</Text>
-          <Text variant="bodySmall" color={theme.colors.textSecondary}>ArrowNexa stores gameplay progress, settings, achievements, and rewards locally on this device. No analytics SDK is installed.</Text>
-          <Text variant="bodySmall" color={theme.colors.textSecondary}>Advertising architecture is prepared but disabled until a production ad SDK and policy review are completed.</Text>
+          <Text variant="bodySmall" color={theme.colors.textSecondary}>ArrowNexa stores gameplay progress, settings, achievements, rewards, notification preferences, and reminder schedules locally on this device.</Text>
+          <Text variant="bodySmall" color={theme.colors.textSecondary}>No analytics SDK, account system, or cloud save is included in this build.</Text>
+          <Text variant="bodySmall" color={theme.colors.textSecondary}>Notification permission is optional. Reminders can be turned off in Settings at any time.</Text>
         </Card>
         <Card style={styles.stack}>
           <Text variant="heading2">Terms</Text>

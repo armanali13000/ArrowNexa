@@ -30,6 +30,22 @@ import { GENERATION_VERSION } from '../engine/levels/levelConfig';
 import { calculateLevelXP } from '../services/progression/xpService';
 
 const DEBUG_BOARD = false;
+const generatedLevelCache = new Map<number, GeneratedLevel>();
+
+const getGeneratedLevel = (levelNumber: number) => {
+  const cached = generatedLevelCache.get(levelNumber);
+  if (cached) return cached;
+  const level = createLevel(levelNumber);
+  generatedLevelCache.set(levelNumber, level);
+  return level;
+};
+
+const prebuildGeneratedLevel = (levelNumber: number) => {
+  if (levelNumber < 1 || levelNumber > 500 || generatedLevelCache.has(levelNumber)) return;
+  setTimeout(() => {
+    if (!generatedLevelCache.has(levelNumber)) generatedLevelCache.set(levelNumber, createLevel(levelNumber));
+  }, 450);
+};
 
 type CompletionSummary = {
   stars: number;
@@ -63,7 +79,7 @@ export default function GameScreen() {
   const recordUndoUsed = useProgressStore((state) => state.recordUndoUsed);
   const recordRetry = useProgressStore((state) => state.recordRetry);
   const setPauseVisible = useGameStore((state) => state.setPauseVisible);
-  const [level, setLevel] = useState<GeneratedLevel>(() => (isDailyMode ? createDailyChallengeLevel(dailyDate) : createLevel(currentLevel)));
+  const [level, setLevel] = useState<GeneratedLevel>(() => (isDailyMode ? createDailyChallengeLevel(dailyDate) : getGeneratedLevel(currentLevel)));
   const [arrows, setArrows] = useState<PuzzleArrow[]>(() => cloneLevelArrows(level));
   const [lives, setLives] = useState(DEFAULT_LIVES);
   const [moveCount, setMoveCount] = useState(0);
@@ -115,7 +131,7 @@ export default function GameScreen() {
 
   useEffect(() => {
     let mounted = true;
-    const nextLevel = isDailyMode ? createDailyChallengeLevel(dailyDate) : createLevel(currentLevel);
+    const nextLevel = isDailyMode ? createDailyChallengeLevel(dailyDate) : getGeneratedLevel(currentLevel);
     setLevel(nextLevel);
     resetAttempt(nextLevel);
     if (isDailyMode) recordDailyChallengeStarted(dailyDate).catch(() => undefined);
@@ -281,6 +297,21 @@ export default function GameScreen() {
     resetAttempt();
   }, [recordRetry, resetAttempt]);
 
+  const handleNextLevel = useCallback(() => {
+    if (isDailyMode) {
+      router.replace('/daily');
+      return;
+    }
+    const nextLevelNumber = Math.min(500, currentLevel + 1);
+    const nextLevel = getGeneratedLevel(nextLevelNumber);
+    setCurrentLevel(nextLevelNumber);
+    setLevel(nextLevel);
+    resetAttempt(nextLevel);
+    router.replace(`/game?level=${nextLevelNumber}`);
+    saveCachedLevel(nextLevel).catch(() => undefined);
+    prebuildGeneratedLevel(nextLevelNumber + 1);
+  }, [currentLevel, isDailyMode, resetAttempt]);
+
   const handleComplete = useCallback(async (finalArrows: PuzzleArrow[]) => {
     if (completionHandledRef.current) return;
     completionHandledRef.current = true;
@@ -315,6 +346,7 @@ export default function GameScreen() {
     setArrows(finalArrows);
     setCompleteVisible(true);
     void Promise.all([hapticsService.levelComplete(), audioService.levelComplete()]).catch(() => undefined);
+    if (!isDailyMode) prebuildGeneratedLevel(currentLevel + 1);
 
     const persistCompletion = async () => {
       if (isDailyMode) {
@@ -326,7 +358,9 @@ export default function GameScreen() {
       await recordLevelCompletion(performance, rewards.rewards, rewards.rewardKeys);
       await clearGameplaySession();
     };
-    persistCompletion().catch(() => undefined);
+    setTimeout(() => {
+      persistCompletion().catch(() => undefined);
+    }, 350);
   }, [claimedRewards, completedLevels, currentLevel, dailyDate, hintsUsed, isDailyMode, level.difficulty, lives, mistakes, moveCount, nexaRank, recordDailyChallengeCompletion, recordLevelCompletion, usedExtraLife]);
 
   completeHandlerRef.current = handleComplete;
@@ -375,7 +409,7 @@ export default function GameScreen() {
       </View>
 
       <PauseModal onRestart={retry} />
-      <CompleteModal daily={isDailyMode} visible={completeVisible} summary={completion} onNext={() => router.replace(isDailyMode ? '/daily' : `/game?level=${currentLevel + 1}`)} onReplay={retry} />
+      <CompleteModal daily={isDailyMode} visible={completeVisible} summary={completion} onNext={handleNextLevel} onReplay={retry} />
       <FailureModal visible={failedVisible} levelNumber={currentLevel} mistakes={mistakes} remaining={arrows.filter((arrow) => arrow.state !== 'removed').length} extraLives={boosters.extraLife} onRetry={retry} onExtraLife={useExtraLife} />
       <BoostersModal visible={boostersVisible} lives={lives} inventory={boosters} onClose={() => setBoostersVisible(false)} onExtraLife={useExtraLife} onUndo={handleUndo} undoDisabled={!undoAvailable} onReveal={useReveal} revealDisabled={!validMoves.length} />
       <NoHintsModal visible={noHintsVisible} onClose={() => setNoHintsVisible(false)} />

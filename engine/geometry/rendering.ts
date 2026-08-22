@@ -72,6 +72,21 @@ const slicePolyline = (points: PixelPoint[], startDistance: number, endDistance:
   return sliced.filter((point, index, items) => index === 0 || distance(point, items[index - 1]) > 0.1);
 };
 
+const buildFollowerPoints = (route: PixelPoint[], bodyLength: number, progress: number, cellSize: number) => {
+  const routeLength = polylineLength(route);
+  const clampedHeadDistance = Math.max(bodyLength, Math.min(routeLength, bodyLength + progress));
+  const steps = Math.max(4, Math.ceil(bodyLength / Math.max(1, cellSize * 0.33)) + 1);
+  const spacing = bodyLength / (steps - 1);
+  const points: PixelPoint[] = [];
+
+  for (let index = steps - 1; index >= 0; index -= 1) {
+    const sampleDistance = clampedHeadDistance - spacing * index;
+    points.push(pointAtDistance(route, sampleDistance).point);
+  }
+
+  return points.filter((point, index, items) => index === 0 || distance(point, items[index - 1]) > 0.1);
+};
+
 const pointBetween = (from: PixelPoint, to: PixelPoint, amount: number): PixelPoint => {
   const segmentLength = distance(from, to);
   if (segmentLength === 0) return from;
@@ -174,7 +189,7 @@ export const getSnakeEscapeGeometry = (
   const routeLength = polylineLength(route);
   const maxProgress = Math.max(0, routeLength - bodyLength);
   const clampedProgress = Math.max(0, Math.min(maxProgress, progress));
-  const visiblePoints = slicePolyline(route, clampedProgress, clampedProgress + bodyLength);
+  const visiblePoints = buildFollowerPoints(route, bodyLength, clampedProgress, cellSize);
   const headSample = pointAtDistance(route, clampedProgress + bodyLength);
 
   return {

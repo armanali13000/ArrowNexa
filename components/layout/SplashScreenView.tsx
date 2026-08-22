@@ -26,7 +26,6 @@ export const SplashScreenView = () => {
         <Animated.View entering={FadeInDown.delay(120).duration(280)} style={styles.copy}>
           <Text variant="display" align="center">ArrowNexa</Text>
           <Text variant="title" color={theme.colors.textSecondary} align="center">Find the Way Out</Text>
-          <Text variant="caption" color={theme.colors.textSecondary} align="center">Armanix Apps</Text>
         </Animated.View>
       </View>
     </AppBackground>

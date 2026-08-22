@@ -27,24 +27,12 @@
 - [x] Final completion appears after the final arrow exit callback
 - [ ] Capture final Easy, Hard, Expert screenshots on device
 
-## Monetization
-- [x] Central ad config exists in `services/ads/adConfig.ts`
-- [x] Ad manager exists in `services/ads/AdManager.ts`
-- [x] Development test ad unit IDs are centralized
-- [x] Gameplay banner placement is disallowed by architecture
-- [x] Interstitial frequency/cooldown/early-level protection are configured
-- [x] Rewarded ad reward path is architecture-only and optional
-- [ ] Choose and install a current Expo-compatible Google Mobile Ads SDK
-- [ ] Add production ad unit IDs through production configuration
-- [ ] Implement official consent flow required by the selected SDK
-- [ ] Verify ads offline failure behavior in a custom build
-
 ## Privacy / Data Safety
 - [x] No analytics SDK added
 - [x] Local gameplay data is documented
-- [x] Notifications are off by default
+- [x] Notification permission prompt and local reminders are implemented
 - [ ] Update hosted Privacy Policy before Play Store submission
-- [ ] Fill Google Play Data Safety after final ad SDK is selected
+- [ ] Fill Google Play Data Safety before submission
 - [ ] Review target audience and Families policy choices
 
 ## Store Listing
@@ -71,7 +59,5 @@
 - [ ] Tester feedback reviewed for tap accuracy, clarity, spacing, difficulty, and crashes
 
 ## Known Issues
-- Production ads are not active until a native ad SDK, consent flow, production IDs, and privacy review are completed.
-- Notification scheduling preferences exist, but scheduling is not active until `expo-notifications` is installed and permission UX is finalized.
 - Splash artwork exists, but final native splash configuration still needs the SDK-supported splash package/plugin before Play Store submission.
 - Legal text in-app is concise; a hosted Privacy Policy/Terms page is still needed for Play Store submission.

@@ -26,7 +26,14 @@
     },
     "plugins": [
       "expo-router",
-      "expo-audio"
+      "expo-audio",
+      [
+        "expo-notifications",
+        {
+          "color": "#159BE8",
+          "defaultChannel": "game-reminders"
+        }
+      ]
     ]
   }
 }

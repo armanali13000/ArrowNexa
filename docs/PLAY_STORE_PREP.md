@@ -26,9 +26,7 @@ Features:
 - Offline puzzle gameplay
 
 ## Data Safety Notes
-Current source does not include analytics or an active advertising SDK. Gameplay progress, settings, achievements, rewards, and activity summaries are stored locally on the device.
-
-If Google Mobile Ads is added, review the selected SDK documentation and declare advertising identifiers, diagnostics, approximate collection/sharing behavior, and consent requirements accurately in Google Play Console.
+Current source does not include analytics SDKs. Gameplay progress, settings, achievements, rewards, notification preferences, reminder schedules, and activity summaries are stored locally on the device.
 
 ## Content Rating Notes
-ArrowNexa is a logic puzzle game with no realistic violence, sexual content, gambling, or user-generated content. If ads are enabled, answer the Play Console questionnaire to reflect advertising.
+ArrowNexa is a logic puzzle game with no realistic violence, sexual content, gambling, or user-generated content.

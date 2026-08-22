@@ -10,8 +10,24 @@ import { Text } from '../components/ui/Text';
 import { ToggleRow } from '../components/ui/ToggleRow';
 import { useTheme } from '../hooks/useTheme';
 import { audioService } from '../services/audio/audioService';
+import { reminderService } from '../services/notifications/reminderService';
 import { useProgressStore } from '../store/progress/progressStore';
 import { useSettingsStore } from '../store/settings/settingsStore';
+
+const languageOptions = [
+  'English',
+  'Hindi',
+  'Urdu',
+  'Spanish',
+  'French',
+  'German',
+  'Portuguese',
+  'Arabic',
+  'Chinese',
+  'Japanese',
+  'Korean',
+  'Russian',
+];
 
 export default function SettingsScreen() {
   const theme = useTheme();
@@ -20,10 +36,14 @@ export default function SettingsScreen() {
   const resetProgress = useProgressStore((state) => state.resetProgress);
   const notifications = useProgressStore((state) => state.notificationPreferences);
   const updateNotificationPreferences = useProgressStore((state) => state.updateNotificationPreferences);
+  const updateNotifications = async (next: Partial<typeof notifications>) => {
+    await updateNotificationPreferences(next);
+    await reminderService.syncFromPreferences();
+  };
 
   return (
     <AppBackground>
-      <ScreenHeader title="Settings" subtitle="Preferences persist locally" />
+      <ScreenHeader title="Settings" subtitle={`Language: ${settings.language}`} />
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <Section title="Audio">
           <ToggleRow title="Music" enabled={settings.musicEnabled} onToggle={async () => { await settings.updateSetting('musicEnabled', !settings.musicEnabled); await audioService.syncMusicWithSettings(); }} />
@@ -53,8 +73,7 @@ export default function SettingsScreen() {
           </View>
         </Section>
         <Section title="Other">
-          <Text variant="body">Language</Text>
-          <Text variant="bodySmall" color={theme.colors.textSecondary}>English is the Phase 1 placeholder.</Text>
+          <LanguagePicker value={settings.language} onChange={(language) => settings.updateSetting('language', language)} />
           <Button title="Privacy Policy" variant="tool" onPress={() => router.push('/about')} />
           <Button title="Terms and Conditions" variant="tool" onPress={() => router.push('/about')} />
           <Button title="About" variant="tool" onPress={() => router.push('/about')} />
@@ -66,16 +85,23 @@ export default function SettingsScreen() {
             await settings.updateSetting('hapticsEnabled', true);
             await settings.updateSetting('animationsEnabled', true);
             await settings.updateSetting('themeMode', 'system');
+            await settings.updateSetting('language', 'English');
             await audioService.syncMusicWithSettings();
           }} />
           <Button title="Reset Progress" variant="ghost" onPress={() => setConfirmReset(true)} />
         </Section>
         <Section title="Notifications">
-          <Text variant="bodySmall" color={theme.colors.textSecondary}>Reminders are off by default and stay local. Permission is requested only when scheduling is added and enabled.</Text>
-          <ToggleRow title="Notifications" enabled={notifications.enabled} onToggle={() => updateNotificationPreferences({ enabled: !notifications.enabled })} />
-          <ToggleRow title="Daily Challenge Reminder" enabled={notifications.enabled && notifications.dailyChallengeReminder} onToggle={() => updateNotificationPreferences({ dailyChallengeReminder: !notifications.dailyChallengeReminder })} disabled={!notifications.enabled} />
-          <ToggleRow title="Daily Reward Reminder" enabled={notifications.enabled && notifications.dailyRewardReminder} onToggle={() => updateNotificationPreferences({ dailyRewardReminder: !notifications.dailyRewardReminder })} disabled={!notifications.enabled} />
-          <Text variant="caption" color={theme.colors.textSecondary}>Default reminder time: 7:00 PM</Text>
+          <Text variant="bodySmall" color={theme.colors.textSecondary}>Reminders are scheduled on this device and rotate messages so the same alert is not repeated.</Text>
+          <ToggleRow
+            title="Notifications"
+            enabled={notifications.enabled}
+            onToggle={() => updateNotifications(notifications.enabled
+              ? { enabled: false, dailyChallengeReminder: false, dailyRewardReminder: false }
+              : { enabled: true, dailyChallengeReminder: true, dailyRewardReminder: true })}
+          />
+          <ToggleRow title="Daily Challenge Reminder" enabled={notifications.enabled && notifications.dailyChallengeReminder} onToggle={() => updateNotifications({ dailyChallengeReminder: !notifications.dailyChallengeReminder })} disabled={!notifications.enabled} />
+          <ToggleRow title="Daily Reward Reminder" enabled={notifications.enabled && notifications.dailyRewardReminder} onToggle={() => updateNotifications({ dailyRewardReminder: !notifications.dailyRewardReminder })} disabled={!notifications.enabled} />
+          <ReminderIntervalPicker value={notifications.reminderIntervalHours} disabled={!notifications.enabled} onChange={(reminderIntervalHours) => updateNotifications({ reminderIntervalHours })} />
         </Section>
       </ScrollView>
       <AppModal visible={confirmReset} onClose={() => setConfirmReset(false)}>
@@ -124,6 +150,49 @@ const VolumePicker = ({ title, value, onChange }: { title: string; value: number
   );
 };
 
+const LanguagePicker = ({ value, onChange }: { value: string; onChange: (language: string) => void }) => (
+  <View style={styles.volumeGroup}>
+    <Text variant="body">Language</Text>
+    <View style={styles.languageGrid}>
+      {languageOptions.map((language) => (
+        <Button
+          key={language}
+          title={language}
+          variant={value === language ? 'primary' : 'tool'}
+          onPress={() => onChange(language)}
+          style={styles.languageChip}
+        />
+      ))}
+    </View>
+    <Text variant="caption">Selected: {value}</Text>
+  </View>
+);
+
+const ReminderIntervalPicker = ({ value, disabled, onChange }: { value: number; disabled?: boolean; onChange: (hour: number) => void }) => {
+  const options = [
+    { label: '4h', value: 4 },
+    { label: '5h', value: 5 },
+    { label: '6h', value: 6 },
+  ];
+  return (
+    <View style={[styles.volumeGroup, { opacity: disabled ? 0.45 : 1 }]}>
+      <Text variant="body">Reminder Interval</Text>
+      <View style={styles.segment}>
+        {options.map((option) => (
+          <Button
+            key={option.label}
+            title={option.label}
+            variant={value === option.value ? 'primary' : 'tool'}
+            disabled={disabled}
+            onPress={() => onChange(option.value)}
+            style={styles.segmentButton}
+          />
+        ))}
+      </View>
+    </View>
+  );
+};
+
 const styles = StyleSheet.create({
   content: {
     padding: 18,
@@ -139,6 +208,15 @@ const styles = StyleSheet.create({
   },
   segmentButton: {
     flex: 1,
+  },
+  languageGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  languageChip: {
+    minWidth: '30%',
+    flexGrow: 1,
   },
   actions: {
     flexDirection: 'row',

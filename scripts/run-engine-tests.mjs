@@ -75,6 +75,11 @@ assert.equal(canArrowEscape(blocked, size, 'main').canEscape, false, 'blocked ar
 assert.equal(getBlockingArrow(blocked, size, 'main'), 'blocker', 'blocking arrow id should be returned');
 
 assert.equal(canArrowEscape([arrow('self', [[2, 1], [2, 2], [2, 3]], 'RIGHT')], size, 'self').canEscape, true, 'arrow should not block itself');
+assert.equal(
+  canArrowEscape([arrow('bent', [[0, 2], [0, 3], [1, 3], [2, 3]], 'DOWN'), arrow('tail-side', [[0, 1], [1, 1]], 'UP')], size, 'bent').canEscape,
+  true,
+  'a blocker beside or behind the tail should not block a clear head exit lane',
+);
 assert.equal(canArrowEscape([arrow('main', [[2, 0], [2, 1]], 'RIGHT'), arrow('gone', [[2, 3]], 'RIGHT', 'removed')], size, 'main').canEscape, true, 'removed arrows should not block exits');
 assert.deepEqual(getValidMoves(blocked, size), ['blocker'], 'only currently free arrows should be valid');
 assert.equal(isBoardComplete([arrow('a', [[0, 0]], 'RIGHT', 'removed'), arrow('b', [[1, 0]], 'RIGHT', 'removed')]), true, 'all removed should complete');
@@ -108,7 +113,7 @@ assert.equal(solveGenerated(generated120a), true, 'generated level should be sol
 const easy = createLevel(5);
 const hard = createLevel(360);
 const expert = createLevel(480);
-assert.equal(easy.metrics.complexityScore < 76, true, 'early easy level should not classify like Expert');
+assert.equal(easy.difficulty, 'Easy', 'early easy level should keep Easy difficulty classification');
 assert.equal(expert.metrics.complexityScore > easy.metrics.complexityScore, true, 'late level should be harder than early level');
 assert.equal(hard.metrics.arrowCount > easy.metrics.arrowCount, true, 'later boards should contain substantially more arrows');
 assert.equal(hard.metrics.complexityScore > easy.metrics.complexityScore, true, 'later boards should be more complex');

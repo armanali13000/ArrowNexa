@@ -98,6 +98,7 @@ export type NotificationPreferences = {
   dailyChallengeReminder: boolean;
   dailyRewardReminder: boolean;
   reminderHour: number;
+  reminderIntervalHours: number;
 };
 
 export type ProgressData = {
@@ -196,6 +197,7 @@ export const defaultProgress: ProgressData = {
     dailyChallengeReminder: false,
     dailyRewardReminder: false,
     reminderHour: 19,
+    reminderIntervalHours: 5,
   },
 };
 
