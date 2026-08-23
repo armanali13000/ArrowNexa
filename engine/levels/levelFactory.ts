@@ -20,7 +20,7 @@ export const createLevel = (levelNumber: number): GeneratedLevel => {
   }
   const seed = createLevelSeed(levelNumber, MAX_GENERATION_ATTEMPTS);
   const config = createGenerationConfig(levelNumber, seed);
-  return createFallbackLevel(levelNumber, config.difficulty, seed);
+  return createFallbackLevel(levelNumber, config, seed);
 };
 
 export const createLevelMetadata = (levelNumber: number) => {

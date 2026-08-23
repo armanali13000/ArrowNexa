@@ -43,12 +43,12 @@ export const generateLevelFromConfig = (config: LevelGenerationConfig, levelNumb
 
   const minimumArrowCount =
     config.difficulty === 'Easy'
-      ? Math.max(4, Math.floor(config.targetArrowCount * 0.86))
+      ? Math.max(4, Math.floor(config.targetArrowCount * 0.92))
       : config.difficulty === 'Normal'
-        ? 20
+        ? Math.max(20, Math.floor(config.targetArrowCount * 0.94))
         : config.difficulty === 'Hard'
-          ? 35
-          : 50;
+          ? Math.max(35, Math.floor(config.targetArrowCount * 0.92))
+          : Math.max(50, Math.floor(config.targetArrowCount * 0.9));
   if (arrows.length < minimumArrowCount) return undefined;
   if (!validateLevelGeometry(baseLevel)) return undefined;
   const coverage = calculateVisualCoverage(arrows, config.rows, config.cols);

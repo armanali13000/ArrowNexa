@@ -1,4 +1,4 @@
-import { Direction, GeneratedLevel, GridPoint, PuzzleArrow, PuzzleLevel } from '../types/game';
+import { Direction, GeneratedLevel, GridPoint, LevelGenerationConfig, PuzzleArrow, PuzzleLevel } from '../types/game';
 import { analyzeDifficulty } from '../solver/difficulty';
 import { denseReferenceLevel, testLevelOne, testLevelTwo, testLevelThree } from './testLevels';
 import { GENERATION_VERSION } from './levelConfig';
@@ -19,6 +19,8 @@ const fallbackShape = {
   Hard: { rows: 13, cols: 13, count: 38, minLength: 2, maxLength: 7, maxTurns: 3 },
   Expert: { rows: 16, cols: 16, count: 52, minLength: 2, maxLength: 8, maxTurns: 4 },
 };
+
+type FallbackShape = typeof fallbackShape.Easy;
 
 const directions: Direction[] = ['UP', 'DOWN', 'LEFT', 'RIGHT'];
 
@@ -51,7 +53,7 @@ const borderHeads = (rows: number, cols: number) => {
   return heads;
 };
 
-const candidateHeads = (shape: typeof fallbackShape.Easy, difficulty: keyof typeof fallbackByDifficulty, random: ReturnType<typeof createSeededRandom>) => {
+const candidateHeads = (shape: FallbackShape, difficulty: keyof typeof fallbackByDifficulty, random: ReturnType<typeof createSeededRandom>) => {
   const heads = borderHeads(shape.rows, shape.cols);
   const inset = difficulty === 'Easy' ? 1 : 2;
   for (let row = inset; row < shape.rows - inset; row += 1) {
@@ -62,7 +64,7 @@ const candidateHeads = (shape: typeof fallbackShape.Easy, difficulty: keyof type
   return random.shuffle(heads);
 };
 
-const placeArrow = (arrows: PuzzleArrow[], occupied: Set<string>, path: GridPoint[], direction: Direction, shape: typeof fallbackShape.Easy) => {
+const placeArrow = (arrows: PuzzleArrow[], occupied: Set<string>, path: GridPoint[], direction: Direction, shape: FallbackShape) => {
   const nextArrow: PuzzleArrow = {
     id: `fb-${String(arrows.length + 1).padStart(3, '0')}`,
     path,
@@ -77,11 +79,48 @@ const placeArrow = (arrows: PuzzleArrow[], occupied: Set<string>, path: GridPoin
   return true;
 };
 
+const createBorderFallbackArrows = (
+  shape: FallbackShape,
+  difficulty: keyof typeof fallbackByDifficulty,
+  random: ReturnType<typeof createSeededRandom>,
+) => {
+  const occupied = new Set<string>();
+  const arrows: PuzzleArrow[] = [];
+  const heads = candidateHeads(shape, difficulty, random);
+
+  for (const { head, direction } of heads) {
+    if (arrows.length >= shape.count) break;
+    if (head.row !== 0 && head.row !== shape.rows - 1 && head.col !== 0 && head.col !== shape.cols - 1) continue;
+    const pathFromHead = [head];
+    let cursor = head;
+    let travel = opposite[direction];
+    const targetLength = random.int(shape.minLength, Math.min(shape.maxLength, difficulty === 'Easy' ? 3 : 4));
+
+    for (let index = 1; index < targetLength; index += 1) {
+      const options = index > 1 && random.chance(difficulty === 'Easy' ? 0.12 : 0.28)
+        ? random.shuffle([travel, ...directions.filter((candidate) => candidate !== travel && candidate !== opposite[travel])])
+        : [travel];
+      const next = options
+        .map((option) => ({ option, point: step(cursor, option) }))
+        .find(({ point }) => inside(point, shape.rows, shape.cols) && !occupied.has(cellKey(point)) && !pathFromHead.some((used) => used.row === point.row && used.col === point.col));
+      if (!next) break;
+      travel = next.option;
+      cursor = next.point;
+      pathFromHead.push(next.point);
+    }
+
+    if (pathFromHead.length < shape.minLength) continue;
+    placeArrow(arrows, occupied, pathFromHead.reverse(), direction, shape);
+  }
+
+  return arrows;
+};
+
 const createCandidate = (
   head: GridPoint,
   direction: Direction,
   occupied: Set<string>,
-  shape: typeof fallbackShape.Easy,
+  shape: FallbackShape,
   random: ReturnType<typeof createSeededRandom>,
 ) => {
   if (occupied.has(cellKey(head))) return undefined;
@@ -119,8 +158,17 @@ const createCandidate = (
   return pathFromHead.reverse();
 };
 
-const createDenseFallback = (levelNumber: number, difficulty: keyof typeof fallbackByDifficulty, seed: string): PuzzleLevel => {
-  const shape = fallbackShape[difficulty];
+const createDenseFallback = (levelNumber: number, config: LevelGenerationConfig, seed: string): PuzzleLevel => {
+  const difficulty = config.difficulty;
+  const baseShape = fallbackShape[difficulty];
+  const shape: FallbackShape = {
+    rows: config.rows,
+    cols: config.cols,
+    count: Math.max(baseShape.count, Math.floor(config.targetArrowCount * 0.95)),
+    minLength: config.minPathLength,
+    maxLength: Math.min(config.maxPathLength, baseShape.maxLength + 3),
+    maxTurns: Math.min(config.maxTurnsPerArrow, baseShape.maxTurns + 1),
+  };
   const random = createSeededRandom(`${seed}:fallback`);
   const occupied = new Set<string>();
   const arrows: PuzzleArrow[] = [];
@@ -177,27 +225,28 @@ const createDenseFallback = (levelNumber: number, difficulty: keyof typeof fallb
     }
   }
 
-  const source = arrows.length >= Math.max(4, Math.floor(shape.count * 0.55))
+  const fallbackArrows = arrows.length >= Math.floor(shape.count * 0.82) ? arrows : createBorderFallbackArrows(shape, difficulty, random);
+  const source = fallbackArrows.length >= Math.max(4, Math.floor(shape.count * 0.55))
     ? {
         id: `dense-fallback-${difficulty.toLowerCase()}-${levelNumber}`,
         title: `Level ${levelNumber}`,
         size: { rows: shape.rows, cols: shape.cols },
         difficulty,
-        arrows,
-        solutionOrder: arrows.map((arrow) => arrow.id).reverse(),
+        arrows: fallbackArrows,
+        solutionOrder: fallbackArrows.map((arrow) => arrow.id).reverse(),
       }
     : fallbackByDifficulty[difficulty];
 
   return source;
 };
 
-export const createFallbackLevel = (levelNumber: number, difficulty: keyof typeof fallbackByDifficulty, seed: string): GeneratedLevel => {
-  const source = createDenseFallback(levelNumber, difficulty, seed);
+export const createFallbackLevel = (levelNumber: number, config: LevelGenerationConfig, seed: string): GeneratedLevel => {
+  const source = createDenseFallback(levelNumber, config, seed);
   const level = {
     ...source,
-    id: `fallback-${difficulty.toLowerCase()}-${levelNumber}`,
+    id: `fallback-${config.difficulty.toLowerCase()}-${levelNumber}`,
     title: `Level ${levelNumber}`,
-    difficulty,
+    difficulty: config.difficulty,
     levelNumber,
     generationVersion: GENERATION_VERSION,
     seed,

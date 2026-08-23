@@ -1,8 +1,8 @@
 import { validateLevelGeometry } from '../generator/validation';
 import { canArrowEscape, getArrowFacingDirection, isBoardComplete, markArrowRemoved } from '../moves';
-import { Direction, GeneratedLevel, PuzzleArrow, PuzzleLevel } from '../types/game';
+import { Direction, GeneratedLevel, GridPoint, LevelGenerationConfig, PuzzleArrow, PuzzleLevel } from '../types/game';
 import { analyzeDifficulty } from '../solver/difficulty';
-import { GENERATION_VERSION } from './levelConfig';
+import { createGenerationConfig, GENERATION_VERSION } from './levelConfig';
 
 type ThemedArrow = {
   path: Array<[number, number]>;
@@ -19,6 +19,18 @@ type ThemedTemplate = {
 };
 
 const cellKey = ([row, col]: [number, number]) => `${row},${col}`;
+const pointKey = (point: GridPoint) => `${point.row},${point.col}`;
+const directions: Direction[] = ['UP', 'DOWN', 'LEFT', 'RIGHT'];
+const opposite: Record<Direction, Direction> = { UP: 'DOWN', DOWN: 'UP', LEFT: 'RIGHT', RIGHT: 'LEFT' };
+
+const step = (point: GridPoint, direction: Direction): GridPoint => {
+  if (direction === 'UP') return { row: point.row - 1, col: point.col };
+  if (direction === 'DOWN') return { row: point.row + 1, col: point.col };
+  if (direction === 'LEFT') return { row: point.row, col: point.col - 1 };
+  return { row: point.row, col: point.col + 1 };
+};
+
+const inside = (point: GridPoint, size: PuzzleLevel['size']) => point.row >= 0 && point.row < size.rows && point.col >= 0 && point.col < size.cols;
 
 const isConnectedPath = (path: Array<[number, number]>) =>
   path.length >= 2 &&
@@ -50,6 +62,70 @@ const sanitizeTemplateArrows = (template: ThemedTemplate) => {
     clean.push(arrow);
   }
   return clean.map((arrow, index) => buildArrow(template.id, index, arrow));
+};
+
+const borderHeads = (size: PuzzleLevel['size']) => {
+  const heads: Array<{ head: GridPoint; direction: Direction }> = [];
+  for (let col = 0; col < size.cols; col += 1) {
+    heads.push({ head: { row: 0, col }, direction: 'UP' });
+    heads.push({ head: { row: size.rows - 1, col }, direction: 'DOWN' });
+  }
+  for (let row = 1; row < size.rows - 1; row += 1) {
+    heads.push({ head: { row, col: 0 }, direction: 'LEFT' });
+    heads.push({ head: { row, col: size.cols - 1 }, direction: 'RIGHT' });
+  }
+  return heads;
+};
+
+const themedTargetCount = (template: ThemedTemplate, config: LevelGenerationConfig) => {
+  if (template.difficulty === 'Expert') return Math.max(46, Math.floor(config.targetArrowCount * 0.82));
+  if (template.difficulty === 'Hard') return Math.max(34, Math.floor(config.targetArrowCount * 0.78));
+  return Math.max(26, Math.floor(config.targetArrowCount * 0.76));
+};
+
+const supplementThemeArrows = (template: ThemedTemplate, arrows: PuzzleArrow[], config: LevelGenerationConfig) => {
+  const target = themedTargetCount(template, config);
+  if (arrows.length >= target) return arrows;
+  const occupied = new Set<string>();
+  arrows.forEach((arrow) => arrow.path.forEach((point) => occupied.add(pointKey(point))));
+  const orderedHeads = borderHeads(template.size).sort((left, right) => {
+    const leftDistance = Math.abs(left.head.row - template.size.rows / 2) + Math.abs(left.head.col - template.size.cols / 2);
+    const rightDistance = Math.abs(right.head.row - template.size.rows / 2) + Math.abs(right.head.col - template.size.cols / 2);
+    return rightDistance - leftDistance;
+  });
+  let cursor = 0;
+
+  while (arrows.length < target && cursor < orderedHeads.length) {
+    const { head, direction } = orderedHeads[cursor];
+    cursor += 1;
+    if (occupied.has(pointKey(head))) continue;
+    const pathFromHead = [head];
+    let point = head;
+    let travel = opposite[direction];
+    const maxLength = Math.min(config.maxPathLength, template.difficulty === 'Normal' ? 3 : 4);
+
+    for (let index = 1; index < maxLength; index += 1) {
+      const options = index > 1 ? [travel, ...directions.filter((candidate) => candidate !== travel && candidate !== opposite[travel])] : [travel];
+      const next = options.map((option) => ({ option, point: step(point, option) })).find((candidate) => {
+        const key = pointKey(candidate.point);
+        return inside(candidate.point, template.size) && !occupied.has(key) && !pathFromHead.some((used) => used.row === candidate.point.row && used.col === candidate.point.col);
+      });
+      if (!next) break;
+      point = next.point;
+      travel = next.option;
+      pathFromHead.push(point);
+    }
+
+    if (pathFromHead.length < config.minPathLength) continue;
+    const nextArrow = buildArrow(template.id, arrows.length, { path: pathFromHead.reverse().map((item) => [item.row, item.col]), direction });
+    if (!canArrowEscape([...arrows, nextArrow], template.size, nextArrow.id).canEscape) continue;
+    const nextArrows = [...arrows, nextArrow];
+    if (!solveOrder(nextArrows, template.size)) continue;
+    nextArrow.path.forEach((item) => occupied.add(pointKey(item)));
+    arrows = nextArrows;
+  }
+
+  return arrows;
 };
 
 const templates: ThemedTemplate[] = [
@@ -192,7 +268,8 @@ export const createThemedLevel = (levelNumber: number, seed: string): GeneratedL
   const template = templates.find((item) => item.levelNumbers.includes(levelNumber));
   if (!template) return undefined;
 
-  const arrows = sanitizeTemplateArrows(template);
+  const config = createGenerationConfig(levelNumber, seed);
+  const arrows = supplementThemeArrows(template, sanitizeTemplateArrows(template), config);
   const baseLevel: PuzzleLevel = {
     id: `theme-${template.id}-${levelNumber}`,
     title: template.title,

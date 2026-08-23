@@ -1,5 +1,5 @@
 import { createFallbackLevel } from '../../engine/levels/fallbackLevels';
-import { GENERATION_VERSION, classifyDifficulty } from '../../engine/levels/levelConfig';
+import { GENERATION_VERSION } from '../../engine/levels/levelConfig';
 import { generateLevelFromConfig } from '../../engine/generator/generateLevel';
 import { Difficulty, GeneratedLevel, LevelGenerationConfig, LevelPerformance, Reward } from '../../engine/types/game';
 import { ChallengeStreakState, DailyChallengeResult, ProgressData } from '../storage/progressStorage';
@@ -46,7 +46,7 @@ export const createDailyChallengeLevel = (dateKey = getLocalDateKey()): Generate
     if (level) return { ...level, id: `daily-${dateKey}`, title: 'Daily Challenge', seed: createDailySeed(dateKey) };
   }
   const config = createDailyConfig(dateKey, 8);
-  return createFallbackLevel(900000, classifyDifficulty(config.targetScore), createDailySeed(dateKey));
+  return createFallbackLevel(900000, config, createDailySeed(dateKey));
 };
 
 export const getDailyReward = (difficulty: Difficulty, perfect: boolean): Reward[] => {

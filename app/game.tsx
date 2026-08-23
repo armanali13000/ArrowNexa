@@ -1,6 +1,6 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { BackHandler, Pressable, StyleSheet, View } from 'react-native';
+import { BackHandler, InteractionManager, Pressable, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn, ZoomIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { GameBoard } from '../components/game/GameBoard';
@@ -41,11 +41,13 @@ const getGeneratedLevel = (levelNumber: number) => {
   return level;
 };
 
-const prebuildGeneratedLevel = (levelNumber: number) => {
+const prebuildGeneratedLevel = (levelNumber: number, delayMs = 900) => {
   if (levelNumber < 1 || levelNumber > 500 || generatedLevelCache.has(levelNumber)) return;
   setTimeout(() => {
-    if (!generatedLevelCache.has(levelNumber)) generatedLevelCache.set(levelNumber, createLevel(levelNumber));
-  }, 16);
+    InteractionManager.runAfterInteractions(() => {
+      if (!generatedLevelCache.has(levelNumber)) generatedLevelCache.set(levelNumber, createLevel(levelNumber));
+    });
+  }, delayMs);
 };
 
 type CompletionSummary = {
@@ -144,7 +146,7 @@ export default function GameScreen() {
     if (isDailyMode) recordDailyChallengeStarted(dailyDate).catch(() => undefined);
     else {
       saveCachedLevel(nextLevel).catch(() => undefined);
-      prebuildGeneratedLevel(currentLevel + 1);
+      prebuildGeneratedLevel(currentLevel + 1, 1800);
     }
 
     const restoreSession = async () => {
@@ -320,7 +322,7 @@ export default function GameScreen() {
     setLevel(nextLevel);
     resetAttempt(nextLevel);
     saveCachedLevel(nextLevel).catch(() => undefined);
-    prebuildGeneratedLevel(nextLevelNumber + 1);
+    prebuildGeneratedLevel(nextLevelNumber + 1, 1800);
   }, [currentLevel, isDailyMode, resetAttempt]);
 
   const handleComplete = useCallback(async (finalArrows: PuzzleArrow[]) => {
@@ -357,7 +359,7 @@ export default function GameScreen() {
     setArrows(finalArrows);
     setCompleteVisible(true);
     void Promise.all([hapticsService.levelComplete(), audioService.levelComplete()]).catch(() => undefined);
-    if (!isDailyMode) prebuildGeneratedLevel(currentLevel + 1);
+    if (!isDailyMode) prebuildGeneratedLevel(currentLevel + 1, 120);
 
     const persistCompletion = async () => {
       if (isDailyMode) {
