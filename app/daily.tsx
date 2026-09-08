@@ -6,6 +6,7 @@ import { AppBackground } from '../components/layout/AppBackground';
 import { ScreenHeader } from '../components/layout/ScreenHeader';
 import { Button, PrimaryButton, SecondaryButton } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
+import { BadgeTile, GamePanel } from '../components/ui/GamePanel';
 import { ProgressBar } from '../components/ui/ProgressBar';
 import { Text } from '../components/ui/Text';
 import { DAILY_REWARD_SCHEDULE } from '../constants/progression';
@@ -45,7 +46,7 @@ export default function DailyScreen() {
     <AppBackground>
       <ScreenHeader title={copy.dailyChallenge} subtitle={`${formatDayMonth(today)} - ${t(getDailyDifficulty(today))}`} />
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <Card style={styles.stack}>
+        <GamePanel title={copy.dailyChallenge} eyebrow={t('SPECIAL MODE')} accent="#38BDF8" style={styles.hero}>
           <View style={styles.row}>
             <View>
               <Text variant="caption">{t('TODAY')}</Text>
@@ -61,13 +62,9 @@ export default function DailyScreen() {
             title={dailyStatus === 'Not Played' ? copy.play : todayResult?.completed ? t('REPLAY') : copy.continue}
             onPress={() => router.push({ pathname: '/game', params: { mode: 'daily', date: today } })}
           />
-        </Card>
+        </GamePanel>
 
-        <Card style={styles.stack}>
-          <View style={styles.row}>
-            <Text variant="heading2">{t('Daily History')}</Text>
-            <Text variant="caption">{progress.stats.dailyChallengesCompleted} {copy.complete}</Text>
-          </View>
+        <GamePanel title={t('Daily History')} eyebrow={`${progress.stats.dailyChallengesCompleted} ${copy.complete}`} accent="#A855F7">
           <View style={styles.calendar}>
             {history.map((date) => {
               const result = progress.dailyChallenges[date];
@@ -82,9 +79,9 @@ export default function DailyScreen() {
               );
             })}
           </View>
-        </Card>
+        </GamePanel>
 
-        <Card style={styles.stack}>
+        <GamePanel title={t('Weekly Missions')} accent="#FFB84D">
           <View style={styles.row}>
             <Text variant="heading2">{t('Weekly Goals')}</Text>
             <SecondaryButton title={copy.open} onPress={() => router.push('/weekly')} style={styles.smallButton} />
@@ -98,28 +95,27 @@ export default function DailyScreen() {
               <ProgressBar value={objective.progress / objective.target} />
             </View>
           ))}
-        </Card>
+        </GamePanel>
 
-        <Card style={styles.stack}>
-          <Text variant="heading2">{t('Daily Rewards')}</Text>
+        <GamePanel title={t('Daily Rewards')} eyebrow={t('LOGIN CHEST')} accent="#22D3EE">
           <Text variant="bodySmall">{t('Claim once per local calendar day. Device clock rollback will not grant duplicates.')}</Text>
           <View style={styles.days}>
             {DAILY_REWARD_SCHEDULE.map((day) => {
               const state = day.day < progress.dailyReward.cycleDay ? 'claimed' : day.day === progress.dailyReward.cycleDay && dailyRewardStatus.available ? 'available' : 'locked';
               return (
                 <Animated.View key={day.day} entering={state === 'available' ? ZoomIn.duration(260) : undefined} style={styles.rewardDayWrap}>
-                  <Card style={styles.rewardDay}>
+                  <View style={[styles.rewardDay, state === 'available' && styles.rewardReady]}>
                     <Text variant="title">{t('Day')} {day.day}</Text>
                     <Text variant="caption">{t(state.toUpperCase())}</Text>
                     <Text variant="caption">{day.rewards.map((reward) => reward.type === 'hint' ? `+${reward.amount} ${t('Hint')}` : `+${reward.amount} ${t('Booster')}`).join(', ')}</Text>
-                  </Card>
+                  </View>
                 </Animated.View>
               );
             })}
           </View>
           {message ? <Text variant="bodySmall" align="center">{message}</Text> : null}
           <PrimaryButton title={t('CLAIM LOGIN REWARD')} disabled={!dailyRewardStatus.available} onPress={claim} />
-        </Card>
+        </GamePanel>
 
         {process.env.NODE_ENV !== 'production' ? <Button title="Dev: Replay Today" variant="ghost" onPress={() => router.push({ pathname: '/game', params: { mode: 'daily', date: today } })} /> : null}
       </ScrollView>
@@ -129,6 +125,7 @@ export default function DailyScreen() {
 
 const styles = StyleSheet.create({
   content: { padding: 18, gap: 14, paddingBottom: 34 },
+  hero: { minHeight: 210, justifyContent: 'space-between' },
   stack: { gap: 14 },
   row: { flexDirection: 'row', justifyContent: 'space-between', gap: 12, alignItems: 'center' },
   badge: { minWidth: 76, minHeight: 40, borderRadius: 8, backgroundColor: '#1B8A8F', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 10 },
@@ -141,5 +138,6 @@ const styles = StyleSheet.create({
   smallButton: { minWidth: 86 },
   days: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   rewardDayWrap: { width: '47%' },
-  rewardDay: { minHeight: 104, gap: 6 },
+  rewardDay: { minHeight: 104, gap: 6, padding: 12, borderRadius: 8, borderWidth: 1, borderColor: 'rgba(125,211,252,0.22)', backgroundColor: 'rgba(255,255,255,0.08)' },
+  rewardReady: { borderColor: '#FFB84D', backgroundColor: 'rgba(255,184,77,0.16)' },
 });

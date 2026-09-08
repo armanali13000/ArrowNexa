@@ -3,7 +3,7 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 import { AppBackground } from '../components/layout/AppBackground';
 import { ScreenHeader } from '../components/layout/ScreenHeader';
 import { Button } from '../components/ui/Button';
-import { Card } from '../components/ui/Card';
+import { GamePanel } from '../components/ui/GamePanel';
 import { ProgressBar } from '../components/ui/ProgressBar';
 import { Text } from '../components/ui/Text';
 import { achievementCatalog, achievementCategories } from '../constants/achievements';
@@ -40,8 +40,8 @@ export default function AchievementsScreen() {
           const unlocked = stored?.unlocked ?? achievement.unlocked;
           const hidden = achievement.hidden && !unlocked;
           return (
-            <Card key={achievement.id} style={styles.card}>
-              <View style={[styles.icon, { backgroundColor: unlocked ? theme.colors.primary : theme.colors.boardBackground }]}>
+            <GamePanel key={achievement.id} accent={tierColor(achievement.tier)} style={[styles.card, unlocked && styles.unlockedCard]}>
+              <View style={[styles.icon, { borderColor: tierColor(achievement.tier), backgroundColor: unlocked ? 'rgba(255,184,77,0.16)' : 'rgba(255,255,255,0.07)' }]}>
                 <Text variant="caption" color={unlocked ? '#FFFFFF' : theme.colors.textSecondary}>{hidden ? '??' : achievement.icon}</Text>
               </View>
               <View style={styles.achievementCopy}>
@@ -56,7 +56,7 @@ export default function AchievementsScreen() {
                   <Text variant="caption" color={theme.colors.textSecondary}>{stored?.rewardGranted ? t('Reward granted') : achievement.reward ? t('Reward on unlock') : ''}</Text>
                 </View>
               </View>
-            </Card>
+            </GamePanel>
           );
         })}
       </ScrollView>
@@ -64,12 +64,20 @@ export default function AchievementsScreen() {
   );
 }
 
+const tierColor = (tier?: string) => {
+  if (tier === 'Master') return '#A855F7';
+  if (tier === 'Gold') return '#FFB84D';
+  if (tier === 'Silver') return '#B7C7D9';
+  return '#38BDF8';
+};
+
 const styles = StyleSheet.create({
   content: { padding: 18, gap: 12, paddingBottom: 34 },
   filters: { gap: 8, paddingBottom: 2 },
   filterButton: { minHeight: 42 },
   card: { flexDirection: 'row', gap: 14 },
-  icon: { width: 48, height: 48, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
+  unlockedCard: { backgroundColor: 'rgba(12, 74, 110, 0.72)' },
+  icon: { width: 54, height: 54, borderRadius: 8, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
   achievementCopy: { flex: 1, gap: 8 },
   row: { flexDirection: 'row', justifyContent: 'space-between', gap: 12 },
 });

@@ -7,6 +7,7 @@ import { GameBoard } from '../components/game/GameBoard';
 import { PauseModal } from '../components/game/GameModals';
 import { AppModal } from '../components/ui/AppModal';
 import { Button, PrimaryButton, SecondaryButton } from '../components/ui/Button';
+import { GamePanel } from '../components/ui/GamePanel';
 import { ArrowBackIcon, BoosterIcon, HeartIcon, HintIcon, PauseIcon, StarIcon, UndoIcon } from '../components/ui/Icons';
 import { Text } from '../components/ui/Text';
 import { DEFAULT_LIVES, FIRST_LIFE_LOSS_LEVEL, FREE_UNDOS_PER_LEVEL, MAX_LIVES_WITH_BOOSTER, REVEAL_COUNT } from '../constants/gameBalance';
@@ -124,6 +125,11 @@ export default function GameScreen() {
   const completeHandlerRef = useRef<(finalArrows: PuzzleArrow[]) => void>(() => undefined);
   const skipNextLevelEffectRef = useRef(false);
   const lockedArrowIdsRef = useRef(new Set<string>());
+  const arrowsRef = useRef<PuzzleArrow[]>(arrows);
+
+  useEffect(() => {
+    arrowsRef.current = arrows;
+  }, [arrows]);
 
   const validMoves = useMemo(() => (level ? getValidMoves(arrows, level.size) : []), [arrows, level]);
   const removedArrowIds = useMemo(() => arrows.filter((arrow) => arrow.state === 'removed').map((arrow) => arrow.id), [arrows]);
@@ -131,13 +137,19 @@ export default function GameScreen() {
   const motionLocked = movingArrowIds.length > 0 || arrows.some((arrow) => arrow.state === 'restoring');
   const undoAvailable = moveHistory.length > 0 && !motionLocked && !completeVisible && (freeUndosUsed < FREE_UNDOS_PER_LEVEL || boosters.undo > 0);
 
+  const openPauseMenu = useCallback(() => {
+    setPauseVisible(true);
+  }, [setPauseVisible]);
+
   useEffect(() => {
     if (Number.isFinite(routeLevel) && routeLevel > 0) setCurrentLevel(Math.max(1, Math.min(500, routeLevel)));
   }, [routeLevel]);
 
   const resetAttempt = useCallback((nextLevel?: GeneratedLevel) => {
     if (!nextLevel) return;
-    setArrows(cloneLevelArrows(nextLevel));
+    const nextArrows = cloneLevelArrows(nextLevel);
+    arrowsRef.current = nextArrows;
+    setArrows(nextArrows);
     setLives(DEFAULT_LIVES);
     setMoveCount(0);
     setMistakes(0);
@@ -179,7 +191,9 @@ export default function GameScreen() {
       const session = await loadGameplaySession();
       if (!mounted || session?.levelNumber !== currentLevel || session.generationVersion !== GENERATION_VERSION) return;
       const removed = new Set(session.removedArrowIds);
-      setArrows(nextLevel.arrows.map((arrow) => ({ ...arrow, path: [...arrow.path], state: removed.has(arrow.id) ? 'removed' : 'normal' })));
+      const restoredArrows = nextLevel.arrows.map((arrow) => ({ ...arrow, path: [...arrow.path], state: removed.has(arrow.id) ? 'removed' as const : 'normal' as const }));
+      arrowsRef.current = restoredArrows;
+      setArrows(restoredArrows);
       setLives(session.lives);
       setMoveCount(session.moves);
       setMistakes(session.mistakes);
@@ -200,11 +214,11 @@ export default function GameScreen() {
   useEffect(() => {
     const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
       if (useGameStore.getState().pauseVisible) setPauseVisible(false);
-      else setPauseVisible(true);
+      else openPauseMenu();
       return true;
     });
     return () => subscription.remove();
-  }, [setPauseVisible]);
+  }, [openPauseMenu, setPauseVisible]);
 
   useEffect(() => {
     if (completeVisible || isDailyMode) return;
@@ -225,16 +239,19 @@ export default function GameScreen() {
   }, [completeVisible, currentLevel, freeUndosUsed, hintsUsed, isDailyMode, lives, mistakes, moveCount, moveHistory, removedArrowIds, usedExtraLife]);
 
   const handleArrowPress = useCallback(async (arrowId: string) => {
-    if (completeVisible || failedVisible || movingArrowIds.length > 0 || lockedArrowIdsRef.current.has(arrowId)) return;
-    const target = arrows.find((arrow) => arrow.id === arrowId);
+    if (completeVisible || failedVisible || lockedArrowIdsRef.current.has(arrowId)) return;
+    const snapshot = arrowsRef.current;
+    const target = snapshot.find((arrow) => arrow.id === arrowId);
     if (!target || target.state === 'moving' || target.state === 'restoring' || target.state === 'removed') return;
     lockedArrowIdsRef.current.add(arrowId);
 
     if (!level) return;
-    const result = canArrowEscape(arrows, level.size, arrowId);
+    const result = canArrowEscape(snapshot, level.size, arrowId);
     if (!result.canEscape) {
       void Promise.all([hapticsService.blocked(), audioService.blockedArrow()]).catch(() => undefined);
-      setArrows((current) => current.map((arrow) => (arrow.id === arrowId ? { ...arrow, state: 'blocked' } : arrow)));
+      const blockedArrows = snapshot.map((arrow) => (arrow.id === arrowId ? { ...arrow, state: 'blocked' as const } : arrow));
+      arrowsRef.current = blockedArrows;
+      setArrows(blockedArrows);
       setMistakes((count) => count + 1);
       if (currentLevel >= FIRST_LIFE_LOSS_LEVEL) {
         setLives((currentLives) => {
@@ -250,6 +267,13 @@ export default function GameScreen() {
       }
       recordBlockedTap().catch(() => undefined);
       lockedArrowIdsRef.current.delete(arrowId);
+      setTimeout(() => {
+        const current = arrowsRef.current;
+        if (current.find((arrow) => arrow.id === arrowId)?.state !== 'blocked') return;
+        const normalized = current.map((arrow) => (arrow.id === arrowId ? { ...arrow, state: 'normal' as const } : arrow));
+        arrowsRef.current = normalized;
+        setArrows(normalized);
+      }, 180);
       return;
     }
 
@@ -257,8 +281,10 @@ export default function GameScreen() {
     setHighlightedArrowIds([]);
     setMovingArrowIds((ids) => (ids.includes(arrowId) ? ids : [...ids, arrowId]));
     setMoveCount((count) => count + 1);
-    setArrows((current) => current.map((arrow) => (arrow.id === arrowId ? { ...arrow, state: 'moving' } : arrow)));
-  }, [arrows, completeVisible, currentLevel, failedVisible, level, movingArrowIds.length, recordBlockedTap, recordLifeLost]);
+    const movingArrows = snapshot.map((arrow) => (arrow.id === arrowId ? { ...arrow, state: 'moving' as const } : arrow));
+    arrowsRef.current = movingArrows;
+    setArrows(movingArrows);
+  }, [completeVisible, currentLevel, failedVisible, level, recordBlockedTap, recordLifeLost]);
 
   const handleEscapeComplete = useCallback((arrowId: string) => {
     lockedArrowIdsRef.current.delete(arrowId);
@@ -266,13 +292,18 @@ export default function GameScreen() {
     setMoveHistory((history) => [...history, arrowId]);
     setArrows((current) => {
       const next = markArrowRemoved(current, arrowId);
+      arrowsRef.current = next;
       if (isBoardComplete(next)) setTimeout(() => completeHandlerRef.current(next), 0);
       return next;
     });
   }, []);
 
   const handleRestoreComplete = useCallback((arrowId: string) => {
-    setArrows((current) => current.map((arrow) => (arrow.id === arrowId && arrow.state === 'restoring' ? { ...arrow, state: 'normal' } : arrow)));
+    setArrows((current) => {
+      const next = current.map((arrow) => (arrow.id === arrowId && arrow.state === 'restoring' ? { ...arrow, state: 'normal' as const } : arrow));
+      arrowsRef.current = next;
+      return next;
+    });
     lockedArrowIdsRef.current.delete(arrowId);
   }, []);
 
@@ -305,7 +336,11 @@ export default function GameScreen() {
     setHighlightedArrowIds([]);
     setMoveHistory((history) => history.slice(0, -1));
     setMoveCount((count) => Math.max(0, count - 1));
-    setArrows((current) => current.map((arrow) => (arrow.id === arrowId ? { ...arrow, state: 'restoring' } : arrow)));
+    setArrows((current) => {
+      const next = current.map((arrow) => (arrow.id === arrowId ? { ...arrow, state: 'restoring' as const } : arrow));
+      arrowsRef.current = next;
+      return next;
+    });
     await recordUndoUsed();
     await Promise.all([hapticsService.undo(), audioService.play('undo')]);
   }, [freeUndosUsed, moveHistory, recordUndoUsed, undoAvailable]);
@@ -413,7 +448,7 @@ export default function GameScreen() {
     <SafeAreaView style={styles.safe}>
       <View style={styles.topBar}>
         <View style={styles.leftControls}>
-          <Pressable accessibilityRole="button" accessibilityLabel={t('Back')} onPress={() => setPauseVisible(true)} style={styles.iconButton}>
+          <Pressable accessibilityRole="button" accessibilityLabel={t('Back')} onPress={openPauseMenu} style={styles.iconButton}>
             <ArrowBackIcon color="#1B1E22" size={20} />
           </Pressable>
           <View style={styles.counterPill} accessibilityLabel={`${remainingArrows} ${t('arrows remaining')}`}>
@@ -429,7 +464,7 @@ export default function GameScreen() {
             ))}
           </View>
         </View>
-        <Pressable accessibilityRole="button" accessibilityLabel={t('Pause menu')} onPress={() => setPauseVisible(true)} style={styles.iconButton}>
+        <Pressable accessibilityRole="button" accessibilityLabel={t('Pause menu')} onPress={openPauseMenu} style={styles.iconButton}>
           <PauseIcon color="#1B1E22" size={20} />
         </Pressable>
       </View>
@@ -490,8 +525,7 @@ const Tool = ({ icon, label, value, disabled, onPress }: { icon: React.ReactNode
 
 const CompleteModal = ({ daily, visible, summary, onNext, onReplay, t, copy }: { daily?: boolean; visible: boolean; summary?: CompletionSummary; onNext: () => void; onReplay: () => void; t: (text: string) => string; copy: ReturnType<typeof useAppCopy>['copy'] }) => (
   <AppModal visible={visible} onClose={() => undefined}>
-    <View style={styles.modalStack}>
-      <Text variant="heading1" align="center">{daily ? t('Daily Complete') : t('Level Complete')}</Text>
+    <GamePanel title={daily ? t('Daily Complete') : t('Level Complete')} eyebrow={t('CLEAR ROUTE')} accent="#FFB84D" style={styles.modalStack}>
       <View style={styles.starRow}>
         {Array.from({ length: 3 }, (_, index) => (
           <Animated.View key={index} entering={visible ? ZoomIn.delay(index * 130).duration(260) : undefined}>
@@ -499,26 +533,41 @@ const CompleteModal = ({ daily, visible, summary, onNext, onReplay, t, copy }: {
           </Animated.View>
         ))}
       </View>
-      <Text variant="body" align="center">{t('Moves')} {summary?.moves ?? 0} - {t('Mistakes')} {summary?.mistakes ?? 0} - {t('Hints')} {summary?.hintsUsed ?? 0} - {t('Time')} {summary?.timeSeconds ?? 0}s</Text>
+      <View style={styles.resultGrid}>
+        <Result label={t('Moves')} value={summary?.moves ?? 0} />
+        <Result label={t('Mistakes')} value={summary?.mistakes ?? 0} />
+        <Result label={t('Hints')} value={summary?.hintsUsed ?? 0} />
+        <Result label={t('Time')} value={`${summary?.timeSeconds ?? 0}s`} />
+      </View>
       <Text variant="title" align="center">{summary?.rewardLabel ?? t('Progress unlocked')}</Text>
       <Text variant="title" align="center">{daily ? `${t('Daily Streak')} ${summary?.nexaRank ?? 1}` : `+${summary?.xpGained ?? 0} XP - ${copy.nexaRank} ${summary?.nexaRank ?? 1}`}</Text>
       <PrimaryButton title={daily ? t('Daily Home') : t('Next')} onPress={onNext} />
       <SecondaryButton title={t('Replay')} onPress={onReplay} />
       <Button title={t('Levels')} variant="ghost" onPress={() => router.push('/levels')} />
-    </View>
+    </GamePanel>
   </AppModal>
 );
 
 const FailureModal = ({ visible, levelNumber, mistakes, remaining, extraLives, onRetry, onExtraLife, t, copy }: { visible: boolean; levelNumber: number; mistakes: number; remaining: number; extraLives: number; onRetry: () => void; onExtraLife: () => void; t: (text: string) => string; copy: ReturnType<typeof useAppCopy>['copy'] }) => (
   <AppModal visible={visible} onClose={() => undefined}>
-    <View style={styles.modalStack}>
-      <Text variant="heading1" align="center">{t('Out of Lives')}</Text>
-      <Text variant="body" align="center">{copy.level} {levelNumber} - {t('Mistakes')} {mistakes} - {remaining} {t('arrows remaining')}</Text>
+    <GamePanel title={t('Out of Lives')} eyebrow={t('ROUTE FAILED')} accent="#D9514E" style={styles.modalStack}>
+      <View style={styles.resultGrid}>
+        <Result label={copy.level} value={levelNumber} />
+        <Result label={t('Mistakes')} value={mistakes} />
+        <Result label={t('Arrows')} value={remaining} />
+      </View>
       <PrimaryButton title={t('Retry')} onPress={onRetry} />
       <SecondaryButton title={`${t('Extra Life')} x${extraLives}`} disabled={extraLives <= 0} onPress={onExtraLife} />
       <Button title={t('Levels')} variant="ghost" onPress={() => router.push('/levels')} />
-    </View>
+    </GamePanel>
   </AppModal>
+);
+
+const Result = ({ label, value }: { label: string; value: string | number }) => (
+  <View style={styles.resultCell}>
+    <Text variant="caption" align="center" color="#B7C7D9">{label}</Text>
+    <Text variant="title" align="center">{value}</Text>
+  </View>
 );
 
 const BoostersModal = ({ visible, lives, inventory, onClose, onExtraLife, onUndo, undoDisabled, onReveal, revealDisabled, t }: { visible: boolean; lives: number; inventory: { extraLife: number; undo: number; reveal: number; clearBlocker: number }; onClose: () => void; onExtraLife: () => void; onUndo: () => void; undoDisabled: boolean; onReveal: () => void; revealDisabled: boolean; t: (text: string) => string }) => (
@@ -556,5 +605,7 @@ const styles = StyleSheet.create({
   footer: { minHeight: 78, paddingHorizontal: 24, paddingBottom: 8, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   tool: { minWidth: 78, minHeight: 58, alignItems: 'center', justifyContent: 'center', gap: 2 },
   modalStack: { gap: 14 },
+  resultGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  resultCell: { width: '47%', minHeight: 58, borderRadius: 8, padding: 8, justifyContent: 'center', backgroundColor: 'rgba(255,255,255,0.08)' },
   starRow: { flexDirection: 'row', justifyContent: 'center', gap: 8 },
 });

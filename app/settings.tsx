@@ -5,7 +5,7 @@ import { AppBackground } from '../components/layout/AppBackground';
 import { ScreenHeader } from '../components/layout/ScreenHeader';
 import { AppModal } from '../components/ui/AppModal';
 import { Button, PrimaryButton } from '../components/ui/Button';
-import { Card } from '../components/ui/Card';
+import { GamePanel } from '../components/ui/GamePanel';
 import { Text } from '../components/ui/Text';
 import { ToggleRow } from '../components/ui/ToggleRow';
 import { useTheme } from '../hooks/useTheme';
@@ -104,10 +104,9 @@ export default function SettingsScreen() {
 }
 
 const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
-  <Card style={styles.section}>
-    <Text variant="heading2">{title}</Text>
+  <GamePanel title={title} accent="#38BDF8" style={styles.section}>
     {children}
-  </Card>
+  </GamePanel>
 );
 
 const VolumePicker = ({ title, value, onChange }: { title: string; value: number; onChange: (value: number) => void }) => {
@@ -154,7 +153,7 @@ const LanguagePicker = ({ copy, value, onChange }: { copy: ReturnType<typeof get
         accessibilityRole="button"
         accessibilityLabel={copy.changeLanguage}
         onPress={() => setOpen(true)}
-        style={({ pressed }) => [styles.selectRow, { borderColor: theme.colors.divider, backgroundColor: theme.colors.surface, opacity: pressed ? 0.75 : 1 }]}
+        style={({ pressed }) => [styles.selectRow, { borderColor: theme.colors.divider, backgroundColor: 'rgba(255,255,255,0.08)', opacity: pressed ? 0.75 : 1 }]}
       >
         <View>
           <Text variant="title">{selected.nativeLabel}</Text>
@@ -174,7 +173,7 @@ const LanguagePicker = ({ copy, value, onChange }: { copy: ReturnType<typeof get
                 onPress={() => choose(language.value)}
                 style={({ pressed }) => [
                   styles.languageRow,
-                  { borderColor: value === language.value ? theme.colors.primary : theme.colors.divider, backgroundColor: value === language.value ? theme.colors.surface : 'transparent', opacity: pressed ? 0.72 : 1 },
+                  { borderColor: value === language.value ? theme.colors.primary : theme.colors.divider, backgroundColor: value === language.value ? 'rgba(20,152,229,0.18)' : 'transparent', opacity: pressed ? 0.72 : 1 },
                 ]}
               >
                 <View style={styles.languageRowCopy}>

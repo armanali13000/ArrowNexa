@@ -65,7 +65,7 @@ export const ArrowPath = memo(({ arrow, boardSize, cellSize, boardPadding, theme
     if (arrow.state === 'moving') {
       escapeReportedRef.current = false;
       const maxProgress = getSnakeEscapeGeometry(arrow.path, visualDirection, 0, cellSize, boardPadding, boardSize, strokeWidth).maxProgress;
-      const duration = Math.min(1350, Math.max(850, maxProgress * 1.45));
+      const duration = Math.min(350, Math.max(220, maxProgress * 0.38));
       const startedAt = Date.now();
       pulse.value = withSequence(withTiming(1.02, { duration: 80 }), withTiming(1, { duration: 100 }));
 

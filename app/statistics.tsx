@@ -3,6 +3,7 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 import { AppBackground } from '../components/layout/AppBackground';
 import { ScreenHeader } from '../components/layout/ScreenHeader';
 import { Card } from '../components/ui/Card';
+import { BadgeTile, GamePanel } from '../components/ui/GamePanel';
 import { Text } from '../components/ui/Text';
 import { calculateTotalStars } from '../services/progression/progressionService';
 import { addDays, getLocalDateKey } from '../services/progression/dateService';
@@ -64,8 +65,16 @@ export default function StatisticsScreen() {
 
   return (
     <AppBackground>
-      <ScreenHeader title={t('Statistics')} subtitle={t('Local performance dashboard')} />
+      <ScreenHeader title={t('Statistics')} subtitle={t('Player records')} />
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        <GamePanel title={`${t('Nexa Rank')} ${progress.nexaRank}`} eyebrow={t('PLAYER RECORDS')} accent="#38BDF8" style={styles.hero}>
+          <View style={styles.grid}>
+            <BadgeTile icon="XP" label={t('Total XP')} value={progress.xp} />
+            <BadgeTile icon="*" label={t('Total Stars')} value={totalStars} accent="#FFB84D" />
+            <BadgeTile icon=">" label={t('Levels Completed')} value={completed} accent="#22D3EE" />
+            <BadgeTile icon="!" label={t('Perfect Levels')} value={perfect} accent="#A855F7" />
+          </View>
+        </GamePanel>
         <Section title={t('Overall')} stats={overall} />
         <Section title={t('Gameplay')} stats={gameplay} />
         <Section title={t('Difficulty')} stats={[
@@ -97,8 +106,7 @@ export default function StatisticsScreen() {
 }
 
 const Section = ({ title, stats }: { title: string; stats: Array<[string, string | number]> }) => (
-  <Card style={styles.stack}>
-    <Text variant="heading2">{title}</Text>
+  <GamePanel title={title} accent="#22D3EE">
     <View style={styles.grid}>
       {stats.map(([label, value]) => (
         <View key={label} style={styles.stat}>
@@ -107,18 +115,19 @@ const Section = ({ title, stats }: { title: string; stats: Array<[string, string
         </View>
       ))}
     </View>
-  </Card>
+  </GamePanel>
 );
 
 const styles = StyleSheet.create({
   content: { padding: 18, gap: 14, paddingBottom: 34 },
+  hero: { minHeight: 230 },
   stack: { gap: 12 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  stat: { width: '47%', minHeight: 58, justifyContent: 'space-between' },
+  stat: { width: '47%', minHeight: 62, justifyContent: 'space-between', padding: 10, borderRadius: 8, backgroundColor: 'rgba(255,255,255,0.08)' },
   activityGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 5 },
   activityCell: { width: 18, height: 18, borderRadius: 4 },
-  activity0: { backgroundColor: '#ECEFF1' },
-  activity1: { backgroundColor: '#C8E6E4' },
-  activity2: { backgroundColor: '#62B6B0' },
-  activity3: { backgroundColor: '#1B8A8F' },
+  activity0: { backgroundColor: 'rgba(255,255,255,0.08)' },
+  activity1: { backgroundColor: '#164E63' },
+  activity2: { backgroundColor: '#1498E5' },
+  activity3: { backgroundColor: '#FFB84D' },
 });

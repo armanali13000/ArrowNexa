@@ -43,6 +43,7 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (ready) SplashScreen.hideAsync().catch(() => undefined);
+    if (ready) reminderService.setNavigationReady();
   }, [ready]);
 
   useEffect(() => {

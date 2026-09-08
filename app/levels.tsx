@@ -43,7 +43,7 @@ export default function LevelsScreen() {
           const completed = levels.filter((level) => completedLevels[level]).length;
           const stars = levels.reduce((sum, level) => sum + (completedLevels[level] ?? 0), 0);
           return (
-            <Card style={styles.chapter}>
+            <Card style={[styles.chapter, { borderColor: chapterAccent(item.chapter), backgroundColor: chapterBackground(item.chapter) }]}>
               <View style={styles.chapterHead}>
                 <View>
                   <Text variant="heading2">{copy.chapter} {item.chapter}</Text>
@@ -53,7 +53,7 @@ export default function LevelsScreen() {
               </View>
               <View style={styles.map}>
                 <Svg style={StyleSheet.absoluteFill} width="100%" height="100%" viewBox="0 0 320 520">
-                  <Path d={createPathData(levels.length)} fill="none" stroke={theme.colors.divider} strokeWidth="3" strokeLinecap="round" />
+                  <Path d={createPathData(levels.length)} fill="none" stroke={chapterAccent(item.chapter)} strokeWidth="3" strokeLinecap="round" opacity={0.65} />
                 </Svg>
                 {levels.map((levelNumber, index) => {
                   const metadata = createLevelMetadata(levelNumber);
@@ -112,6 +112,9 @@ const nodeColor = (state: string) => {
   if (state === 'unlocked') return '#F4F8FB';
   return '#ECEFF1';
 };
+
+const chapterAccent = (chapter: number) => ['#38BDF8', '#1498E5', '#A855F7', '#64748B', '#F97316', '#22D3EE', '#F472B6', '#818CF8', '#FACC15', '#7DD3FC'][(chapter - 1) % 10];
+const chapterBackground = (chapter: number) => ['rgba(8,47,73,0.82)', 'rgba(12,74,110,0.8)', 'rgba(59,7,100,0.78)', 'rgba(15,23,42,0.84)', 'rgba(67,20,7,0.78)', 'rgba(8,47,73,0.8)', 'rgba(74,4,78,0.78)', 'rgba(30,27,75,0.8)', 'rgba(66,32,6,0.78)', 'rgba(2,6,23,0.9)'][(chapter - 1) % 10];
 
 const styles = StyleSheet.create({
   list: { padding: 18, gap: 16, paddingBottom: 34 },

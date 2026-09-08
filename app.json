@@ -30,6 +30,7 @@
       [
         "expo-notifications",
         {
+          "icon": "./assets/notification/notification-icon.png",
           "color": "#159BE8",
           "defaultChannel": "game-reminders"
         }

@@ -6,7 +6,15 @@ import { STORAGE_KEYS } from '../storage/keys';
 import { useProgressStore } from '../../store/progress/progressStore';
 
 const CHANNEL_ID = 'game-reminders';
+const CHALLENGE_CHANNEL_ID = 'arrownexa-challenges';
+const REWARD_CHANNEL_ID = 'arrownexa-rewards';
 const SCHEDULE_COUNT = 8;
+
+export type NotificationType = 'daily_challenge' | 'daily_reward' | 'continue_level' | 'achievement';
+type NotificationPayload = {
+  type?: NotificationType;
+  level?: number;
+};
 
 const reminderMessages = [
   { title: 'Your arrows are waiting', body: 'A fresh ArrowNexa puzzle is ready. Clear one board and keep the streak alive.' },
@@ -46,10 +54,22 @@ const saveScheduleState = async (state: ScheduleState) => {
 const ensureChannel = async () => {
   if (Platform.OS !== 'android') return;
   await Notifications.setNotificationChannelAsync(CHANNEL_ID, {
-    name: 'Game reminders',
+    name: 'ArrowNexa Reminders',
     importance: Notifications.AndroidImportance.DEFAULT,
     vibrationPattern: [0, 220, 160, 220],
     lightColor: '#159BE8',
+  });
+  await Notifications.setNotificationChannelAsync(CHALLENGE_CHANNEL_ID, {
+    name: 'ArrowNexa Challenges',
+    importance: Notifications.AndroidImportance.DEFAULT,
+    vibrationPattern: [0, 180, 120, 180],
+    lightColor: '#169BFF',
+  });
+  await Notifications.setNotificationChannelAsync(REWARD_CHANNEL_ID, {
+    name: 'ArrowNexa Rewards',
+    importance: Notifications.AndroidImportance.DEFAULT,
+    vibrationPattern: [0, 120, 80, 120],
+    lightColor: '#FFB84D',
   });
 };
 
@@ -82,12 +102,12 @@ const scheduleReminderQueue = async () => {
         title: message.title,
         body: message.body,
         sound: true,
-        data: { url: '/game' },
+        data: { type: index % 3 === 0 ? 'daily_challenge' : 'continue_level' } satisfies NotificationPayload,
       },
       trigger: {
         type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
         seconds: delaySeconds,
-        channelId: CHANNEL_ID,
+        channelId: index % 3 === 0 ? CHALLENGE_CHANNEL_ID : CHANNEL_ID,
       },
     });
     notificationIds.push(id);
@@ -97,6 +117,37 @@ const scheduleReminderQueue = async () => {
     messageCursor: (state.messageCursor + SCHEDULE_COUNT) % reminderMessages.length,
     notificationIds,
   });
+};
+
+let navigationReady = false;
+let pendingNotificationData: NotificationPayload | undefined;
+
+const normalizePayload = (data: Notifications.NotificationContent['data'] | undefined): NotificationPayload => {
+  if (!data || typeof data !== 'object') return {};
+  const type = typeof data.type === 'string' ? data.type : undefined;
+  if (type === 'daily_challenge' || type === 'daily_reward' || type === 'continue_level' || type === 'achievement') {
+    const level = typeof data.level === 'number' ? data.level : undefined;
+    return { type, level };
+  }
+  return {};
+};
+
+export const handleNotificationResponse = (data: NotificationPayload = {}) => {
+  if (!navigationReady) {
+    pendingNotificationData = data;
+    return;
+  }
+  const state = useProgressStore.getState();
+  if (data.type === 'daily_challenge' || data.type === 'daily_reward') router.replace('/daily');
+  else if (data.type === 'achievement') router.replace('/achievements');
+  else if (data.type === 'continue_level') router.replace({ pathname: '/game', params: { level: String(data.level ?? state.currentLevel) } });
+  else router.replace('/');
+  pendingNotificationData = undefined;
+};
+
+const redirect = (notification?: Notifications.Notification) => {
+  handleNotificationResponse(normalizePayload(notification?.request.content.data));
+  reminderService.syncFromPreferences().catch(() => undefined);
 };
 
 export const reminderService = {
@@ -122,13 +173,11 @@ export const reminderService = {
   disable: async () => {
     await cancelStoredNotifications();
   },
+  setNavigationReady: () => {
+    navigationReady = true;
+    if (pendingNotificationData) handleNotificationResponse(pendingNotificationData);
+  },
   handleNotificationTap: () => {
-    const redirect = (notification?: Notifications.Notification) => {
-      const url = notification?.request.content.data?.url;
-      router.push(typeof url === 'string' ? url : '/game');
-      reminderService.syncFromPreferences().catch(() => undefined);
-    };
-
     const response = Notifications.getLastNotificationResponse();
     if (response?.notification) redirect(response.notification);
 

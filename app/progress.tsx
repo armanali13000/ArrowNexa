@@ -2,7 +2,7 @@ import React from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { AppBackground } from '../components/layout/AppBackground';
 import { ScreenHeader } from '../components/layout/ScreenHeader';
-import { Card } from '../components/ui/Card';
+import { BadgeTile, GamePanel } from '../components/ui/GamePanel';
 import { ProgressBar } from '../components/ui/ProgressBar';
 import { Text } from '../components/ui/Text';
 import { useProgressStore } from '../store/progress/progressStore';
@@ -27,39 +27,29 @@ export default function ProgressScreen() {
     <AppBackground>
       <ScreenHeader title={copy.progress} subtitle={t('Nexa Rank and collection')} />
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <Card style={styles.stack}>
-          <Text variant="heading2">{copy.nexaRank} {progress.nexaRank}</Text>
+        <GamePanel title={`${copy.nexaRank} ${progress.nexaRank}`} eyebrow={t('PLAYER PROGRESS')} accent="#38BDF8" style={styles.hero}>
           <Text variant="bodySmall">{progress.xp} / {xpRequiredForRank(progress.nexaRank)} XP</Text>
           <ProgressBar value={progress.xp / xpRequiredForRank(progress.nexaRank)} />
-        </Card>
+        </GamePanel>
         <View style={styles.grid}>
-          <Stat label={t('Puzzle Level')} value={progress.currentLevel} />
-          <Stat label={t('Total Stars')} value={`${totalStars}/1500`} />
-          <Stat label={t('Chapters Complete')} value={progress.completedChapters.length} />
-          <Stat label={t('Levels Complete')} value={completed} />
-          <Stat label={t('Perfect Levels')} value={perfect} />
-          <Stat label={t('Current Streak')} value={progress.dailyReward.currentStreak} />
-          <Stat label={t('Best Streak')} value={progress.dailyReward.bestStreak} />
+          <BadgeTile icon=">" label={t('Puzzle Level')} value={progress.currentLevel} />
+          <BadgeTile icon="*" label={t('Total Stars')} value={`${totalStars}/1500`} accent="#FFB84D" />
+          <BadgeTile icon="#" label={t('Chapters Complete')} value={progress.completedChapters.length} accent="#A855F7" />
+          <BadgeTile icon="+" label={t('Levels Complete')} value={completed} accent="#22D3EE" />
+          <BadgeTile icon="*" label={t('Perfect Levels')} value={perfect} accent="#FFB84D" />
+          <BadgeTile icon="^" label={t('Current Streak')} value={progress.dailyReward.currentStreak} accent="#38BDF8" />
+          <BadgeTile icon="!" label={t('Best Streak')} value={progress.dailyReward.bestStreak} accent="#A855F7" />
         </View>
-        <Card style={styles.stack}>
-          <Text variant="heading2">{t('Difficulty Completion')}</Text>
+        <GamePanel title={t('Difficulty Completion')} accent="#FFB84D">
           {Object.entries(difficultyCounts).map(([difficulty, value]) => <Text key={difficulty} variant="body">{t(difficulty)}: {value}</Text>)}
-        </Card>
+        </GamePanel>
       </ScrollView>
     </AppBackground>
   );
 }
 
-const Stat = ({ label, value }: { label: string; value: string | number }) => (
-  <Card style={styles.stat}>
-    <Text variant="caption">{label}</Text>
-    <Text variant="heading2">{value}</Text>
-  </Card>
-);
-
 const styles = StyleSheet.create({
   content: { padding: 18, gap: 14, paddingBottom: 34 },
-  stack: { gap: 12 },
+  hero: { minHeight: 150 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
-  stat: { width: '48%', minHeight: 110, justifyContent: 'space-between' },
 });
