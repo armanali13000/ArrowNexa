@@ -13,6 +13,7 @@ const requested = process.argv.includes('--all')
   : process.argv.includes('--four')
     ? fourGateLevels
   : prototypeLevels;
+const constructiveOnly = !process.argv.includes('--all');
 const maxAttempts = Number(process.env.MAX_ATTEMPTS_PER_LEVEL ?? 240);
 
 rmSync(outDir, { recursive: true, force: true });
@@ -81,18 +82,39 @@ const profileQuality = (level, profile) => {
   return reasons;
 };
 
+const countTurns = (path) => {
+  let turns = 0;
+  for (let index = 2; index < path.length; index += 1) {
+    const previousVector = {
+      row: path[index - 1].row - path[index - 2].row,
+      col: path[index - 1].col - path[index - 2].col,
+    };
+    const nextVector = {
+      row: path[index].row - path[index - 1].row,
+      col: path[index].col - path[index - 1].col,
+    };
+    if (previousVector.row !== nextVector.row || previousVector.col !== nextVector.col) turns += 1;
+  }
+  return turns;
+};
+
 const rowFor = (level, profile, generationAttempts, solver, visualQuality, puzzleQuality, profileReasons, duplicate) => ({
   level: level.levelNumber,
   chapter: profile.chapter,
   tutorial: profile.tutorial,
   finale: profile.finale,
   arrows: level.metrics.arrowCount,
+  occupiedCells: level.metrics.occupiedCells,
   density: Number(level.metrics.density.toFixed(3)),
   openingFreeCount: level.metrics.initialValidMoves,
   openingFreeRatio: Number((level.metrics.initialValidMoves / Math.max(1, level.metrics.arrowCount)).toFixed(3)),
   dependencyDepth: level.metrics.dependencyDepth,
+  branching: Number(level.metrics.averageValidMoves.toFixed(2)),
   averageTurns: Number(level.metrics.averageTurns.toFixed(2)),
+  maxTurns: Math.max(...level.arrows.map((arrow) => countTurns(arrow.path))),
   averagePathLength: Number(level.metrics.averagePathLength.toFixed(2)),
+  maxPathLength: Math.max(...level.arrows.map((arrow) => arrow.path.length)),
+  solutionDepth: level.metrics.solutionDepth,
   difficultyScore: Number(level.difficultyScore.toFixed(2)),
   generationAttempts,
   solver: solver.solvable,
@@ -174,6 +196,13 @@ for (const levelNumber of requested) {
       accepted = constructive;
       acceptedRow = row;
     }
+  }
+
+  if (!accepted && constructiveOnly) {
+    failures.push({ level: levelNumber, message: `LEVEL GENERATION FAILED: LEVEL ${levelNumber}`, maxAttempts: 1, profile, counters, closestCandidate });
+    diagnostics.push({ level: levelNumber, profile, counters, closestCandidate });
+    console.error(`LEVEL GENERATION FAILED: LEVEL ${levelNumber}`);
+    continue;
   }
 
   for (let attempt = 0; !accepted && attempt < maxAttempts; attempt += 1) {

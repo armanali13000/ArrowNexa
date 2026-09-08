@@ -1,6 +1,6 @@
 import { cellKey } from '../occupancy';
 import { analyzeDifficulty } from '../solver/difficulty';
-import { GeneratedLevel, GridPoint, PuzzleArrow, PuzzleLevel } from '../types/game';
+import { GeneratedLevel, PuzzleArrow, PuzzleLevel } from '../types/game';
 import { GENERATION_VERSION } from './levelConfig';
 import { getLevelDifficultyProfile, LevelDifficultyProfile } from './v2Profiles';
 
@@ -68,16 +68,28 @@ const buildLevel1 = () => {
   return makeGenerated(1, 8, 8, arrows, 1);
 };
 
-const buildLayered = (levelNumber: number, rows: number, cols: number, targetCount: number) => {
+type LayeredPattern = 'rightShort' | 'downShort' | 'rightLong' | 'downLong';
+
+const cellsForTile = (row: number, col: number, pattern: LayeredPattern): Array<[number, number]> => {
+  if (pattern === 'downShort') return [[row, col], [row, col + 1], [row + 1, col + 1]];
+  if (pattern === 'rightLong') return [[row, col + 1], [row, col], [row + 1, col], [row + 1, col + 1]];
+  if (pattern === 'downLong') return [[row + 1, col], [row, col], [row, col + 1], [row + 1, col + 1]];
+  return [[row, col], [row + 1, col], [row + 1, col + 1]];
+};
+
+const buildLayered = (
+  levelNumber: number,
+  rows: number,
+  cols: number,
+  targetCount: number,
+  pattern: LayeredPattern = levelNumber >= 250 ? 'downLong' : 'rightShort',
+) => {
   const arrows: PuzzleArrow[] = [];
   let order = 1;
 
   for (let row = 0; row + 1 < rows && arrows.length < targetCount; row += 2) {
     for (let col = 0; col + 1 < cols && arrows.length < targetCount; col += 2) {
-      const cells: Array<[number, number]> = levelNumber >= 250
-        ? [[row + 1, col], [row, col], [row, col + 1], [row + 1, col + 1]]
-        : [[row, col], [row + 1, col], [row + 1, col + 1]];
-      arrows.push(arrow(`v2-${levelNumber}-t-${String(order).padStart(3, '0')}`, cells, order));
+      arrows.push(arrow(`v2-${levelNumber}-t-${String(order).padStart(3, '0')}`, cellsForTile(row, col, pattern), order));
       order += 1;
     }
   }
@@ -110,9 +122,17 @@ const makeGenerated = (levelNumber: number, rows: number, cols: number, arrows: 
 
 export const createConstructiveV2Level = (levelNumber: number): GeneratedLevel | undefined => {
   if (levelNumber === 1) return buildLevel1();
+  if (levelNumber === 5) return buildLayered(5, 8, 8, 10);
+  if (levelNumber === 10) return buildLayered(10, 9, 9, 14, 'downShort');
+  if (levelNumber === 25) return buildLayered(25, 10, 10, 16);
   if (levelNumber === 50) return buildLayered(50, 11, 11, 20);
+  if (levelNumber === 75) return buildLayered(75, 11, 11, 24, 'downShort');
+  if (levelNumber === 100) return buildLayered(100, 12, 12, 28);
+  if (levelNumber === 150) return buildLayered(150, 13, 13, 34, 'downShort');
   if (levelNumber === 250) return buildLayered(250, 15, 15, 38);
-  if (levelNumber === 500) return buildLayered(500, 16, 16, 58);
+  if (levelNumber === 350) return buildLayered(350, 16, 16, 50, 'rightLong');
+  if (levelNumber === 450) return buildLayered(450, 16, 17, 56);
+  if (levelNumber === 500) return buildLayered(500, 17, 17, 65);
   return undefined;
 };
 
