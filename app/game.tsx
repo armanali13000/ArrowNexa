@@ -11,7 +11,6 @@ import { GamePanel } from '../components/ui/GamePanel';
 import { ArrowBackIcon, BoosterIcon, HeartIcon, HintIcon, PauseIcon, StarIcon, UndoIcon } from '../components/ui/Icons';
 import { Text } from '../components/ui/Text';
 import { DEFAULT_LIVES, FIRST_LIFE_LOSS_LEVEL, FREE_UNDOS_PER_LEVEL, MAX_LIVES_WITH_BOOSTER, REVEAL_COUNT } from '../constants/gameBalance';
-import { createLevel } from '../engine/board';
 import { canArrowEscape, getValidMoves, isBoardComplete, markArrowRemoved } from '../engine/moves';
 import { calculateCompletionRewards } from '../engine/rewards/rewards';
 import { calculateStars } from '../engine/rewards/stars';
@@ -25,6 +24,7 @@ import { hapticsService } from '../services/haptics/hapticsService';
 import { audioService } from '../services/audio/audioService';
 import { createDailyChallengeLevel, getDailyDifficulty } from '../services/progression/dailyChallengeService';
 import { formatDayMonth, getLocalDateKey } from '../services/progression/dateService';
+import { levelRepository } from '../services/levels/levelRepository';
 import { loadCachedLevel, saveCachedLevel } from '../services/storage/levelCacheStorage';
 import { useGameStore } from '../store/game/gameStore';
 import { useProgressStore } from '../store/progress/progressStore';
@@ -37,7 +37,7 @@ const generatedLevelCache = new Map<number, GeneratedLevel>();
 const getGeneratedLevel = (levelNumber: number) => {
   const cached = generatedLevelCache.get(levelNumber);
   if (cached) return cached;
-  const level = createLevel(levelNumber);
+  const level = levelRepository.getLevel(levelNumber);
   generatedLevelCache.set(levelNumber, level);
   return level;
 };
@@ -55,7 +55,7 @@ const loadGeneratedLevel = async (levelNumber: number) => {
     if (__DEV__) console.log(`[LEVEL] ${levelNumber} storage cache: ${Date.now() - started}ms`);
     return stored;
   }
-  const level = createLevel(levelNumber);
+  const level = levelRepository.getLevel(levelNumber);
   generatedLevelCache.set(levelNumber, level);
   saveCachedLevel(level).catch(() => undefined);
   if (__DEV__) console.log(`[LEVEL] ${levelNumber} generated: ${Date.now() - started}ms`);
@@ -66,7 +66,7 @@ const prebuildGeneratedLevel = (levelNumber: number, delayMs = 900) => {
   if (levelNumber < 1 || levelNumber > 500 || generatedLevelCache.has(levelNumber)) return;
   setTimeout(() => {
     InteractionManager.runAfterInteractions(() => {
-      if (!generatedLevelCache.has(levelNumber)) generatedLevelCache.set(levelNumber, createLevel(levelNumber));
+      if (!generatedLevelCache.has(levelNumber)) generatedLevelCache.set(levelNumber, levelRepository.getLevel(levelNumber));
     });
   }, delayMs);
 };

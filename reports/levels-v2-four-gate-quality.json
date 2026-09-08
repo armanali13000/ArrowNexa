@@ -1,0 +1,467 @@
+{
+  "version": 2,
+  "generatedAt": "2026-09-08T14:25:38.385Z",
+  "requested": [
+    1,
+    50,
+    250,
+    500
+  ],
+  "maxAttempts": 240,
+  "total": 4,
+  "failures": [],
+  "diagnostics": [
+    {
+      "level": 1,
+      "profile": {
+        "chapter": 1,
+        "chapterProgress": 0,
+        "arrowCountRange": [
+          7,
+          11
+        ],
+        "densityRange": [
+          0.34,
+          0.54
+        ],
+        "openingFreeRatioRange": [
+          0.35,
+          0.65
+        ],
+        "dependencyDepthRange": [
+          0,
+          2
+        ],
+        "turnComplexity": [
+          0.2,
+          1.1
+        ],
+        "pathLengthRange": [
+          2,
+          5
+        ],
+        "branchingRange": [
+          2,
+          7
+        ],
+        "targetDifficultyScore": 18,
+        "difficulty": "Easy",
+        "finale": false,
+        "tutorial": true
+      },
+      "counters": {
+        "attempts": 1,
+        "structurallyValid": 1,
+        "solverSolvable": 1,
+        "geometryInvalid": 0,
+        "pathCollision": 0,
+        "arrowCollision": 0,
+        "outOfBounds": 0,
+        "solverFailed": 0,
+        "arrowCount": 0,
+        "density": 1,
+        "coverage": 0,
+        "openingFreeRatio": 1,
+        "dependencyDepth": 0,
+        "pathLength": 0,
+        "turnComplexity": 1,
+        "branching": 0,
+        "difficultyScore": 0,
+        "duplicate": 0,
+        "other": 0
+      },
+      "closestCandidate": {
+        "level": 1,
+        "chapter": 1,
+        "tutorial": true,
+        "finale": false,
+        "arrows": 8,
+        "density": 0.313,
+        "openingFreeCount": 6,
+        "openingFreeRatio": 0.75,
+        "dependencyDepth": 1,
+        "averageTurns": 0,
+        "averagePathLength": 2.5,
+        "difficultyScore": 43.92,
+        "generationAttempts": 1,
+        "solver": true,
+        "visualQuality": true,
+        "puzzleQuality": false,
+        "profileQuality": false,
+        "duplicate": false,
+        "qualityScore": 71.8,
+        "minimumQualityScore": 55,
+        "quality": true,
+        "reasons": [
+          "densityOutOfProfile"
+        ]
+      }
+    },
+    {
+      "level": 50,
+      "profile": {
+        "chapter": 1,
+        "chapterProgress": 1,
+        "arrowCountRange": [
+          18,
+          24
+        ],
+        "densityRange": [
+          0.36749498997995994,
+          0.6835671342685371
+        ],
+        "openingFreeRatioRange": [
+          0.35,
+          0.5700000000000001
+        ],
+        "dependencyDepthRange": [
+          1,
+          6
+        ],
+        "turnComplexity": [
+          0.29819639278557114,
+          1.266933867735471
+        ],
+        "pathLengthRange": [
+          2,
+          6
+        ],
+        "branchingRange": [
+          2.2945891783567136,
+          7.687374749498998
+        ],
+        "targetDifficultyScore": 29.019318637274548,
+        "difficulty": "Normal",
+        "finale": true,
+        "tutorial": false
+      },
+      "counters": {
+        "attempts": 1,
+        "structurallyValid": 1,
+        "solverSolvable": 1,
+        "geometryInvalid": 0,
+        "pathCollision": 0,
+        "arrowCollision": 0,
+        "outOfBounds": 0,
+        "solverFailed": 0,
+        "arrowCount": 0,
+        "density": 0,
+        "coverage": 0,
+        "openingFreeRatio": 1,
+        "dependencyDepth": 0,
+        "pathLength": 0,
+        "turnComplexity": 0,
+        "branching": 0,
+        "difficultyScore": 0,
+        "duplicate": 0,
+        "other": 0
+      },
+      "closestCandidate": {
+        "level": 50,
+        "chapter": 1,
+        "tutorial": false,
+        "finale": true,
+        "arrows": 20,
+        "density": 0.496,
+        "openingFreeCount": 4,
+        "openingFreeRatio": 0.2,
+        "dependencyDepth": 4,
+        "averageTurns": 1,
+        "averagePathLength": 3,
+        "difficultyScore": 89.16,
+        "generationAttempts": 1,
+        "solver": true,
+        "visualQuality": true,
+        "puzzleQuality": true,
+        "profileQuality": false,
+        "duplicate": false,
+        "qualityScore": 86.5,
+        "minimumQualityScore": 68,
+        "quality": true,
+        "reasons": [
+          "openingRatioOutOfProfile"
+        ]
+      }
+    },
+    {
+      "level": 250,
+      "profile": {
+        "chapter": 5,
+        "chapterProgress": 1,
+        "arrowCountRange": [
+          34,
+          45
+        ],
+        "densityRange": [
+          0.47971943887775553,
+          0.7797595190380762
+        ],
+        "openingFreeRatioRange": [
+          0.18,
+          0.26999999999999996
+        ],
+        "dependencyDepthRange": [
+          3,
+          9
+        ],
+        "turnComplexity": [
+          0.698997995991984,
+          1.9482965931863727
+        ],
+        "pathLengthRange": [
+          3,
+          8
+        ],
+        "branchingRange": [
+          3.496993987975952,
+          10.492985971943888
+        ],
+        "targetDifficultyScore": 60.281843687374746,
+        "difficulty": "Hard",
+        "finale": true,
+        "tutorial": false
+      },
+      "counters": {
+        "attempts": 1,
+        "structurallyValid": 1,
+        "solverSolvable": 1,
+        "geometryInvalid": 0,
+        "pathCollision": 0,
+        "arrowCollision": 0,
+        "outOfBounds": 0,
+        "solverFailed": 0,
+        "arrowCount": 0,
+        "density": 0,
+        "coverage": 1,
+        "openingFreeRatio": 0,
+        "dependencyDepth": 0,
+        "pathLength": 0,
+        "turnComplexity": 1,
+        "branching": 0,
+        "difficultyScore": 0,
+        "duplicate": 0,
+        "other": 0
+      },
+      "closestCandidate": {
+        "level": 250,
+        "chapter": 5,
+        "tutorial": false,
+        "finale": true,
+        "arrows": 38,
+        "density": 0.676,
+        "openingFreeCount": 7,
+        "openingFreeRatio": 0.184,
+        "dependencyDepth": 5,
+        "averageTurns": 2,
+        "averagePathLength": 4,
+        "difficultyScore": 100,
+        "generationAttempts": 1,
+        "solver": true,
+        "visualQuality": false,
+        "puzzleQuality": true,
+        "profileQuality": false,
+        "duplicate": false,
+        "qualityScore": 91.4,
+        "minimumQualityScore": 74,
+        "quality": true,
+        "reasons": [
+          "turnComplexityOutOfProfile"
+        ]
+      }
+    },
+    {
+      "level": 500,
+      "profile": {
+        "chapter": 10,
+        "chapterProgress": 1,
+        "arrowCountRange": [
+          54,
+          72
+        ],
+        "densityRange": [
+          0.62,
+          0.82
+        ],
+        "openingFreeRatioRange": [
+          0.06,
+          0.12000000000000001
+        ],
+        "dependencyDepthRange": [
+          7,
+          14
+        ],
+        "turnComplexity": [
+          1.2,
+          2.8
+        ],
+        "pathLengthRange": [
+          4,
+          11
+        ],
+        "branchingRange": [
+          5,
+          14
+        ],
+        "targetDifficultyScore": 99.36,
+        "difficulty": "Expert",
+        "finale": true,
+        "tutorial": false
+      },
+      "counters": {
+        "attempts": 1,
+        "structurallyValid": 1,
+        "solverSolvable": 1,
+        "geometryInvalid": 0,
+        "pathCollision": 0,
+        "arrowCollision": 0,
+        "outOfBounds": 0,
+        "solverFailed": 0,
+        "arrowCount": 0,
+        "density": 1,
+        "coverage": 1,
+        "openingFreeRatio": 1,
+        "dependencyDepth": 0,
+        "pathLength": 0,
+        "turnComplexity": 0,
+        "branching": 1,
+        "difficultyScore": 0,
+        "duplicate": 0,
+        "other": 0
+      },
+      "closestCandidate": {
+        "level": 500,
+        "chapter": 10,
+        "tutorial": false,
+        "finale": true,
+        "arrows": 58,
+        "density": 0.906,
+        "openingFreeCount": 8,
+        "openingFreeRatio": 0.138,
+        "dependencyDepth": 7,
+        "averageTurns": 2,
+        "averagePathLength": 4,
+        "difficultyScore": 100,
+        "generationAttempts": 1,
+        "solver": true,
+        "visualQuality": false,
+        "puzzleQuality": false,
+        "profileQuality": false,
+        "duplicate": false,
+        "qualityScore": 79.9,
+        "minimumQualityScore": 78,
+        "quality": true,
+        "reasons": [
+          "densityOutOfProfile",
+          "openingRatioOutOfProfile"
+        ]
+      }
+    }
+  ],
+  "levels": [
+    {
+      "level": 1,
+      "chapter": 1,
+      "tutorial": true,
+      "finale": false,
+      "arrows": 8,
+      "density": 0.313,
+      "openingFreeCount": 6,
+      "openingFreeRatio": 0.75,
+      "dependencyDepth": 1,
+      "averageTurns": 0,
+      "averagePathLength": 2.5,
+      "difficultyScore": 43.92,
+      "generationAttempts": 1,
+      "solver": true,
+      "visualQuality": true,
+      "puzzleQuality": false,
+      "profileQuality": false,
+      "duplicate": false,
+      "qualityScore": 71.8,
+      "minimumQualityScore": 55,
+      "quality": true,
+      "reasons": [
+        "densityOutOfProfile"
+      ]
+    },
+    {
+      "level": 50,
+      "chapter": 1,
+      "tutorial": false,
+      "finale": true,
+      "arrows": 20,
+      "density": 0.496,
+      "openingFreeCount": 4,
+      "openingFreeRatio": 0.2,
+      "dependencyDepth": 4,
+      "averageTurns": 1,
+      "averagePathLength": 3,
+      "difficultyScore": 89.16,
+      "generationAttempts": 1,
+      "solver": true,
+      "visualQuality": true,
+      "puzzleQuality": true,
+      "profileQuality": false,
+      "duplicate": false,
+      "qualityScore": 86.5,
+      "minimumQualityScore": 68,
+      "quality": true,
+      "reasons": [
+        "openingRatioOutOfProfile"
+      ]
+    },
+    {
+      "level": 250,
+      "chapter": 5,
+      "tutorial": false,
+      "finale": true,
+      "arrows": 38,
+      "density": 0.676,
+      "openingFreeCount": 7,
+      "openingFreeRatio": 0.184,
+      "dependencyDepth": 5,
+      "averageTurns": 2,
+      "averagePathLength": 4,
+      "difficultyScore": 100,
+      "generationAttempts": 1,
+      "solver": true,
+      "visualQuality": false,
+      "puzzleQuality": true,
+      "profileQuality": false,
+      "duplicate": false,
+      "qualityScore": 91.4,
+      "minimumQualityScore": 74,
+      "quality": true,
+      "reasons": [
+        "turnComplexityOutOfProfile"
+      ]
+    },
+    {
+      "level": 500,
+      "chapter": 10,
+      "tutorial": false,
+      "finale": true,
+      "arrows": 58,
+      "density": 0.906,
+      "openingFreeCount": 8,
+      "openingFreeRatio": 0.138,
+      "dependencyDepth": 7,
+      "averageTurns": 2,
+      "averagePathLength": 4,
+      "difficultyScore": 100,
+      "generationAttempts": 1,
+      "solver": true,
+      "visualQuality": false,
+      "puzzleQuality": false,
+      "profileQuality": false,
+      "duplicate": false,
+      "qualityScore": 79.9,
+      "minimumQualityScore": 78,
+      "quality": true,
+      "reasons": [
+        "densityOutOfProfile",
+        "openingRatioOutOfProfile"
+      ]
+    }
+  ]
+}

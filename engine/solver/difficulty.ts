@@ -1,6 +1,6 @@
 import { calculateDensity } from '../generator/density';
 import { countTurns } from '../generator/pathGenerator';
-import { getBlockingArrow, getValidMoves, markArrowRemoved } from '../moves';
+import { getBlockingArrow, getValidMoves } from '../moves';
 import { classifyDifficulty } from '../levels/levelConfig';
 import { DifficultyMetrics, PuzzleLevel } from '../types/game';
 import { solveLevel } from './solveLevel';
@@ -51,7 +51,6 @@ export const analyzeDifficulty = (level: PuzzleLevel): DifficultyMetrics => {
 export const classifyAnalyzedDifficulty = (metrics: DifficultyMetrics) => classifyDifficulty(metrics.complexityScore);
 
 const getDependencyDepth = (level: PuzzleLevel) => {
-  let arrows = level.arrows.map((arrow) => ({ ...arrow }));
   let maxDepth = 0;
   for (const target of level.arrows) {
     let depth = 0;
@@ -59,13 +58,12 @@ const getDependencyDepth = (level: PuzzleLevel) => {
     let cursor = target.id;
     while (cursor && !seen.has(cursor)) {
       seen.add(cursor);
-      const blocker = getBlockingArrow(arrows, level.size, cursor);
+      const blocker = getBlockingArrow(level.arrows, level.size, cursor);
       if (!blocker) break;
       depth += 1;
       cursor = blocker;
     }
     maxDepth = Math.max(maxDepth, depth);
-    arrows = markArrowRemoved(arrows, target.id);
   }
   return maxDepth;
 };

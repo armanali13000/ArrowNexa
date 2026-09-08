@@ -1,0 +1,3109 @@
+{
+  "version": 2,
+  "levels": [
+    {
+      "id": "v2-001",
+      "title": "Level 1",
+      "size": {
+        "rows": 8,
+        "cols": 8
+      },
+      "difficulty": "Easy",
+      "arrows": [
+        {
+          "id": "v2-1-open-1",
+          "path": [
+            {
+              "row": 0,
+              "col": 1
+            },
+            {
+              "row": 0,
+              "col": 2
+            }
+          ],
+          "direction": "RIGHT",
+          "state": "normal",
+          "order": 1
+        },
+        {
+          "id": "v2-1-open-2",
+          "path": [
+            {
+              "row": 7,
+              "col": 6
+            },
+            {
+              "row": 7,
+              "col": 5
+            }
+          ],
+          "direction": "LEFT",
+          "state": "normal",
+          "order": 2
+        },
+        {
+          "id": "v2-1-open-3",
+          "path": [
+            {
+              "row": 6,
+              "col": 0
+            },
+            {
+              "row": 5,
+              "col": 0
+            }
+          ],
+          "direction": "UP",
+          "state": "normal",
+          "order": 3
+        },
+        {
+          "id": "v2-1-open-4",
+          "path": [
+            {
+              "row": 1,
+              "col": 7
+            },
+            {
+              "row": 2,
+              "col": 7
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 4
+        },
+        {
+          "id": "v2-1-blocked-1",
+          "path": [
+            {
+              "row": 3,
+              "col": 1
+            },
+            {
+              "row": 3,
+              "col": 2
+            },
+            {
+              "row": 3,
+              "col": 3
+            }
+          ],
+          "direction": "RIGHT",
+          "state": "normal",
+          "order": 5
+        },
+        {
+          "id": "v2-1-blocker-1",
+          "path": [
+            {
+              "row": 5,
+              "col": 5
+            },
+            {
+              "row": 4,
+              "col": 5
+            },
+            {
+              "row": 3,
+              "col": 5
+            }
+          ],
+          "direction": "UP",
+          "state": "normal",
+          "order": 6
+        },
+        {
+          "id": "v2-1-bend-1",
+          "path": [
+            {
+              "row": 5,
+              "col": 1
+            },
+            {
+              "row": 5,
+              "col": 2
+            },
+            {
+              "row": 5,
+              "col": 3
+            }
+          ],
+          "direction": "RIGHT",
+          "state": "normal",
+          "order": 7
+        },
+        {
+          "id": "v2-1-bend-2",
+          "path": [
+            {
+              "row": 6,
+              "col": 4
+            },
+            {
+              "row": 5,
+              "col": 4
+            },
+            {
+              "row": 4,
+              "col": 4
+            }
+          ],
+          "direction": "UP",
+          "state": "normal",
+          "order": 8
+        }
+      ],
+      "solutionOrder": [
+        "v2-1-open-1",
+        "v2-1-open-2",
+        "v2-1-open-3",
+        "v2-1-open-4",
+        "v2-1-blocked-1",
+        "v2-1-blocker-1",
+        "v2-1-bend-1",
+        "v2-1-bend-2"
+      ],
+      "levelNumber": 1,
+      "generationVersion": 9,
+      "seed": "ARROWNEXA_V2_CONSTRUCTIVE_LEVEL_1",
+      "difficultyScore": 43.915000000000006,
+      "metrics": {
+        "arrowCount": 8,
+        "occupiedCells": 20,
+        "density": 0.3125,
+        "solutionDepth": 8,
+        "initialValidMoves": 6,
+        "averageValidMoves": 3,
+        "dependencyDepth": 1,
+        "branchingScore": 3,
+        "forcedMoveRatio": 0.25,
+        "averagePathLength": 2.5,
+        "averageTurns": 0,
+        "complexityScore": 43.915000000000006
+      },
+      "generationAttempts": 1,
+      "generationDurationMs": 0
+    },
+    {
+      "id": "v2-050",
+      "title": "Level 50",
+      "size": {
+        "rows": 11,
+        "cols": 11
+      },
+      "difficulty": "Normal",
+      "arrows": [
+        {
+          "id": "v2-50-t-001",
+          "path": [
+            {
+              "row": 0,
+              "col": 0
+            },
+            {
+              "row": 1,
+              "col": 0
+            },
+            {
+              "row": 1,
+              "col": 1
+            }
+          ],
+          "direction": "RIGHT",
+          "state": "normal",
+          "order": 1
+        },
+        {
+          "id": "v2-50-t-002",
+          "path": [
+            {
+              "row": 0,
+              "col": 2
+            },
+            {
+              "row": 1,
+              "col": 2
+            },
+            {
+              "row": 1,
+              "col": 3
+            }
+          ],
+          "direction": "RIGHT",
+          "state": "normal",
+          "order": 2
+        },
+        {
+          "id": "v2-50-t-003",
+          "path": [
+            {
+              "row": 0,
+              "col": 4
+            },
+            {
+              "row": 1,
+              "col": 4
+            },
+            {
+              "row": 1,
+              "col": 5
+            }
+          ],
+          "direction": "RIGHT",
+          "state": "normal",
+          "order": 3
+        },
+        {
+          "id": "v2-50-t-004",
+          "path": [
+            {
+              "row": 0,
+              "col": 6
+            },
+            {
+              "row": 1,
+              "col": 6
+            },
+            {
+              "row": 1,
+              "col": 7
+            }
+          ],
+          "direction": "RIGHT",
+          "state": "normal",
+          "order": 4
+        },
+        {
+          "id": "v2-50-t-005",
+          "path": [
+            {
+              "row": 0,
+              "col": 8
+            },
+            {
+              "row": 1,
+              "col": 8
+            },
+            {
+              "row": 1,
+              "col": 9
+            }
+          ],
+          "direction": "RIGHT",
+          "state": "normal",
+          "order": 5
+        },
+        {
+          "id": "v2-50-t-006",
+          "path": [
+            {
+              "row": 2,
+              "col": 0
+            },
+            {
+              "row": 3,
+              "col": 0
+            },
+            {
+              "row": 3,
+              "col": 1
+            }
+          ],
+          "direction": "RIGHT",
+          "state": "normal",
+          "order": 6
+        },
+        {
+          "id": "v2-50-t-007",
+          "path": [
+            {
+              "row": 2,
+              "col": 2
+            },
+            {
+              "row": 3,
+              "col": 2
+            },
+            {
+              "row": 3,
+              "col": 3
+            }
+          ],
+          "direction": "RIGHT",
+          "state": "normal",
+          "order": 7
+        },
+        {
+          "id": "v2-50-t-008",
+          "path": [
+            {
+              "row": 2,
+              "col": 4
+            },
+            {
+              "row": 3,
+              "col": 4
+            },
+            {
+              "row": 3,
+              "col": 5
+            }
+          ],
+          "direction": "RIGHT",
+          "state": "normal",
+          "order": 8
+        },
+        {
+          "id": "v2-50-t-009",
+          "path": [
+            {
+              "row": 2,
+              "col": 6
+            },
+            {
+              "row": 3,
+              "col": 6
+            },
+            {
+              "row": 3,
+              "col": 7
+            }
+          ],
+          "direction": "RIGHT",
+          "state": "normal",
+          "order": 9
+        },
+        {
+          "id": "v2-50-t-010",
+          "path": [
+            {
+              "row": 2,
+              "col": 8
+            },
+            {
+              "row": 3,
+              "col": 8
+            },
+            {
+              "row": 3,
+              "col": 9
+            }
+          ],
+          "direction": "RIGHT",
+          "state": "normal",
+          "order": 10
+        },
+        {
+          "id": "v2-50-t-011",
+          "path": [
+            {
+              "row": 4,
+              "col": 0
+            },
+            {
+              "row": 5,
+              "col": 0
+            },
+            {
+              "row": 5,
+              "col": 1
+            }
+          ],
+          "direction": "RIGHT",
+          "state": "normal",
+          "order": 11
+        },
+        {
+          "id": "v2-50-t-012",
+          "path": [
+            {
+              "row": 4,
+              "col": 2
+            },
+            {
+              "row": 5,
+              "col": 2
+            },
+            {
+              "row": 5,
+              "col": 3
+            }
+          ],
+          "direction": "RIGHT",
+          "state": "normal",
+          "order": 12
+        },
+        {
+          "id": "v2-50-t-013",
+          "path": [
+            {
+              "row": 4,
+              "col": 4
+            },
+            {
+              "row": 5,
+              "col": 4
+            },
+            {
+              "row": 5,
+              "col": 5
+            }
+          ],
+          "direction": "RIGHT",
+          "state": "normal",
+          "order": 13
+        },
+        {
+          "id": "v2-50-t-014",
+          "path": [
+            {
+              "row": 4,
+              "col": 6
+            },
+            {
+              "row": 5,
+              "col": 6
+            },
+            {
+              "row": 5,
+              "col": 7
+            }
+          ],
+          "direction": "RIGHT",
+          "state": "normal",
+          "order": 14
+        },
+        {
+          "id": "v2-50-t-015",
+          "path": [
+            {
+              "row": 4,
+              "col": 8
+            },
+            {
+              "row": 5,
+              "col": 8
+            },
+            {
+              "row": 5,
+              "col": 9
+            }
+          ],
+          "direction": "RIGHT",
+          "state": "normal",
+          "order": 15
+        },
+        {
+          "id": "v2-50-t-016",
+          "path": [
+            {
+              "row": 6,
+              "col": 0
+            },
+            {
+              "row": 7,
+              "col": 0
+            },
+            {
+              "row": 7,
+              "col": 1
+            }
+          ],
+          "direction": "RIGHT",
+          "state": "normal",
+          "order": 16
+        },
+        {
+          "id": "v2-50-t-017",
+          "path": [
+            {
+              "row": 6,
+              "col": 2
+            },
+            {
+              "row": 7,
+              "col": 2
+            },
+            {
+              "row": 7,
+              "col": 3
+            }
+          ],
+          "direction": "RIGHT",
+          "state": "normal",
+          "order": 17
+        },
+        {
+          "id": "v2-50-t-018",
+          "path": [
+            {
+              "row": 6,
+              "col": 4
+            },
+            {
+              "row": 7,
+              "col": 4
+            },
+            {
+              "row": 7,
+              "col": 5
+            }
+          ],
+          "direction": "RIGHT",
+          "state": "normal",
+          "order": 18
+        },
+        {
+          "id": "v2-50-t-019",
+          "path": [
+            {
+              "row": 6,
+              "col": 6
+            },
+            {
+              "row": 7,
+              "col": 6
+            },
+            {
+              "row": 7,
+              "col": 7
+            }
+          ],
+          "direction": "RIGHT",
+          "state": "normal",
+          "order": 19
+        },
+        {
+          "id": "v2-50-t-020",
+          "path": [
+            {
+              "row": 6,
+              "col": 8
+            },
+            {
+              "row": 7,
+              "col": 8
+            },
+            {
+              "row": 7,
+              "col": 9
+            }
+          ],
+          "direction": "RIGHT",
+          "state": "normal",
+          "order": 20
+        }
+      ],
+      "solutionOrder": [
+        "v2-50-t-001",
+        "v2-50-t-002",
+        "v2-50-t-003",
+        "v2-50-t-004",
+        "v2-50-t-005",
+        "v2-50-t-006",
+        "v2-50-t-007",
+        "v2-50-t-008",
+        "v2-50-t-009",
+        "v2-50-t-010",
+        "v2-50-t-011",
+        "v2-50-t-012",
+        "v2-50-t-013",
+        "v2-50-t-014",
+        "v2-50-t-015",
+        "v2-50-t-016",
+        "v2-50-t-017",
+        "v2-50-t-018",
+        "v2-50-t-019",
+        "v2-50-t-020"
+      ],
+      "levelNumber": 50,
+      "generationVersion": 9,
+      "seed": "ARROWNEXA_V2_CONSTRUCTIVE_LEVEL_50",
+      "difficultyScore": 89.1595041322314,
+      "metrics": {
+        "arrowCount": 20,
+        "occupiedCells": 60,
+        "density": 0.49586776859504134,
+        "solutionDepth": 20,
+        "initialValidMoves": 4,
+        "averageValidMoves": 2.5,
+        "dependencyDepth": 4,
+        "branchingScore": 2.5,
+        "forcedMoveRatio": 0.25,
+        "averagePathLength": 3,
+        "averageTurns": 1,
+        "complexityScore": 89.1595041322314
+      },
+      "generationAttempts": 1,
+      "generationDurationMs": 0
+    },
+    {
+      "id": "v2-250",
+      "title": "Level 250",
+      "size": {
+        "rows": 15,
+        "cols": 15
+      },
+      "difficulty": "Hard",
+      "arrows": [
+        {
+          "id": "v2-250-t-001",
+          "path": [
+            {
+              "row": 1,
+              "col": 0
+            },
+            {
+              "row": 0,
+              "col": 0
+            },
+            {
+              "row": 0,
+              "col": 1
+            },
+            {
+              "row": 1,
+              "col": 1
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 1
+        },
+        {
+          "id": "v2-250-t-002",
+          "path": [
+            {
+              "row": 1,
+              "col": 2
+            },
+            {
+              "row": 0,
+              "col": 2
+            },
+            {
+              "row": 0,
+              "col": 3
+            },
+            {
+              "row": 1,
+              "col": 3
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 2
+        },
+        {
+          "id": "v2-250-t-003",
+          "path": [
+            {
+              "row": 1,
+              "col": 4
+            },
+            {
+              "row": 0,
+              "col": 4
+            },
+            {
+              "row": 0,
+              "col": 5
+            },
+            {
+              "row": 1,
+              "col": 5
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 3
+        },
+        {
+          "id": "v2-250-t-004",
+          "path": [
+            {
+              "row": 1,
+              "col": 6
+            },
+            {
+              "row": 0,
+              "col": 6
+            },
+            {
+              "row": 0,
+              "col": 7
+            },
+            {
+              "row": 1,
+              "col": 7
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 4
+        },
+        {
+          "id": "v2-250-t-005",
+          "path": [
+            {
+              "row": 1,
+              "col": 8
+            },
+            {
+              "row": 0,
+              "col": 8
+            },
+            {
+              "row": 0,
+              "col": 9
+            },
+            {
+              "row": 1,
+              "col": 9
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 5
+        },
+        {
+          "id": "v2-250-t-006",
+          "path": [
+            {
+              "row": 1,
+              "col": 10
+            },
+            {
+              "row": 0,
+              "col": 10
+            },
+            {
+              "row": 0,
+              "col": 11
+            },
+            {
+              "row": 1,
+              "col": 11
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 6
+        },
+        {
+          "id": "v2-250-t-007",
+          "path": [
+            {
+              "row": 1,
+              "col": 12
+            },
+            {
+              "row": 0,
+              "col": 12
+            },
+            {
+              "row": 0,
+              "col": 13
+            },
+            {
+              "row": 1,
+              "col": 13
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 7
+        },
+        {
+          "id": "v2-250-t-008",
+          "path": [
+            {
+              "row": 3,
+              "col": 0
+            },
+            {
+              "row": 2,
+              "col": 0
+            },
+            {
+              "row": 2,
+              "col": 1
+            },
+            {
+              "row": 3,
+              "col": 1
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 8
+        },
+        {
+          "id": "v2-250-t-009",
+          "path": [
+            {
+              "row": 3,
+              "col": 2
+            },
+            {
+              "row": 2,
+              "col": 2
+            },
+            {
+              "row": 2,
+              "col": 3
+            },
+            {
+              "row": 3,
+              "col": 3
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 9
+        },
+        {
+          "id": "v2-250-t-010",
+          "path": [
+            {
+              "row": 3,
+              "col": 4
+            },
+            {
+              "row": 2,
+              "col": 4
+            },
+            {
+              "row": 2,
+              "col": 5
+            },
+            {
+              "row": 3,
+              "col": 5
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 10
+        },
+        {
+          "id": "v2-250-t-011",
+          "path": [
+            {
+              "row": 3,
+              "col": 6
+            },
+            {
+              "row": 2,
+              "col": 6
+            },
+            {
+              "row": 2,
+              "col": 7
+            },
+            {
+              "row": 3,
+              "col": 7
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 11
+        },
+        {
+          "id": "v2-250-t-012",
+          "path": [
+            {
+              "row": 3,
+              "col": 8
+            },
+            {
+              "row": 2,
+              "col": 8
+            },
+            {
+              "row": 2,
+              "col": 9
+            },
+            {
+              "row": 3,
+              "col": 9
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 12
+        },
+        {
+          "id": "v2-250-t-013",
+          "path": [
+            {
+              "row": 3,
+              "col": 10
+            },
+            {
+              "row": 2,
+              "col": 10
+            },
+            {
+              "row": 2,
+              "col": 11
+            },
+            {
+              "row": 3,
+              "col": 11
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 13
+        },
+        {
+          "id": "v2-250-t-014",
+          "path": [
+            {
+              "row": 3,
+              "col": 12
+            },
+            {
+              "row": 2,
+              "col": 12
+            },
+            {
+              "row": 2,
+              "col": 13
+            },
+            {
+              "row": 3,
+              "col": 13
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 14
+        },
+        {
+          "id": "v2-250-t-015",
+          "path": [
+            {
+              "row": 5,
+              "col": 0
+            },
+            {
+              "row": 4,
+              "col": 0
+            },
+            {
+              "row": 4,
+              "col": 1
+            },
+            {
+              "row": 5,
+              "col": 1
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 15
+        },
+        {
+          "id": "v2-250-t-016",
+          "path": [
+            {
+              "row": 5,
+              "col": 2
+            },
+            {
+              "row": 4,
+              "col": 2
+            },
+            {
+              "row": 4,
+              "col": 3
+            },
+            {
+              "row": 5,
+              "col": 3
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 16
+        },
+        {
+          "id": "v2-250-t-017",
+          "path": [
+            {
+              "row": 5,
+              "col": 4
+            },
+            {
+              "row": 4,
+              "col": 4
+            },
+            {
+              "row": 4,
+              "col": 5
+            },
+            {
+              "row": 5,
+              "col": 5
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 17
+        },
+        {
+          "id": "v2-250-t-018",
+          "path": [
+            {
+              "row": 5,
+              "col": 6
+            },
+            {
+              "row": 4,
+              "col": 6
+            },
+            {
+              "row": 4,
+              "col": 7
+            },
+            {
+              "row": 5,
+              "col": 7
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 18
+        },
+        {
+          "id": "v2-250-t-019",
+          "path": [
+            {
+              "row": 5,
+              "col": 8
+            },
+            {
+              "row": 4,
+              "col": 8
+            },
+            {
+              "row": 4,
+              "col": 9
+            },
+            {
+              "row": 5,
+              "col": 9
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 19
+        },
+        {
+          "id": "v2-250-t-020",
+          "path": [
+            {
+              "row": 5,
+              "col": 10
+            },
+            {
+              "row": 4,
+              "col": 10
+            },
+            {
+              "row": 4,
+              "col": 11
+            },
+            {
+              "row": 5,
+              "col": 11
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 20
+        },
+        {
+          "id": "v2-250-t-021",
+          "path": [
+            {
+              "row": 5,
+              "col": 12
+            },
+            {
+              "row": 4,
+              "col": 12
+            },
+            {
+              "row": 4,
+              "col": 13
+            },
+            {
+              "row": 5,
+              "col": 13
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 21
+        },
+        {
+          "id": "v2-250-t-022",
+          "path": [
+            {
+              "row": 7,
+              "col": 0
+            },
+            {
+              "row": 6,
+              "col": 0
+            },
+            {
+              "row": 6,
+              "col": 1
+            },
+            {
+              "row": 7,
+              "col": 1
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 22
+        },
+        {
+          "id": "v2-250-t-023",
+          "path": [
+            {
+              "row": 7,
+              "col": 2
+            },
+            {
+              "row": 6,
+              "col": 2
+            },
+            {
+              "row": 6,
+              "col": 3
+            },
+            {
+              "row": 7,
+              "col": 3
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 23
+        },
+        {
+          "id": "v2-250-t-024",
+          "path": [
+            {
+              "row": 7,
+              "col": 4
+            },
+            {
+              "row": 6,
+              "col": 4
+            },
+            {
+              "row": 6,
+              "col": 5
+            },
+            {
+              "row": 7,
+              "col": 5
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 24
+        },
+        {
+          "id": "v2-250-t-025",
+          "path": [
+            {
+              "row": 7,
+              "col": 6
+            },
+            {
+              "row": 6,
+              "col": 6
+            },
+            {
+              "row": 6,
+              "col": 7
+            },
+            {
+              "row": 7,
+              "col": 7
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 25
+        },
+        {
+          "id": "v2-250-t-026",
+          "path": [
+            {
+              "row": 7,
+              "col": 8
+            },
+            {
+              "row": 6,
+              "col": 8
+            },
+            {
+              "row": 6,
+              "col": 9
+            },
+            {
+              "row": 7,
+              "col": 9
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 26
+        },
+        {
+          "id": "v2-250-t-027",
+          "path": [
+            {
+              "row": 7,
+              "col": 10
+            },
+            {
+              "row": 6,
+              "col": 10
+            },
+            {
+              "row": 6,
+              "col": 11
+            },
+            {
+              "row": 7,
+              "col": 11
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 27
+        },
+        {
+          "id": "v2-250-t-028",
+          "path": [
+            {
+              "row": 7,
+              "col": 12
+            },
+            {
+              "row": 6,
+              "col": 12
+            },
+            {
+              "row": 6,
+              "col": 13
+            },
+            {
+              "row": 7,
+              "col": 13
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 28
+        },
+        {
+          "id": "v2-250-t-029",
+          "path": [
+            {
+              "row": 9,
+              "col": 0
+            },
+            {
+              "row": 8,
+              "col": 0
+            },
+            {
+              "row": 8,
+              "col": 1
+            },
+            {
+              "row": 9,
+              "col": 1
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 29
+        },
+        {
+          "id": "v2-250-t-030",
+          "path": [
+            {
+              "row": 9,
+              "col": 2
+            },
+            {
+              "row": 8,
+              "col": 2
+            },
+            {
+              "row": 8,
+              "col": 3
+            },
+            {
+              "row": 9,
+              "col": 3
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 30
+        },
+        {
+          "id": "v2-250-t-031",
+          "path": [
+            {
+              "row": 9,
+              "col": 4
+            },
+            {
+              "row": 8,
+              "col": 4
+            },
+            {
+              "row": 8,
+              "col": 5
+            },
+            {
+              "row": 9,
+              "col": 5
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 31
+        },
+        {
+          "id": "v2-250-t-032",
+          "path": [
+            {
+              "row": 9,
+              "col": 6
+            },
+            {
+              "row": 8,
+              "col": 6
+            },
+            {
+              "row": 8,
+              "col": 7
+            },
+            {
+              "row": 9,
+              "col": 7
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 32
+        },
+        {
+          "id": "v2-250-t-033",
+          "path": [
+            {
+              "row": 9,
+              "col": 8
+            },
+            {
+              "row": 8,
+              "col": 8
+            },
+            {
+              "row": 8,
+              "col": 9
+            },
+            {
+              "row": 9,
+              "col": 9
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 33
+        },
+        {
+          "id": "v2-250-t-034",
+          "path": [
+            {
+              "row": 9,
+              "col": 10
+            },
+            {
+              "row": 8,
+              "col": 10
+            },
+            {
+              "row": 8,
+              "col": 11
+            },
+            {
+              "row": 9,
+              "col": 11
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 34
+        },
+        {
+          "id": "v2-250-t-035",
+          "path": [
+            {
+              "row": 9,
+              "col": 12
+            },
+            {
+              "row": 8,
+              "col": 12
+            },
+            {
+              "row": 8,
+              "col": 13
+            },
+            {
+              "row": 9,
+              "col": 13
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 35
+        },
+        {
+          "id": "v2-250-t-036",
+          "path": [
+            {
+              "row": 11,
+              "col": 0
+            },
+            {
+              "row": 10,
+              "col": 0
+            },
+            {
+              "row": 10,
+              "col": 1
+            },
+            {
+              "row": 11,
+              "col": 1
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 36
+        },
+        {
+          "id": "v2-250-t-037",
+          "path": [
+            {
+              "row": 11,
+              "col": 2
+            },
+            {
+              "row": 10,
+              "col": 2
+            },
+            {
+              "row": 10,
+              "col": 3
+            },
+            {
+              "row": 11,
+              "col": 3
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 37
+        },
+        {
+          "id": "v2-250-t-038",
+          "path": [
+            {
+              "row": 11,
+              "col": 4
+            },
+            {
+              "row": 10,
+              "col": 4
+            },
+            {
+              "row": 10,
+              "col": 5
+            },
+            {
+              "row": 11,
+              "col": 5
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 38
+        }
+      ],
+      "solutionOrder": [
+        "v2-250-t-001",
+        "v2-250-t-002",
+        "v2-250-t-003",
+        "v2-250-t-004",
+        "v2-250-t-005",
+        "v2-250-t-006",
+        "v2-250-t-007",
+        "v2-250-t-008",
+        "v2-250-t-009",
+        "v2-250-t-010",
+        "v2-250-t-011",
+        "v2-250-t-012",
+        "v2-250-t-013",
+        "v2-250-t-014",
+        "v2-250-t-015",
+        "v2-250-t-016",
+        "v2-250-t-017",
+        "v2-250-t-018",
+        "v2-250-t-019",
+        "v2-250-t-020",
+        "v2-250-t-021",
+        "v2-250-t-022",
+        "v2-250-t-023",
+        "v2-250-t-024",
+        "v2-250-t-025",
+        "v2-250-t-026",
+        "v2-250-t-027",
+        "v2-250-t-028",
+        "v2-250-t-029",
+        "v2-250-t-030",
+        "v2-250-t-031",
+        "v2-250-t-032",
+        "v2-250-t-033",
+        "v2-250-t-034",
+        "v2-250-t-035",
+        "v2-250-t-036",
+        "v2-250-t-037",
+        "v2-250-t-038"
+      ],
+      "levelNumber": 250,
+      "generationVersion": 9,
+      "seed": "ARROWNEXA_V2_CONSTRUCTIVE_LEVEL_250",
+      "difficultyScore": 100,
+      "metrics": {
+        "arrowCount": 38,
+        "occupiedCells": 152,
+        "density": 0.6755555555555556,
+        "solutionDepth": 38,
+        "initialValidMoves": 7,
+        "averageValidMoves": 3.8421052631578947,
+        "dependencyDepth": 5,
+        "branchingScore": 3.8421052631578947,
+        "forcedMoveRatio": 0.15789473684210525,
+        "averagePathLength": 4,
+        "averageTurns": 2,
+        "complexityScore": 100
+      },
+      "generationAttempts": 1,
+      "generationDurationMs": 0
+    },
+    {
+      "id": "v2-500",
+      "title": "Level 500",
+      "size": {
+        "rows": 16,
+        "cols": 16
+      },
+      "difficulty": "Expert",
+      "arrows": [
+        {
+          "id": "v2-500-t-001",
+          "path": [
+            {
+              "row": 1,
+              "col": 0
+            },
+            {
+              "row": 0,
+              "col": 0
+            },
+            {
+              "row": 0,
+              "col": 1
+            },
+            {
+              "row": 1,
+              "col": 1
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 1
+        },
+        {
+          "id": "v2-500-t-002",
+          "path": [
+            {
+              "row": 1,
+              "col": 2
+            },
+            {
+              "row": 0,
+              "col": 2
+            },
+            {
+              "row": 0,
+              "col": 3
+            },
+            {
+              "row": 1,
+              "col": 3
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 2
+        },
+        {
+          "id": "v2-500-t-003",
+          "path": [
+            {
+              "row": 1,
+              "col": 4
+            },
+            {
+              "row": 0,
+              "col": 4
+            },
+            {
+              "row": 0,
+              "col": 5
+            },
+            {
+              "row": 1,
+              "col": 5
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 3
+        },
+        {
+          "id": "v2-500-t-004",
+          "path": [
+            {
+              "row": 1,
+              "col": 6
+            },
+            {
+              "row": 0,
+              "col": 6
+            },
+            {
+              "row": 0,
+              "col": 7
+            },
+            {
+              "row": 1,
+              "col": 7
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 4
+        },
+        {
+          "id": "v2-500-t-005",
+          "path": [
+            {
+              "row": 1,
+              "col": 8
+            },
+            {
+              "row": 0,
+              "col": 8
+            },
+            {
+              "row": 0,
+              "col": 9
+            },
+            {
+              "row": 1,
+              "col": 9
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 5
+        },
+        {
+          "id": "v2-500-t-006",
+          "path": [
+            {
+              "row": 1,
+              "col": 10
+            },
+            {
+              "row": 0,
+              "col": 10
+            },
+            {
+              "row": 0,
+              "col": 11
+            },
+            {
+              "row": 1,
+              "col": 11
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 6
+        },
+        {
+          "id": "v2-500-t-007",
+          "path": [
+            {
+              "row": 1,
+              "col": 12
+            },
+            {
+              "row": 0,
+              "col": 12
+            },
+            {
+              "row": 0,
+              "col": 13
+            },
+            {
+              "row": 1,
+              "col": 13
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 7
+        },
+        {
+          "id": "v2-500-t-008",
+          "path": [
+            {
+              "row": 1,
+              "col": 14
+            },
+            {
+              "row": 0,
+              "col": 14
+            },
+            {
+              "row": 0,
+              "col": 15
+            },
+            {
+              "row": 1,
+              "col": 15
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 8
+        },
+        {
+          "id": "v2-500-t-009",
+          "path": [
+            {
+              "row": 3,
+              "col": 0
+            },
+            {
+              "row": 2,
+              "col": 0
+            },
+            {
+              "row": 2,
+              "col": 1
+            },
+            {
+              "row": 3,
+              "col": 1
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 9
+        },
+        {
+          "id": "v2-500-t-010",
+          "path": [
+            {
+              "row": 3,
+              "col": 2
+            },
+            {
+              "row": 2,
+              "col": 2
+            },
+            {
+              "row": 2,
+              "col": 3
+            },
+            {
+              "row": 3,
+              "col": 3
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 10
+        },
+        {
+          "id": "v2-500-t-011",
+          "path": [
+            {
+              "row": 3,
+              "col": 4
+            },
+            {
+              "row": 2,
+              "col": 4
+            },
+            {
+              "row": 2,
+              "col": 5
+            },
+            {
+              "row": 3,
+              "col": 5
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 11
+        },
+        {
+          "id": "v2-500-t-012",
+          "path": [
+            {
+              "row": 3,
+              "col": 6
+            },
+            {
+              "row": 2,
+              "col": 6
+            },
+            {
+              "row": 2,
+              "col": 7
+            },
+            {
+              "row": 3,
+              "col": 7
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 12
+        },
+        {
+          "id": "v2-500-t-013",
+          "path": [
+            {
+              "row": 3,
+              "col": 8
+            },
+            {
+              "row": 2,
+              "col": 8
+            },
+            {
+              "row": 2,
+              "col": 9
+            },
+            {
+              "row": 3,
+              "col": 9
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 13
+        },
+        {
+          "id": "v2-500-t-014",
+          "path": [
+            {
+              "row": 3,
+              "col": 10
+            },
+            {
+              "row": 2,
+              "col": 10
+            },
+            {
+              "row": 2,
+              "col": 11
+            },
+            {
+              "row": 3,
+              "col": 11
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 14
+        },
+        {
+          "id": "v2-500-t-015",
+          "path": [
+            {
+              "row": 3,
+              "col": 12
+            },
+            {
+              "row": 2,
+              "col": 12
+            },
+            {
+              "row": 2,
+              "col": 13
+            },
+            {
+              "row": 3,
+              "col": 13
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 15
+        },
+        {
+          "id": "v2-500-t-016",
+          "path": [
+            {
+              "row": 3,
+              "col": 14
+            },
+            {
+              "row": 2,
+              "col": 14
+            },
+            {
+              "row": 2,
+              "col": 15
+            },
+            {
+              "row": 3,
+              "col": 15
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 16
+        },
+        {
+          "id": "v2-500-t-017",
+          "path": [
+            {
+              "row": 5,
+              "col": 0
+            },
+            {
+              "row": 4,
+              "col": 0
+            },
+            {
+              "row": 4,
+              "col": 1
+            },
+            {
+              "row": 5,
+              "col": 1
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 17
+        },
+        {
+          "id": "v2-500-t-018",
+          "path": [
+            {
+              "row": 5,
+              "col": 2
+            },
+            {
+              "row": 4,
+              "col": 2
+            },
+            {
+              "row": 4,
+              "col": 3
+            },
+            {
+              "row": 5,
+              "col": 3
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 18
+        },
+        {
+          "id": "v2-500-t-019",
+          "path": [
+            {
+              "row": 5,
+              "col": 4
+            },
+            {
+              "row": 4,
+              "col": 4
+            },
+            {
+              "row": 4,
+              "col": 5
+            },
+            {
+              "row": 5,
+              "col": 5
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 19
+        },
+        {
+          "id": "v2-500-t-020",
+          "path": [
+            {
+              "row": 5,
+              "col": 6
+            },
+            {
+              "row": 4,
+              "col": 6
+            },
+            {
+              "row": 4,
+              "col": 7
+            },
+            {
+              "row": 5,
+              "col": 7
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 20
+        },
+        {
+          "id": "v2-500-t-021",
+          "path": [
+            {
+              "row": 5,
+              "col": 8
+            },
+            {
+              "row": 4,
+              "col": 8
+            },
+            {
+              "row": 4,
+              "col": 9
+            },
+            {
+              "row": 5,
+              "col": 9
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 21
+        },
+        {
+          "id": "v2-500-t-022",
+          "path": [
+            {
+              "row": 5,
+              "col": 10
+            },
+            {
+              "row": 4,
+              "col": 10
+            },
+            {
+              "row": 4,
+              "col": 11
+            },
+            {
+              "row": 5,
+              "col": 11
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 22
+        },
+        {
+          "id": "v2-500-t-023",
+          "path": [
+            {
+              "row": 5,
+              "col": 12
+            },
+            {
+              "row": 4,
+              "col": 12
+            },
+            {
+              "row": 4,
+              "col": 13
+            },
+            {
+              "row": 5,
+              "col": 13
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 23
+        },
+        {
+          "id": "v2-500-t-024",
+          "path": [
+            {
+              "row": 5,
+              "col": 14
+            },
+            {
+              "row": 4,
+              "col": 14
+            },
+            {
+              "row": 4,
+              "col": 15
+            },
+            {
+              "row": 5,
+              "col": 15
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 24
+        },
+        {
+          "id": "v2-500-t-025",
+          "path": [
+            {
+              "row": 7,
+              "col": 0
+            },
+            {
+              "row": 6,
+              "col": 0
+            },
+            {
+              "row": 6,
+              "col": 1
+            },
+            {
+              "row": 7,
+              "col": 1
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 25
+        },
+        {
+          "id": "v2-500-t-026",
+          "path": [
+            {
+              "row": 7,
+              "col": 2
+            },
+            {
+              "row": 6,
+              "col": 2
+            },
+            {
+              "row": 6,
+              "col": 3
+            },
+            {
+              "row": 7,
+              "col": 3
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 26
+        },
+        {
+          "id": "v2-500-t-027",
+          "path": [
+            {
+              "row": 7,
+              "col": 4
+            },
+            {
+              "row": 6,
+              "col": 4
+            },
+            {
+              "row": 6,
+              "col": 5
+            },
+            {
+              "row": 7,
+              "col": 5
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 27
+        },
+        {
+          "id": "v2-500-t-028",
+          "path": [
+            {
+              "row": 7,
+              "col": 6
+            },
+            {
+              "row": 6,
+              "col": 6
+            },
+            {
+              "row": 6,
+              "col": 7
+            },
+            {
+              "row": 7,
+              "col": 7
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 28
+        },
+        {
+          "id": "v2-500-t-029",
+          "path": [
+            {
+              "row": 7,
+              "col": 8
+            },
+            {
+              "row": 6,
+              "col": 8
+            },
+            {
+              "row": 6,
+              "col": 9
+            },
+            {
+              "row": 7,
+              "col": 9
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 29
+        },
+        {
+          "id": "v2-500-t-030",
+          "path": [
+            {
+              "row": 7,
+              "col": 10
+            },
+            {
+              "row": 6,
+              "col": 10
+            },
+            {
+              "row": 6,
+              "col": 11
+            },
+            {
+              "row": 7,
+              "col": 11
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 30
+        },
+        {
+          "id": "v2-500-t-031",
+          "path": [
+            {
+              "row": 7,
+              "col": 12
+            },
+            {
+              "row": 6,
+              "col": 12
+            },
+            {
+              "row": 6,
+              "col": 13
+            },
+            {
+              "row": 7,
+              "col": 13
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 31
+        },
+        {
+          "id": "v2-500-t-032",
+          "path": [
+            {
+              "row": 7,
+              "col": 14
+            },
+            {
+              "row": 6,
+              "col": 14
+            },
+            {
+              "row": 6,
+              "col": 15
+            },
+            {
+              "row": 7,
+              "col": 15
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 32
+        },
+        {
+          "id": "v2-500-t-033",
+          "path": [
+            {
+              "row": 9,
+              "col": 0
+            },
+            {
+              "row": 8,
+              "col": 0
+            },
+            {
+              "row": 8,
+              "col": 1
+            },
+            {
+              "row": 9,
+              "col": 1
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 33
+        },
+        {
+          "id": "v2-500-t-034",
+          "path": [
+            {
+              "row": 9,
+              "col": 2
+            },
+            {
+              "row": 8,
+              "col": 2
+            },
+            {
+              "row": 8,
+              "col": 3
+            },
+            {
+              "row": 9,
+              "col": 3
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 34
+        },
+        {
+          "id": "v2-500-t-035",
+          "path": [
+            {
+              "row": 9,
+              "col": 4
+            },
+            {
+              "row": 8,
+              "col": 4
+            },
+            {
+              "row": 8,
+              "col": 5
+            },
+            {
+              "row": 9,
+              "col": 5
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 35
+        },
+        {
+          "id": "v2-500-t-036",
+          "path": [
+            {
+              "row": 9,
+              "col": 6
+            },
+            {
+              "row": 8,
+              "col": 6
+            },
+            {
+              "row": 8,
+              "col": 7
+            },
+            {
+              "row": 9,
+              "col": 7
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 36
+        },
+        {
+          "id": "v2-500-t-037",
+          "path": [
+            {
+              "row": 9,
+              "col": 8
+            },
+            {
+              "row": 8,
+              "col": 8
+            },
+            {
+              "row": 8,
+              "col": 9
+            },
+            {
+              "row": 9,
+              "col": 9
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 37
+        },
+        {
+          "id": "v2-500-t-038",
+          "path": [
+            {
+              "row": 9,
+              "col": 10
+            },
+            {
+              "row": 8,
+              "col": 10
+            },
+            {
+              "row": 8,
+              "col": 11
+            },
+            {
+              "row": 9,
+              "col": 11
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 38
+        },
+        {
+          "id": "v2-500-t-039",
+          "path": [
+            {
+              "row": 9,
+              "col": 12
+            },
+            {
+              "row": 8,
+              "col": 12
+            },
+            {
+              "row": 8,
+              "col": 13
+            },
+            {
+              "row": 9,
+              "col": 13
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 39
+        },
+        {
+          "id": "v2-500-t-040",
+          "path": [
+            {
+              "row": 9,
+              "col": 14
+            },
+            {
+              "row": 8,
+              "col": 14
+            },
+            {
+              "row": 8,
+              "col": 15
+            },
+            {
+              "row": 9,
+              "col": 15
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 40
+        },
+        {
+          "id": "v2-500-t-041",
+          "path": [
+            {
+              "row": 11,
+              "col": 0
+            },
+            {
+              "row": 10,
+              "col": 0
+            },
+            {
+              "row": 10,
+              "col": 1
+            },
+            {
+              "row": 11,
+              "col": 1
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 41
+        },
+        {
+          "id": "v2-500-t-042",
+          "path": [
+            {
+              "row": 11,
+              "col": 2
+            },
+            {
+              "row": 10,
+              "col": 2
+            },
+            {
+              "row": 10,
+              "col": 3
+            },
+            {
+              "row": 11,
+              "col": 3
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 42
+        },
+        {
+          "id": "v2-500-t-043",
+          "path": [
+            {
+              "row": 11,
+              "col": 4
+            },
+            {
+              "row": 10,
+              "col": 4
+            },
+            {
+              "row": 10,
+              "col": 5
+            },
+            {
+              "row": 11,
+              "col": 5
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 43
+        },
+        {
+          "id": "v2-500-t-044",
+          "path": [
+            {
+              "row": 11,
+              "col": 6
+            },
+            {
+              "row": 10,
+              "col": 6
+            },
+            {
+              "row": 10,
+              "col": 7
+            },
+            {
+              "row": 11,
+              "col": 7
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 44
+        },
+        {
+          "id": "v2-500-t-045",
+          "path": [
+            {
+              "row": 11,
+              "col": 8
+            },
+            {
+              "row": 10,
+              "col": 8
+            },
+            {
+              "row": 10,
+              "col": 9
+            },
+            {
+              "row": 11,
+              "col": 9
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 45
+        },
+        {
+          "id": "v2-500-t-046",
+          "path": [
+            {
+              "row": 11,
+              "col": 10
+            },
+            {
+              "row": 10,
+              "col": 10
+            },
+            {
+              "row": 10,
+              "col": 11
+            },
+            {
+              "row": 11,
+              "col": 11
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 46
+        },
+        {
+          "id": "v2-500-t-047",
+          "path": [
+            {
+              "row": 11,
+              "col": 12
+            },
+            {
+              "row": 10,
+              "col": 12
+            },
+            {
+              "row": 10,
+              "col": 13
+            },
+            {
+              "row": 11,
+              "col": 13
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 47
+        },
+        {
+          "id": "v2-500-t-048",
+          "path": [
+            {
+              "row": 11,
+              "col": 14
+            },
+            {
+              "row": 10,
+              "col": 14
+            },
+            {
+              "row": 10,
+              "col": 15
+            },
+            {
+              "row": 11,
+              "col": 15
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 48
+        },
+        {
+          "id": "v2-500-t-049",
+          "path": [
+            {
+              "row": 13,
+              "col": 0
+            },
+            {
+              "row": 12,
+              "col": 0
+            },
+            {
+              "row": 12,
+              "col": 1
+            },
+            {
+              "row": 13,
+              "col": 1
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 49
+        },
+        {
+          "id": "v2-500-t-050",
+          "path": [
+            {
+              "row": 13,
+              "col": 2
+            },
+            {
+              "row": 12,
+              "col": 2
+            },
+            {
+              "row": 12,
+              "col": 3
+            },
+            {
+              "row": 13,
+              "col": 3
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 50
+        },
+        {
+          "id": "v2-500-t-051",
+          "path": [
+            {
+              "row": 13,
+              "col": 4
+            },
+            {
+              "row": 12,
+              "col": 4
+            },
+            {
+              "row": 12,
+              "col": 5
+            },
+            {
+              "row": 13,
+              "col": 5
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 51
+        },
+        {
+          "id": "v2-500-t-052",
+          "path": [
+            {
+              "row": 13,
+              "col": 6
+            },
+            {
+              "row": 12,
+              "col": 6
+            },
+            {
+              "row": 12,
+              "col": 7
+            },
+            {
+              "row": 13,
+              "col": 7
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 52
+        },
+        {
+          "id": "v2-500-t-053",
+          "path": [
+            {
+              "row": 13,
+              "col": 8
+            },
+            {
+              "row": 12,
+              "col": 8
+            },
+            {
+              "row": 12,
+              "col": 9
+            },
+            {
+              "row": 13,
+              "col": 9
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 53
+        },
+        {
+          "id": "v2-500-t-054",
+          "path": [
+            {
+              "row": 13,
+              "col": 10
+            },
+            {
+              "row": 12,
+              "col": 10
+            },
+            {
+              "row": 12,
+              "col": 11
+            },
+            {
+              "row": 13,
+              "col": 11
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 54
+        },
+        {
+          "id": "v2-500-t-055",
+          "path": [
+            {
+              "row": 13,
+              "col": 12
+            },
+            {
+              "row": 12,
+              "col": 12
+            },
+            {
+              "row": 12,
+              "col": 13
+            },
+            {
+              "row": 13,
+              "col": 13
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 55
+        },
+        {
+          "id": "v2-500-t-056",
+          "path": [
+            {
+              "row": 13,
+              "col": 14
+            },
+            {
+              "row": 12,
+              "col": 14
+            },
+            {
+              "row": 12,
+              "col": 15
+            },
+            {
+              "row": 13,
+              "col": 15
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 56
+        },
+        {
+          "id": "v2-500-t-057",
+          "path": [
+            {
+              "row": 15,
+              "col": 0
+            },
+            {
+              "row": 14,
+              "col": 0
+            },
+            {
+              "row": 14,
+              "col": 1
+            },
+            {
+              "row": 15,
+              "col": 1
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 57
+        },
+        {
+          "id": "v2-500-t-058",
+          "path": [
+            {
+              "row": 15,
+              "col": 2
+            },
+            {
+              "row": 14,
+              "col": 2
+            },
+            {
+              "row": 14,
+              "col": 3
+            },
+            {
+              "row": 15,
+              "col": 3
+            }
+          ],
+          "direction": "DOWN",
+          "state": "normal",
+          "order": 58
+        }
+      ],
+      "solutionOrder": [
+        "v2-500-t-001",
+        "v2-500-t-002",
+        "v2-500-t-003",
+        "v2-500-t-004",
+        "v2-500-t-005",
+        "v2-500-t-006",
+        "v2-500-t-007",
+        "v2-500-t-008",
+        "v2-500-t-009",
+        "v2-500-t-010",
+        "v2-500-t-011",
+        "v2-500-t-012",
+        "v2-500-t-013",
+        "v2-500-t-014",
+        "v2-500-t-015",
+        "v2-500-t-016",
+        "v2-500-t-017",
+        "v2-500-t-018",
+        "v2-500-t-019",
+        "v2-500-t-020",
+        "v2-500-t-021",
+        "v2-500-t-022",
+        "v2-500-t-023",
+        "v2-500-t-024",
+        "v2-500-t-025",
+        "v2-500-t-026",
+        "v2-500-t-027",
+        "v2-500-t-028",
+        "v2-500-t-029",
+        "v2-500-t-030",
+        "v2-500-t-031",
+        "v2-500-t-032",
+        "v2-500-t-033",
+        "v2-500-t-034",
+        "v2-500-t-035",
+        "v2-500-t-036",
+        "v2-500-t-037",
+        "v2-500-t-038",
+        "v2-500-t-039",
+        "v2-500-t-040",
+        "v2-500-t-041",
+        "v2-500-t-042",
+        "v2-500-t-043",
+        "v2-500-t-044",
+        "v2-500-t-045",
+        "v2-500-t-046",
+        "v2-500-t-047",
+        "v2-500-t-048",
+        "v2-500-t-049",
+        "v2-500-t-050",
+        "v2-500-t-051",
+        "v2-500-t-052",
+        "v2-500-t-053",
+        "v2-500-t-054",
+        "v2-500-t-055",
+        "v2-500-t-056",
+        "v2-500-t-057",
+        "v2-500-t-058"
+      ],
+      "levelNumber": 500,
+      "generationVersion": 9,
+      "seed": "ARROWNEXA_V2_CONSTRUCTIVE_LEVEL_500",
+      "difficultyScore": 100,
+      "metrics": {
+        "arrowCount": 58,
+        "occupiedCells": 232,
+        "density": 0.90625,
+        "solutionDepth": 58,
+        "initialValidMoves": 8,
+        "averageValidMoves": 4.396551724137931,
+        "dependencyDepth": 7,
+        "branchingScore": 4.396551724137931,
+        "forcedMoveRatio": 0.13793103448275862,
+        "averagePathLength": 4,
+        "averageTurns": 2,
+        "complexityScore": 100
+      },
+      "generationAttempts": 1,
+      "generationDurationMs": 0
+    }
+  ]
+}
