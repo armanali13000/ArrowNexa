@@ -13,7 +13,7 @@ const requested = process.argv.includes('--all')
   : process.argv.includes('--four')
     ? fourGateLevels
   : prototypeLevels;
-const constructiveOnly = !process.argv.includes('--all');
+const constructiveOnly = true;
 const maxAttempts = Number(process.env.MAX_ATTEMPTS_PER_LEVEL ?? 240);
 
 rmSync(outDir, { recursive: true, force: true });
@@ -44,7 +44,7 @@ const require = createRequire(import.meta.url);
 const { generateLevelFromConfig } = require(join(outDir, 'engine/generator/generateLevel.js'));
 const { validateLevelGeometry, validatePuzzleQuality, validateVisualQuality } = require(join(outDir, 'engine/generator/validation.js'));
 const { createGenerationConfig, createLevelSeed, GENERATION_VERSION } = require(join(outDir, 'engine/levels/levelConfig.js'));
-const { createConstructiveV2Level, getV2QualityScore } = require(join(outDir, 'engine/levels/v2Constructive.js'));
+const { createConstructiveV2Level, getConstructiveV2Family, getV2QualityScore } = require(join(outDir, 'engine/levels/v2Constructive.js'));
 const { getLevelDifficultyProfile } = require(join(outDir, 'engine/levels/v2Profiles.js'));
 const { solveLevel } = require(join(outDir, 'engine/solver/solveLevel.js'));
 
@@ -54,10 +54,10 @@ const report = [];
 const failures = [];
 const diagnostics = [];
 
-const fingerprintFor = (level) => level.arrows
+const fingerprintFor = (level) => `${level.size.rows}x${level.size.cols}|${level.arrows
   .map((arrow) => `${arrow.direction}:${arrow.path.map((point) => `${point.row},${point.col}`).join(';')}`)
   .sort()
-  .join('|');
+  .join('|')}`;
 
 const inRange = (value, [min, max]) => value >= min && value <= max;
 
@@ -98,11 +98,12 @@ const countTurns = (path) => {
   return turns;
 };
 
-const rowFor = (level, profile, generationAttempts, solver, visualQuality, puzzleQuality, profileReasons, duplicate) => ({
+const rowFor = (level, profile, generationAttempts, solver, visualQuality, puzzleQuality, profileReasons, duplicate, constructionFamily) => ({
   level: level.levelNumber,
   chapter: profile.chapter,
   tutorial: profile.tutorial,
   finale: profile.finale,
+  constructionFamily,
   arrows: level.metrics.arrowCount,
   occupiedCells: level.metrics.occupiedCells,
   density: Number(level.metrics.density.toFixed(3)),
@@ -118,6 +119,9 @@ const rowFor = (level, profile, generationAttempts, solver, visualQuality, puzzl
   difficultyScore: Number(level.difficultyScore.toFixed(2)),
   generationAttempts,
   solver: solver.solvable,
+  v2Status: solver.solvable && validateLevelGeometry(level) && !duplicate && getV2QualityScore(level, profile) >= minimumQualityScore(profile) ? 'PASS' : 'FAIL',
+  legacyVisualStatus: visualQuality ? 'PASS' : 'WARN',
+  legacyPuzzleStatus: puzzleQuality ? 'PASS' : 'WARN',
   visualQuality,
   puzzleQuality,
   profileQuality: profileReasons.length === 0,
@@ -125,6 +129,7 @@ const rowFor = (level, profile, generationAttempts, solver, visualQuality, puzzl
   qualityScore: getV2QualityScore(level, profile),
   minimumQualityScore: minimumQualityScore(profile),
   quality: solver.solvable && validateLevelGeometry(level) && !duplicate && getV2QualityScore(level, profile) >= minimumQualityScore(profile),
+  fingerprint: fingerprintFor(level),
   reasons: profileReasons,
 });
 
@@ -181,12 +186,13 @@ for (const levelNumber of requested) {
 
   const constructive = createConstructiveV2Level(levelNumber);
   if (constructive) {
+    const constructionFamily = getConstructiveV2Family(levelNumber);
     const solver = solveLevel(constructive, { maxExploredStates: 60000 });
     const visualQuality = validateVisualQuality(constructive);
     const puzzleQuality = validatePuzzleQuality(constructive, constructive.metrics);
     const duplicate = fingerprints.has(fingerprintFor(constructive));
     const profileReasons = profileQuality(constructive, profile);
-    const row = rowFor(constructive, profile, 1, solver, visualQuality, puzzleQuality, profileReasons, duplicate);
+    const row = rowFor(constructive, profile, 1, solver, visualQuality, puzzleQuality, profileReasons, duplicate, constructionFamily);
     counters.attempts += 1;
     if (validateLevelGeometry(constructive)) counters.structurallyValid += 1;
     if (solver.solvable) counters.solverSolvable += 1;
@@ -198,14 +204,33 @@ for (const levelNumber of requested) {
     }
   }
 
-  if (!accepted && constructiveOnly) {
-    failures.push({ level: levelNumber, message: `LEVEL GENERATION FAILED: LEVEL ${levelNumber}`, maxAttempts: 1, profile, counters, closestCandidate });
-    diagnostics.push({ level: levelNumber, profile, counters, closestCandidate });
-    console.error(`LEVEL GENERATION FAILED: LEVEL ${levelNumber}`);
-    continue;
+  for (let attempt = 1; constructiveOnly && !accepted && attempt < maxAttempts; attempt += 1) {
+    const candidate = createConstructiveV2Level(levelNumber, attempt);
+    const constructionFamily = getConstructiveV2Family(levelNumber, attempt);
+    counters.attempts += 1;
+    if (!candidate) {
+      counters.other += 1;
+      continue;
+    }
+
+    const solver = solveLevel(candidate, { maxExploredStates: 60000 });
+    const visualQuality = validateVisualQuality(candidate);
+    const puzzleQuality = validatePuzzleQuality(candidate, candidate.metrics);
+    const duplicate = fingerprints.has(fingerprintFor(candidate));
+    const profileReasons = profileQuality(candidate, profile);
+    const row = rowFor(candidate, profile, attempt + 1, solver, visualQuality, puzzleQuality, profileReasons, duplicate, constructionFamily);
+    if (validateLevelGeometry(candidate)) counters.structurallyValid += 1;
+    if (solver.solvable) counters.solverSolvable += 1;
+    for (const reason of reasonsFor(candidate, profile, duplicate)) counters[reason] += 1;
+    if (!closestCandidate || row.qualityScore > closestCandidate.qualityScore) closestCandidate = row;
+    if (!row.quality) continue;
+
+    accepted = { ...candidate, generationAttempts: attempt + 1 };
+    acceptedRow = row;
+    break;
   }
 
-  for (let attempt = 0; !accepted && attempt < maxAttempts; attempt += 1) {
+  for (let attempt = 0; !constructiveOnly && !accepted && attempt < maxAttempts; attempt += 1) {
     const seed = `ARROWNEXA_V2_LEVEL_${levelNumber}_ATTEMPT_${attempt}`;
     const config = createGenerationConfig(levelNumber, seed);
     const candidate = generateLevelFromConfig({ ...config, seed }, levelNumber, attempt);
@@ -220,7 +245,7 @@ for (const levelNumber of requested) {
     const puzzleQuality = validatePuzzleQuality(candidate, candidate.metrics);
     const duplicate = fingerprints.has(fingerprintFor(candidate));
     const profileReasons = profileQuality(candidate, profile);
-    const row = rowFor(candidate, profile, attempt + 1, solver, visualQuality, puzzleQuality, profileReasons, duplicate);
+    const row = rowFor(candidate, profile, attempt + 1, solver, visualQuality, puzzleQuality, profileReasons, duplicate, 'mixed-topology');
     if (validateLevelGeometry(candidate)) counters.structurallyValid += 1;
     if (solver.solvable) counters.solverSolvable += 1;
     for (const reason of reasonsFor(candidate, profile, duplicate)) counters[reason] += 1;
@@ -256,10 +281,30 @@ const isFourGate = requested.length === fourGateLevels.length && requested.every
 const dataPath = join(process.cwd(), requested.length === 500 ? 'assets/levels/levels-v2.json' : isFourGate ? 'assets/levels/levels-v2-four-gate.json' : 'assets/levels/levels-v2-prototype.json');
 const reportPath = join(process.cwd(), requested.length === 500 ? 'reports/levels-v2-quality.json' : isFourGate ? 'reports/levels-v2-four-gate-quality.json' : 'reports/levels-v2-prototype-quality.json');
 const tsPath = join(process.cwd(), 'engine/levels/levelsV2Prototype.ts');
+const productionTsPath = join(process.cwd(), 'engine/levels/levelsV2.ts');
+const productionChapterDir = join(process.cwd(), 'assets/levels/v2');
 mkdirSync(dirname(dataPath), { recursive: true });
 mkdirSync(dirname(reportPath), { recursive: true });
 writeFileSync(dataPath, `${JSON.stringify({ version: 2, levels }, null, 2)}\n`);
 writeFileSync(reportPath, `${JSON.stringify({ version: 2, generatedAt: new Date().toISOString(), requested, maxAttempts, total: levels.length, failures, diagnostics, levels: report }, null, 2)}\n`);
+
+if (requested.length === 500) {
+  mkdirSync(productionChapterDir, { recursive: true });
+  for (let chapter = 1; chapter <= 10; chapter += 1) {
+    const start = (chapter - 1) * 50 + 1;
+    const end = chapter * 50;
+    const chapterLevels = levels.filter((level) => level.levelNumber >= start && level.levelNumber <= end);
+    writeFileSync(join(productionChapterDir, `chapter-${String(chapter).padStart(2, '0')}.json`), `${JSON.stringify({ version: 2, chapter, startLevel: start, endLevel: end, levels: chapterLevels }, null, 2)}\n`);
+  }
+  writeFileSync(productionTsPath, [
+    "import { GeneratedLevel } from '../types/game';",
+    '',
+    'export const LEVEL_SYSTEM_V2_VERSION = 2;',
+    '',
+    `export const levelsV2: GeneratedLevel[] = ${JSON.stringify(levels, null, 2)};`,
+    '',
+  ].join('\n'));
+}
 
 if (requested.length !== 500 && !isFourGate) {
   writeFileSync(tsPath, [

@@ -1,0 +1,271 @@
+{
+  "generated": 500,
+  "missing": [],
+  "fallback": 0,
+  "v2Pass": 500,
+  "solverPass": 500,
+  "exactDuplicates": 0,
+  "structuralSimilarityWarnings": 0,
+  "adjacentSimilarity": [],
+  "rotationReflectionConcerns": 0,
+  "familyDistribution": {
+    "tutorial-open": 1,
+    "simple-chain": 21,
+    "asymmetric-layered": 35,
+    "double-chain": 23,
+    "diverging-branches": 30,
+    "nested-blockers": 34,
+    "dual-opening": 32,
+    "edge-to-center": 37,
+    "converging-branches": 28,
+    "reverse-fork": 31,
+    "mixed-topology": 31,
+    "alternating-chain": 32,
+    "layered-blockers": 34,
+    "staggered-chain": 24,
+    "central-dependency": 29,
+    "triple-opening": 27,
+    "fork": 26,
+    "center-to-edge": 25
+  },
+  "chapterStats": [
+    {
+      "chapter": 1,
+      "levels": 50,
+      "avgArrows": 14.32,
+      "avgDensity": 0.41,
+      "avgOpeningRatio": 0.304,
+      "avgDependencyDepth": 3.26,
+      "avgBranching": 2.65,
+      "avgTurns": 1.09,
+      "avgPathLength": 3.1,
+      "avgDifficulty": 76.17,
+      "avgQuality": 87.37
+    },
+    {
+      "chapter": 2,
+      "levels": 50,
+      "avgArrows": 19.14,
+      "avgDensity": 0.432,
+      "avgOpeningRatio": 0.267,
+      "avgDependencyDepth": 3.72,
+      "avgBranching": 3.05,
+      "avgTurns": 1.09,
+      "avgPathLength": 3.09,
+      "avgDifficulty": 84.84,
+      "avgQuality": 88.6
+    },
+    {
+      "chapter": 3,
+      "levels": 50,
+      "avgArrows": 23.72,
+      "avgDensity": 0.462,
+      "avgOpeningRatio": 0.229,
+      "avgDependencyDepth": 4.22,
+      "avgBranching": 3.34,
+      "avgTurns": 1.08,
+      "avgPathLength": 3.08,
+      "avgDifficulty": 93.71,
+      "avgQuality": 89.54
+    },
+    {
+      "chapter": 4,
+      "levels": 50,
+      "avgArrows": 28.4,
+      "avgDensity": 0.491,
+      "avgOpeningRatio": 0.203,
+      "avgDependencyDepth": 4.74,
+      "avgBranching": 3.45,
+      "avgTurns": 1.14,
+      "avgPathLength": 3.14,
+      "avgDifficulty": 98.12,
+      "avgQuality": 89.95
+    },
+    {
+      "chapter": 5,
+      "levels": 50,
+      "avgArrows": 33.14,
+      "avgDensity": 0.496,
+      "avgOpeningRatio": 0.207,
+      "avgDependencyDepth": 5.08,
+      "avgBranching": 4.09,
+      "avgTurns": 1.71,
+      "avgPathLength": 3.71,
+      "avgDifficulty": 99.92,
+      "avgQuality": 89.63
+    },
+    {
+      "chapter": 6,
+      "levels": 50,
+      "avgArrows": 38.34,
+      "avgDensity": 0.493,
+      "avgOpeningRatio": 0.185,
+      "avgDependencyDepth": 6.02,
+      "avgBranching": 4.22,
+      "avgTurns": 1.67,
+      "avgPathLength": 3.67,
+      "avgDifficulty": 100,
+      "avgQuality": 90.39
+    },
+    {
+      "chapter": 7,
+      "levels": 50,
+      "avgArrows": 42.74,
+      "avgDensity": 0.526,
+      "avgOpeningRatio": 0.173,
+      "avgDependencyDepth": 6.16,
+      "avgBranching": 4.35,
+      "avgTurns": 1.69,
+      "avgPathLength": 3.69,
+      "avgDifficulty": 100,
+      "avgQuality": 90.53
+    },
+    {
+      "chapter": 8,
+      "levels": 50,
+      "avgArrows": 47.96,
+      "avgDensity": 0.556,
+      "avgOpeningRatio": 0.163,
+      "avgDependencyDepth": 6.28,
+      "avgBranching": 4.53,
+      "avgTurns": 1.66,
+      "avgPathLength": 3.66,
+      "avgDifficulty": 100,
+      "avgQuality": 90.32
+    },
+    {
+      "chapter": 9,
+      "levels": 50,
+      "avgArrows": 53.42,
+      "avgDensity": 0.607,
+      "avgOpeningRatio": 0.15,
+      "avgDependencyDepth": 6.88,
+      "avgBranching": 4.76,
+      "avgTurns": 1.65,
+      "avgPathLength": 3.65,
+      "avgDifficulty": 100,
+      "avgQuality": 90.12
+    },
+    {
+      "chapter": 10,
+      "levels": 50,
+      "avgArrows": 59.12,
+      "avgDensity": 0.686,
+      "avgOpeningRatio": 0.144,
+      "avgDependencyDepth": 7.04,
+      "avgBranching": 5,
+      "avgTurns": 1.76,
+      "avgPathLength": 3.76,
+      "avgDifficulty": 100,
+      "avgQuality": 89.51
+    }
+  ],
+  "difficultyAnomalies": [],
+  "finaleChecks": [
+    {
+      "level": 50,
+      "status": "PASS",
+      "previousDifficulty": 88.77,
+      "finaleDifficulty": 89.16,
+      "previousDepth": 19,
+      "finaleDepth": 20
+    },
+    {
+      "level": 100,
+      "status": "PASS",
+      "previousDifficulty": 93.21,
+      "finaleDifficulty": 100,
+      "previousDepth": 22,
+      "finaleDepth": 28
+    },
+    {
+      "level": 150,
+      "status": "PASS",
+      "previousDifficulty": 97.04,
+      "finaleDifficulty": 100,
+      "previousDepth": 27,
+      "finaleDepth": 34
+    },
+    {
+      "level": 200,
+      "status": "PASS",
+      "previousDifficulty": 100,
+      "finaleDifficulty": 100,
+      "previousDepth": 31,
+      "finaleDepth": 40
+    },
+    {
+      "level": 250,
+      "status": "PASS",
+      "previousDifficulty": 100,
+      "finaleDifficulty": 100,
+      "previousDepth": 39,
+      "finaleDepth": 46
+    },
+    {
+      "level": 300,
+      "status": "PASS",
+      "previousDifficulty": 100,
+      "finaleDifficulty": 100,
+      "previousDepth": 46,
+      "finaleDepth": 47
+    },
+    {
+      "level": 350,
+      "status": "PASS",
+      "previousDifficulty": 100,
+      "finaleDifficulty": 100,
+      "previousDepth": 44,
+      "finaleDepth": 50
+    },
+    {
+      "level": 400,
+      "status": "PASS",
+      "previousDifficulty": 100,
+      "finaleDifficulty": 100,
+      "previousDepth": 51,
+      "finaleDepth": 61
+    },
+    {
+      "level": 450,
+      "status": "PASS",
+      "previousDifficulty": 100,
+      "finaleDifficulty": 100,
+      "previousDepth": 59,
+      "finaleDepth": 67
+    },
+    {
+      "level": 500,
+      "status": "PASS",
+      "previousDifficulty": 100,
+      "finaleDifficulty": 100,
+      "previousDepth": 67,
+      "finaleDepth": 72
+    }
+  ],
+  "legacyVisualPass": 71,
+  "legacyVisualWarn": 429,
+  "legacyPuzzlePass": 497,
+  "legacyPuzzleWarn": 3,
+  "performanceMetrics": {
+    "level1RetrievalMs": 0.009,
+    "level50RetrievalMs": 0.022,
+    "level250RetrievalMs": 0.035,
+    "level500RetrievalMs": 0.049,
+    "retryMs": 0.025,
+    "nextMs": 0.014
+  },
+  "repository": {
+    "usesV2": true,
+    "productionLegacyFallbackRemoved": true,
+    "retryDeterministic": true,
+    "nextDeterministic": true,
+    "saveCompatibility": true
+  },
+  "gameplay": {
+    "hint": true,
+    "undo": true,
+    "rapidInput": true,
+    "levelCompletion": true
+  }
+}

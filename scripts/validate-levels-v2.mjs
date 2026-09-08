@@ -44,10 +44,10 @@ const data = JSON.parse(readFileSync(join(process.cwd(), dataPath), 'utf8'));
 const fingerprints = new Set();
 const rows = [];
 
-const fingerprintFor = (level) => level.arrows
+const fingerprintFor = (level) => `${level.size.rows}x${level.size.cols}|${level.arrows
   .map((arrow) => `${arrow.direction}:${arrow.path.map((point) => `${point.row},${point.col}`).join(';')}`)
   .sort()
-  .join('|');
+  .join('|')}`;
 
 for (const level of data.levels) {
   const profile = getLevelDifficultyProfile(level.levelNumber);

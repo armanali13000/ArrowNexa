@@ -142,16 +142,16 @@ const writeBmp = (path, width, height, pixels) => {
   writeFileSync(path, buffer);
 };
 
-const renderContactSheet = () => {
+const renderContactSheet = (sheetLevels = data.levels, filename = 'contact-sheet.bmp') => {
   const tileWidth = 180;
   const tileHeight = 196;
   const columns = 4;
-  const rows = Math.ceil(data.levels.length / columns);
+  const rows = Math.ceil(sheetLevels.length / columns);
   const width = columns * tileWidth;
   const height = rows * tileHeight;
   const pixels = makeBitmap(width, height, [7, 21, 47]);
 
-  data.levels.forEach((level, index) => {
+  sheetLevels.forEach((level, index) => {
     const originX = (index % columns) * tileWidth + 14;
     const originY = Math.floor(index / columns) * tileHeight + 18;
     const board = 148;
@@ -172,11 +172,22 @@ const renderContactSheet = () => {
     });
   });
 
-  const outputPath = join(process.cwd(), outputDir, 'contact-sheet.bmp');
+  const outputPath = join(process.cwd(), outputDir, filename);
   writeBmp(outputPath, width, height, pixels);
-  return join(outputDir, 'contact-sheet.bmp').replaceAll('\\', '/');
+  return join(outputDir, filename).replaceAll('\\', '/');
 };
 
 const contactSheet = renderContactSheet();
+const chapterSheets = [];
+if (data.levels.length === 500) {
+  for (let chapter = 1; chapter <= 10; chapter += 1) {
+    const start = (chapter - 1) * 50 + 1;
+    const end = chapter * 50;
+    chapterSheets.push(renderContactSheet(
+      data.levels.filter((level) => level.levelNumber >= start && level.levelNumber <= end),
+      `chapter-${String(chapter).padStart(2, '0')}-sheet.bmp`,
+    ));
+  }
+}
 
-console.log(JSON.stringify({ inputPath, outputDir, rendered: outputs, contactSheet }, null, 2));
+console.log(JSON.stringify({ inputPath, outputDir, rendered: outputs, contactSheet, chapterSheets }, null, 2));

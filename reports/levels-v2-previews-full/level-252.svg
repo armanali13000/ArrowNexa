@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="548" height="602" viewBox="0 0 548 602">
+  <style>
+    .bg { fill: #07152f; }
+    .panel { fill: #eef4ff; }
+    .grid { stroke: #c7d5f0; stroke-width: 1; }
+    .title { fill: #f7fbff; font: 700 22px Arial, sans-serif; }
+    .meta { fill: #9fc7ff; font: 600 13px Arial, sans-serif; }
+    .glyph { fill: #06132c; font: 700 19px Arial, sans-serif; text-anchor: middle; }
+  </style>
+  <rect class="bg" width="548" height="602" rx="18" />
+  <text x="34" y="34" class="title">Level 252</text>
+  <text x="34" y="52" class="meta">16x16 - 31 arrows - Hard</text>
+  <rect class="panel" x="34" y="88" width="480" height="480" rx="12" />
+  <line x1="34" y1="88" x2="514" y2="88" class="grid" />
+  <line x1="34" y1="118" x2="514" y2="118" class="grid" />
+  <line x1="34" y1="148" x2="514" y2="148" class="grid" />
+  <line x1="34" y1="178" x2="514" y2="178" class="grid" />
+  <line x1="34" y1="208" x2="514" y2="208" class="grid" />
+  <line x1="34" y1="238" x2="514" y2="238" class="grid" />
+  <line x1="34" y1="268" x2="514" y2="268" class="grid" />
+  <line x1="34" y1="298" x2="514" y2="298" class="grid" />
+  <line x1="34" y1="328" x2="514" y2="328" class="grid" />
+  <line x1="34" y1="358" x2="514" y2="358" class="grid" />
+  <line x1="34" y1="388" x2="514" y2="388" class="grid" />
+  <line x1="34" y1="418" x2="514" y2="418" class="grid" />
+  <line x1="34" y1="448" x2="514" y2="448" class="grid" />
+  <line x1="34" y1="478" x2="514" y2="478" class="grid" />
+  <line x1="34" y1="508" x2="514" y2="508" class="grid" />
+  <line x1="34" y1="538" x2="514" y2="538" class="grid" />
+  <line x1="34" y1="568" x2="514" y2="568" class="grid" />
+  <line x1="34" y1="88" x2="34" y2="568" class="grid" />
+  <line x1="64" y1="88" x2="64" y2="568" class="grid" />
+  <line x1="94" y1="88" x2="94" y2="568" class="grid" />
+  <line x1="124" y1="88" x2="124" y2="568" class="grid" />
+  <line x1="154" y1="88" x2="154" y2="568" class="grid" />
+  <line x1="184" y1="88" x2="184" y2="568" class="grid" />
+  <line x1="214" y1="88" x2="214" y2="568" class="grid" />
+  <line x1="244" y1="88" x2="244" y2="568" class="grid" />
+  <line x1="274" y1="88" x2="274" y2="568" class="grid" />
+  <line x1="304" y1="88" x2="304" y2="568" class="grid" />
+  <line x1="334" y1="88" x2="334" y2="568" class="grid" />
+  <line x1="364" y1="88" x2="364" y2="568" class="grid" />
+  <line x1="394" y1="88" x2="394" y2="568" class="grid" />
+  <line x1="424" y1="88" x2="424" y2="568" class="grid" />
+  <line x1="454" y1="88" x2="454" y2="568" class="grid" />
+  <line x1="484" y1="88" x2="484" y2="568" class="grid" />
+  <line x1="514" y1="88" x2="514" y2="568" class="grid" />
+  <polyline points="49,133 49,103 79,103 79,133" fill="none" stroke="#18d9ff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" opacity="0.92" />
+<circle cx="79" cy="133" r="12" fill="#18d9ff" />
+<text x="79" y="139" class="glyph">v</text>
+<polyline points="469,133 469,103 499,103 499,133" fill="none" stroke="#f7f2ff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" opacity="0.92" />
+<circle cx="499" cy="133" r="12" fill="#f7f2ff" />
+<text x="499" y="139" class="glyph">v</text>
+<polyline points="49,553 49,523 79,523 79,553" fill="none" stroke="#62ffb3" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" opacity="0.92" />
+<circle cx="79" cy="553" r="12" fill="#62ffb3" />
+<text x="79" y="559" class="glyph">v</text>
+<polyline points="109,133 109,103 139,103 139,133" fill="none" stroke="#ffd166" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" opacity="0.92" />
+<circle cx="139" cy="133" r="12" fill="#ffd166" />
+<text x="139" y="139" class="glyph">v</text>
+<polyline points="49,193 49,163 79,163 79,193" fill="none" stroke="#ff5b9f" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" opacity="0.92" />
+<circle cx="79" cy="193" r="12" fill="#ff5b9f" />
+<text x="79" y="199" class="glyph">v</text>
+<polyline points="469,553 469,523 499,523 499,553" fill="none" stroke="#8d7cff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" opacity="0.92" />
+<circle cx="499" cy="553" r="12" fill="#8d7cff" />
+<text x="499" y="559" class="glyph">v</text>
+<polyline points="409,133 409,103 439,103 439,133" fill="none" stroke="#18d9ff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" opacity="0.92" />
+<circle cx="439" cy="133" r="12" fill="#18d9ff" />
+<text x="439" y="139" class="glyph">v</text>
+<polyline points="469,193 469,163 499,163 499,193" fill="none" stroke="#f7f2ff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" opacity="0.92" />
+<circle cx="499" cy="193" r="12" fill="#f7f2ff" />
+<text x="499" y="199" class="glyph">v</text>
+<polyline points="49,493 49,463 79,463 79,493" fill="none" stroke="#62ffb3" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" opacity="0.92" />
+<circle cx="79" cy="493" r="12" fill="#62ffb3" />
+<text x="79" y="499" class="glyph">v</text>
+<polyline points="109,553 109,523 139,523 139,553" fill="none" stroke="#ffd166" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" opacity="0.92" />
+<circle cx="139" cy="553" r="12" fill="#ffd166" />
+<text x="139" y="559" class="glyph">v</text>
+<polyline points="169,133 169,103 199,103 199,133" fill="none" stroke="#ff5b9f" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" opacity="0.92" />
+<circle cx="199" cy="133" r="12" fill="#ff5b9f" />
+<text x="199" y="139" class="glyph">v</text>
+<polyline points="109,193 109,163 139,163 139,193" fill="none" stroke="#8d7cff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" opacity="0.92" />
+<circle cx="139" cy="193" r="12" fill="#8d7cff" />
+<text x="139" y="199" class="glyph">v</text>
+<polyline points="49,253 49,223 79,223 79,253" fill="none" stroke="#18d9ff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" opacity="0.92" />
+<circle cx="79" cy="253" r="12" fill="#18d9ff" />
+<text x="79" y="259" class="glyph">v</text>
+<polyline points="469,493 469,463 499,463 499,493" fill="none" stroke="#f7f2ff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" opacity="0.92" />
+<circle cx="499" cy="493" r="12" fill="#f7f2ff" />
+<text x="499" y="499" class="glyph">v</text>
+<polyline points="409,553 409,523 439,523 439,553" fill="none" stroke="#62ffb3" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" opacity="0.92" />
+<circle cx="439" cy="553" r="12" fill="#62ffb3" />
+<text x="439" y="559" class="glyph">v</text>
+<polyline points="349,133 349,103 379,103 379,133" fill="none" stroke="#ffd166" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" opacity="0.92" />
+<circle cx="379" cy="133" r="12" fill="#ffd166" />
+<text x="379" y="139" class="glyph">v</text>
+<polyline points="409,193 409,163 439,163 439,193" fill="none" stroke="#ff5b9f" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" opacity="0.92" />
+<circle cx="439" cy="193" r="12" fill="#ff5b9f" />
+<text x="439" y="199" class="glyph">v</text>
+<polyline points="469,253 469,223 499,223 499,253" fill="none" stroke="#8d7cff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" opacity="0.92" />
+<circle cx="499" cy="253" r="12" fill="#8d7cff" />
+<text x="499" y="259" class="glyph">v</text>
+<polyline points="49,433 49,403 79,403 79,433" fill="none" stroke="#18d9ff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" opacity="0.92" />
+<circle cx="79" cy="433" r="12" fill="#18d9ff" />
+<text x="79" y="439" class="glyph">v</text>
+<polyline points="109,493 109,463 139,463 139,493" fill="none" stroke="#f7f2ff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" opacity="0.92" />
+<circle cx="139" cy="493" r="12" fill="#f7f2ff" />
+<text x="139" y="499" class="glyph">v</text>
+<polyline points="169,553 169,523 199,523 199,553" fill="none" stroke="#62ffb3" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" opacity="0.92" />
+<circle cx="199" cy="553" r="12" fill="#62ffb3" />
+<text x="199" y="559" class="glyph">v</text>
+<polyline points="229,133 229,103 259,103 259,133" fill="none" stroke="#ffd166" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" opacity="0.92" />
+<circle cx="259" cy="133" r="12" fill="#ffd166" />
+<text x="259" y="139" class="glyph">v</text>
+<polyline points="169,193 169,163 199,163 199,193" fill="none" stroke="#ff5b9f" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" opacity="0.92" />
+<circle cx="199" cy="193" r="12" fill="#ff5b9f" />
+<text x="199" y="199" class="glyph">v</text>
+<polyline points="109,253 109,223 139,223 139,253" fill="none" stroke="#8d7cff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" opacity="0.92" />
+<circle cx="139" cy="253" r="12" fill="#8d7cff" />
+<text x="139" y="259" class="glyph">v</text>
+<polyline points="49,313 49,283 79,283 79,313" fill="none" stroke="#18d9ff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" opacity="0.92" />
+<circle cx="79" cy="313" r="12" fill="#18d9ff" />
+<text x="79" y="319" class="glyph">v</text>
+<polyline points="469,433 469,403 499,403 499,433" fill="none" stroke="#f7f2ff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" opacity="0.92" />
+<circle cx="499" cy="433" r="12" fill="#f7f2ff" />
+<text x="499" y="439" class="glyph">v</text>
+<polyline points="409,493 409,463 439,463 439,493" fill="none" stroke="#62ffb3" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" opacity="0.92" />
+<circle cx="439" cy="493" r="12" fill="#62ffb3" />
+<text x="439" y="499" class="glyph">v</text>
+<polyline points="349,553 349,523 379,523 379,553" fill="none" stroke="#ffd166" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" opacity="0.92" />
+<circle cx="379" cy="553" r="12" fill="#ffd166" />
+<text x="379" y="559" class="glyph">v</text>
+<polyline points="289,133 289,103 319,103 319,133" fill="none" stroke="#ff5b9f" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" opacity="0.92" />
+<circle cx="319" cy="133" r="12" fill="#ff5b9f" />
+<text x="319" y="139" class="glyph">v</text>
+<polyline points="349,193 349,163 379,163 379,193" fill="none" stroke="#8d7cff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" opacity="0.92" />
+<circle cx="379" cy="193" r="12" fill="#8d7cff" />
+<text x="379" y="199" class="glyph">v</text>
+<polyline points="409,253 409,223 439,223 439,253" fill="none" stroke="#18d9ff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" opacity="0.92" />
+<circle cx="439" cy="253" r="12" fill="#18d9ff" />
+<text x="439" y="259" class="glyph">v</text>
+</svg>
