@@ -9,8 +9,16 @@ export const useAppBootstrap = () => {
 
   useEffect(() => {
     let mounted = true;
-    const minimumSplashTime = new Promise((resolve) => setTimeout(resolve, 1400));
-    Promise.all([hydrateSettings(), hydrateProgress(), minimumSplashTime]).finally(() => {
+    const started = Date.now();
+    const mark = (label: string) => {
+      if (__DEV__) console.log(`[BOOT] ${label}: ${Date.now() - started}ms`);
+    };
+
+    Promise.all([
+      hydrateSettings().finally(() => mark('settings loaded')),
+      hydrateProgress().finally(() => mark('progress loaded')),
+    ]).finally(() => {
+      mark('total');
       if (mounted) setReady(true);
     });
     return () => {

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Stack, usePathname } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import * as SplashScreen from 'expo-splash-screen';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { AppState, StyleSheet } from 'react-native';
 import { useAppBootstrap } from '../hooks/useAppBootstrap';
@@ -12,12 +13,15 @@ import { reminderService } from '../services/notifications/reminderService';
 import { LanguageOnboarding } from '../components/settings/LanguageOnboarding';
 import { useSettingsStore } from '../store/settings/settingsStore';
 
+void SplashScreen.preventAutoHideAsync();
+SplashScreen.setOptions({ duration: 220, fade: true });
+
 export default function RootLayout() {
   const ready = useAppBootstrap();
   const theme = useTheme();
   const pathname = usePathname();
   const languageConfigured = useSettingsStore((state) => state.languageConfigured);
-  const [notificationReady, setNotificationReady] = useState(false);
+  const [notificationReady, setNotificationReady] = useState(true);
 
   useEffect(() => {
     audioService.initialize().catch(() => undefined);
@@ -38,8 +42,15 @@ export default function RootLayout() {
   }, []);
 
   useEffect(() => {
+    if (ready) SplashScreen.hideAsync().catch(() => undefined);
+  }, [ready]);
+
+  useEffect(() => {
     if (!ready) return;
-    audioService.startMusic(pathname === '/game' ? 'gameplayMusic' : 'menuMusic').catch(() => undefined);
+    const handle = setTimeout(() => {
+      audioService.startMusic(pathname === '/game' ? 'gameplayMusic' : 'menuMusic').catch(() => undefined);
+    }, 80);
+    return () => clearTimeout(handle);
   }, [pathname, ready]);
 
   return (

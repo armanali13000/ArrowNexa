@@ -12,16 +12,16 @@ const sourceFor = (soundId: SoundId) => soundRegistry[soundId].source;
 
 const hasSource = (soundId: SoundId) => Boolean(sourceFor(soundId));
 
-const allSoundIds = Object.keys(soundRegistry) as SoundId[];
+const essentialSoundIds: SoundId[] = ['tap', 'arrowMove', 'arrowBlocked', 'hint', 'undo', 'levelComplete'];
 
-const preloadAll = async () => {
+const preloadEssential = async () => {
   if (preloaded) return;
   preloaded = true;
-  await Promise.all(allSoundIds.map(async (soundId) => {
+  await Promise.all(essentialSoundIds.map(async (soundId) => {
     const source = sourceFor(soundId);
     if (!source) return;
     try {
-      await preload(source, { preferredForwardBufferDuration: soundRegistry[soundId].category === 'music' ? 20 : 3 });
+      await preload(source, { preferredForwardBufferDuration: 2 });
     } catch (error) {
       console.error(`[AudioManager] Failed to preload: ${soundId}`, error);
     }
@@ -54,6 +54,7 @@ export const audioService = {
     try {
       await setAudioModeAsync({ playsInSilentMode: true, shouldPlayInBackground: false, interruptionMode: 'mixWithOthers' });
       await setIsAudioActiveAsync(true);
+      void preloadEssential();
     } catch (error) {
       console.error('[AudioManager] Failed to initialize audio', error);
     }
@@ -128,5 +129,3 @@ export const audioService = {
   gameOver: async () => audioService.play('gameOver'),
   backgroundMusic: async () => audioService.startMusic('menuMusic'),
 };
-
-void preloadAll();

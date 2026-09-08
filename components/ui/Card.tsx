@@ -9,7 +9,7 @@ type Props = {
 
 export const Card = ({ children, style }: Props) => {
   const theme = useTheme();
-  return <View style={[styles.card, { backgroundColor: theme.colors.card, borderColor: theme.colors.divider }, theme.shadow, style]}>{children}</View>;
+  return <View style={[styles.card, { backgroundColor: 'rgba(7, 18, 48, 0.78)', borderColor: 'rgba(56, 189, 248, 0.24)' }, theme.shadow, style]}>{children}</View>;
 };
 
 const styles = StyleSheet.create({

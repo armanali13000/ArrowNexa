@@ -5,7 +5,12 @@ const keyForLevel = (levelNumber: number, generationVersion: number) => `@arrown
 
 export const loadCachedLevel = async (levelNumber: number, generationVersion: number) => {
   const raw = await AsyncStorage.getItem(keyForLevel(levelNumber, generationVersion));
-  return raw ? (JSON.parse(raw) as GeneratedLevel) : undefined;
+  if (!raw) return undefined;
+  try {
+    return JSON.parse(raw) as GeneratedLevel;
+  } catch {
+    return undefined;
+  }
 };
 
 export const saveCachedLevel = async (level: GeneratedLevel) => {

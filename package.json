@@ -12,6 +12,7 @@
     "expo-linking": "~57.0.7",
     "expo-notifications": "~57.0.13",
     "expo-router": "~57.0.15",
+    "expo-splash-screen": "~57.0.8",
     "expo-status-bar": "~57.0.1",
     "react": "19.2.3",
     "react-native": "0.86.2",
@@ -35,6 +36,7 @@
     "test:phase8": "node scripts/phase8-retention-tests.mjs",
     "test:generator:bulk": "node scripts/generator-bulk-test.mjs 100",
     "test:generator:500": "node scripts/generator-bulk-test.mjs 500",
+    "validateAll500Levels": "node scripts/validate-all-500-levels.mjs",
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web"

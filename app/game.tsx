@@ -24,7 +24,7 @@ import { hapticsService } from '../services/haptics/hapticsService';
 import { audioService } from '../services/audio/audioService';
 import { createDailyChallengeLevel, getDailyDifficulty } from '../services/progression/dailyChallengeService';
 import { formatDayMonth, getLocalDateKey } from '../services/progression/dateService';
-import { saveCachedLevel } from '../services/storage/levelCacheStorage';
+import { loadCachedLevel, saveCachedLevel } from '../services/storage/levelCacheStorage';
 import { useGameStore } from '../store/game/gameStore';
 import { useProgressStore } from '../store/progress/progressStore';
 import { GENERATION_VERSION } from '../engine/levels/levelConfig';
@@ -38,6 +38,26 @@ const getGeneratedLevel = (levelNumber: number) => {
   if (cached) return cached;
   const level = createLevel(levelNumber);
   generatedLevelCache.set(levelNumber, level);
+  return level;
+};
+
+const loadGeneratedLevel = async (levelNumber: number) => {
+  const started = Date.now();
+  const memory = generatedLevelCache.get(levelNumber);
+  if (memory) {
+    if (__DEV__) console.log(`[LEVEL] ${levelNumber} memory cache: ${Date.now() - started}ms`);
+    return memory;
+  }
+  const stored = await loadCachedLevel(levelNumber, GENERATION_VERSION);
+  if (stored) {
+    generatedLevelCache.set(levelNumber, stored);
+    if (__DEV__) console.log(`[LEVEL] ${levelNumber} storage cache: ${Date.now() - started}ms`);
+    return stored;
+  }
+  const level = createLevel(levelNumber);
+  generatedLevelCache.set(levelNumber, level);
+  saveCachedLevel(level).catch(() => undefined);
+  if (__DEV__) console.log(`[LEVEL] ${levelNumber} generated: ${Date.now() - started}ms`);
   return level;
 };
 
@@ -83,8 +103,8 @@ export default function GameScreen() {
   const recordUndoUsed = useProgressStore((state) => state.recordUndoUsed);
   const recordRetry = useProgressStore((state) => state.recordRetry);
   const setPauseVisible = useGameStore((state) => state.setPauseVisible);
-  const [level, setLevel] = useState<GeneratedLevel>(() => (isDailyMode ? createDailyChallengeLevel(dailyDate) : getGeneratedLevel(currentLevel)));
-  const [arrows, setArrows] = useState<PuzzleArrow[]>(() => cloneLevelArrows(level));
+  const [level, setLevel] = useState<GeneratedLevel | undefined>(() => (isDailyMode ? createDailyChallengeLevel(dailyDate) : generatedLevelCache.get(currentLevel)));
+  const [arrows, setArrows] = useState<PuzzleArrow[]>(() => (level ? cloneLevelArrows(level) : []));
   const [lives, setLives] = useState(DEFAULT_LIVES);
   const [moveCount, setMoveCount] = useState(0);
   const [mistakes, setMistakes] = useState(0);
@@ -105,7 +125,7 @@ export default function GameScreen() {
   const skipNextLevelEffectRef = useRef(false);
   const lockedArrowIdsRef = useRef(new Set<string>());
 
-  const validMoves = useMemo(() => getValidMoves(arrows, level.size), [arrows, level.size]);
+  const validMoves = useMemo(() => (level ? getValidMoves(arrows, level.size) : []), [arrows, level]);
   const removedArrowIds = useMemo(() => arrows.filter((arrow) => arrow.state === 'removed').map((arrow) => arrow.id), [arrows]);
   const remainingArrows = arrows.filter((arrow) => arrow.state !== 'removed').length;
   const motionLocked = movingArrowIds.length > 0 || arrows.some((arrow) => arrow.state === 'restoring');
@@ -115,7 +135,8 @@ export default function GameScreen() {
     if (Number.isFinite(routeLevel) && routeLevel > 0) setCurrentLevel(Math.max(1, Math.min(500, routeLevel)));
   }, [routeLevel]);
 
-  const resetAttempt = useCallback((nextLevel = level) => {
+  const resetAttempt = useCallback((nextLevel?: GeneratedLevel) => {
+    if (!nextLevel) return;
     setArrows(cloneLevelArrows(nextLevel));
     setLives(DEFAULT_LIVES);
     setMoveCount(0);
@@ -132,7 +153,7 @@ export default function GameScreen() {
     setUsedExtraLife(false);
     completionHandledRef.current = false;
     startedAtRef.current = Date.now();
-  }, [level]);
+  }, []);
 
   useEffect(() => {
     if (skipNextLevelEffectRef.current) {
@@ -140,7 +161,11 @@ export default function GameScreen() {
       return;
     }
     let mounted = true;
-    const nextLevel = isDailyMode ? createDailyChallengeLevel(dailyDate) : getGeneratedLevel(currentLevel);
+    setLevel(undefined);
+    setArrows([]);
+    const loadLevel = async () => {
+      const nextLevel = isDailyMode ? createDailyChallengeLevel(dailyDate) : await loadGeneratedLevel(currentLevel);
+      if (!mounted) return;
     setLevel(nextLevel);
     resetAttempt(nextLevel);
     if (isDailyMode) recordDailyChallengeStarted(dailyDate).catch(() => undefined);
@@ -164,7 +189,9 @@ export default function GameScreen() {
       setUsedExtraLife(session.usedExtraLife);
       startedAtRef.current = Date.now() - session.elapsedSeconds * 1000;
     };
-    restoreSession().catch(() => undefined);
+      restoreSession().catch(() => undefined);
+    };
+    loadLevel().catch(() => undefined);
     return () => {
       mounted = false;
     };
@@ -172,7 +199,8 @@ export default function GameScreen() {
 
   useEffect(() => {
     const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
-      setPauseVisible(true);
+      if (useGameStore.getState().pauseVisible) setPauseVisible(false);
+      else setPauseVisible(true);
       return true;
     });
     return () => subscription.remove();
@@ -202,6 +230,7 @@ export default function GameScreen() {
     if (!target || target.state === 'moving' || target.state === 'restoring' || target.state === 'removed') return;
     lockedArrowIdsRef.current.add(arrowId);
 
+    if (!level) return;
     const result = canArrowEscape(arrows, level.size, arrowId);
     if (!result.canEscape) {
       void Promise.all([hapticsService.blocked(), audioService.blockedArrow()]).catch(() => undefined);
@@ -229,7 +258,7 @@ export default function GameScreen() {
     setMovingArrowIds((ids) => (ids.includes(arrowId) ? ids : [...ids, arrowId]));
     setMoveCount((count) => count + 1);
     setArrows((current) => current.map((arrow) => (arrow.id === arrowId ? { ...arrow, state: 'moving' } : arrow)));
-  }, [arrows, completeVisible, currentLevel, failedVisible, level.size, movingArrowIds.length, recordBlockedTap, recordLifeLost]);
+  }, [arrows, completeVisible, currentLevel, failedVisible, level, movingArrowIds.length, recordBlockedTap, recordLifeLost]);
 
   const handleEscapeComplete = useCallback((arrowId: string) => {
     lockedArrowIdsRef.current.delete(arrowId);
@@ -249,6 +278,7 @@ export default function GameScreen() {
 
   const handleHint = useCallback(async () => {
     if (motionLocked || completeVisible || failedVisible) return;
+    if (!level) return;
     const recommended = getRecommendedMove({ ...level, arrows }, removedArrowIds) ?? validMoves[0];
     if (!recommended) return;
     const spent = await economyService.spendHint();
@@ -306,7 +336,7 @@ export default function GameScreen() {
   const retry = useCallback(async () => {
     await recordRetry();
     lockedArrowIdsRef.current.clear();
-    resetAttempt();
+    resetAttempt(level);
   }, [recordRetry, resetAttempt]);
 
   const handleNextLevel = useCallback(() => {
@@ -329,6 +359,7 @@ export default function GameScreen() {
     if (completionHandledRef.current) return;
     completionHandledRef.current = true;
     const timeSeconds = getElapsedSeconds();
+    if (!level) return;
     const stars = calculateStars({ mistakes, hintsUsed, livesRemaining: lives, moves: moveCount, difficulty: level.difficulty });
     const xpGained = calculateLevelXP(level.difficulty, stars, !completedLevels[currentLevel]);
     const rewards = isDailyMode ? undefined : calculateCompletionRewards({
@@ -374,7 +405,7 @@ export default function GameScreen() {
     setTimeout(() => {
       persistCompletion().catch(() => undefined);
     }, 350);
-  }, [claimedRewards, completedLevels, currentLevel, dailyDate, hintsUsed, isDailyMode, level.difficulty, lives, mistakes, moveCount, nexaRank, recordDailyChallengeCompletion, recordLevelCompletion, usedExtraLife]);
+  }, [claimedRewards, completedLevels, currentLevel, dailyDate, hintsUsed, isDailyMode, level, lives, mistakes, moveCount, nexaRank, recordDailyChallengeCompletion, recordLevelCompletion, usedExtraLife]);
 
   completeHandlerRef.current = handleComplete;
 
@@ -382,7 +413,7 @@ export default function GameScreen() {
     <SafeAreaView style={styles.safe}>
       <View style={styles.topBar}>
         <View style={styles.leftControls}>
-          <Pressable accessibilityRole="button" accessibilityLabel={t('Back')} onPress={() => router.back()} style={styles.iconButton}>
+          <Pressable accessibilityRole="button" accessibilityLabel={t('Back')} onPress={() => setPauseVisible(true)} style={styles.iconButton}>
             <ArrowBackIcon color="#1B1E22" size={20} />
           </Pressable>
           <View style={styles.counterPill} accessibilityLabel={`${remainingArrows} ${t('arrows remaining')}`}>
@@ -391,7 +422,7 @@ export default function GameScreen() {
         </View>
         <View style={styles.levelCopy}>
           <Text variant="title" align="center" color="#1B1E22">{isDailyMode ? copy.dailyChallenge : `${copy.level} ${currentLevel}`}</Text>
-          <Text variant="caption" align="center" color="#5F656B">{isDailyMode ? `${formatDayMonth(dailyDate)} - ${t(getDailyDifficulty(dailyDate)).toUpperCase()}` : t(level.difficulty).toUpperCase()}</Text>
+          <Text variant="caption" align="center" color="#5F656B">{isDailyMode ? `${formatDayMonth(dailyDate)} - ${t(getDailyDifficulty(dailyDate)).toUpperCase()}` : t(level?.difficulty ?? 'Normal').toUpperCase()}</Text>
           <View style={styles.hearts} accessibilityLabel={`${lives} ${t('lives remaining')}`}>
             {Array.from({ length: MAX_LIVES_WITH_BOOSTER }, (_, index) => (
               <HeartIcon key={index} color="#D9514E" size={14} filled={index < lives} />
@@ -404,7 +435,7 @@ export default function GameScreen() {
       </View>
 
       <Animated.View entering={FadeIn.duration(220)} style={styles.boardArea}>
-        <GameBoard
+        {level ? <GameBoard
           level={level}
           arrows={arrows}
           hintedArrowIds={highlightedArrowIds}
@@ -412,7 +443,11 @@ export default function GameScreen() {
           onArrowPress={handleArrowPress}
           onEscapeComplete={handleEscapeComplete}
           onRestoreComplete={handleRestoreComplete}
-        />
+        /> : (
+          <View style={styles.loadingBoard}>
+            <Text variant="heading2" align="center" color="#061344">{t('Preparing Puzzle...')}</Text>
+          </View>
+        )}
       </Animated.View>
 
       <View style={styles.footer}>
@@ -517,6 +552,7 @@ const styles = StyleSheet.create({
   levelCopy: { flex: 1, alignItems: 'center', gap: 4 },
   hearts: { flexDirection: 'row', gap: 7, paddingTop: 4 },
   boardArea: { flex: 1, justifyContent: 'center', paddingHorizontal: 4 },
+  loadingBoard: { flex: 1, minHeight: 280, alignItems: 'center', justifyContent: 'center' },
   footer: { minHeight: 78, paddingHorizontal: 24, paddingBottom: 8, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   tool: { minWidth: 78, minHeight: 58, alignItems: 'center', justifyContent: 'center', gap: 2 },
   modalStack: { gap: 14 },

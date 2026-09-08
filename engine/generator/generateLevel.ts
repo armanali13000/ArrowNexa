@@ -2,7 +2,7 @@ import { calculateVisualCoverage } from './density';
 import { generateArrowCandidate, addArrowCells } from './generateArrow';
 import { canPlaceWithoutOverlap } from './placement';
 import { createSeededRandom } from './seededRandom';
-import { validateLevelGeometry } from './validation';
+import { validateLevelGeometry, validatePuzzleQuality, validateVisualQuality } from './validation';
 import { canArrowEscape } from '../moves';
 import { analyzeDifficulty } from '../solver/difficulty';
 import { solveLevel } from '../solver/solveLevel';
@@ -51,6 +51,7 @@ export const generateLevelFromConfig = (config: LevelGenerationConfig, levelNumb
           : Math.max(50, Math.floor(config.targetArrowCount * 0.9));
   if (arrows.length < minimumArrowCount) return undefined;
   if (!validateLevelGeometry(baseLevel)) return undefined;
+  if (!validateVisualQuality({ ...baseLevel, levelNumber })) return undefined;
   const coverage = calculateVisualCoverage(arrows, config.rows, config.cols);
   const minimumArea = config.difficulty === 'Easy' ? (levelNumber <= 2 ? 0.42 : 0.58) : config.difficulty === 'Normal' ? 0.72 : 0.78;
   const minimumAxis = config.difficulty === 'Easy' ? 0.62 : config.difficulty === 'Normal' ? 0.78 : 0.82;
@@ -63,6 +64,7 @@ export const generateLevelFromConfig = (config: LevelGenerationConfig, levelNumb
 
   const metrics = analyzeDifficulty({ ...baseLevel, solutionOrder: solver.solution });
   if (metrics.density < config.targetDensity.min * 0.76) return undefined;
+  if (!validatePuzzleQuality({ ...baseLevel, levelNumber, solutionOrder: solver.solution }, metrics)) return undefined;
   return {
     ...baseLevel,
     difficulty: config.difficulty,

@@ -35,12 +35,14 @@ const borderHeads = (rows: number, cols: number) => {
 
 const headCandidates = (config: LevelGenerationConfig, random: SeededRandom) => {
   if (config.targetArrowCount <= 6) return borderHeads(config.rows, config.cols);
-  const heads = [...borderHeads(config.rows, config.cols)];
+  const border = borderHeads(config.rows, config.cols);
+  const heads = config.difficulty === 'Easy' ? [...border] : random.shuffle(border).slice(0, Math.max(8, Math.floor(border.length * 0.38)));
   const inset = config.difficulty === 'Easy' ? 1 : 2;
+  const interiorWeight = config.difficulty === 'Expert' ? 3 : config.difficulty === 'Hard' ? 2 : 1;
   for (let row = inset; row < config.rows - inset; row += 1) {
     for (let col = inset; col < config.cols - inset; col += 1) {
       for (const direction of directions) {
-        heads.push({ head: { row, col }, direction });
+        for (let weight = 0; weight < interiorWeight; weight += 1) heads.push({ head: { row, col }, direction });
       }
     }
   }

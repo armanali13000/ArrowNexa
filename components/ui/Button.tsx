@@ -24,10 +24,10 @@ export const Button = ({ title, onPress, variant = 'primary', disabled, loading,
   const theme = useTheme();
   const scale = useSharedValue(1);
   const palette = useMemo(() => {
-    if (variant === 'primary') return { backgroundColor: theme.colors.primary, color: '#FFFFFF', borderColor: theme.colors.primary };
-    if (variant === 'secondary') return { backgroundColor: theme.colors.secondary, color: '#FFFFFF', borderColor: theme.colors.secondary };
-    if (variant === 'tool') return { backgroundColor: theme.colors.surface, color: theme.colors.textPrimary, borderColor: theme.colors.divider };
-    return { backgroundColor: 'transparent', color: theme.colors.primary, borderColor: theme.colors.divider };
+    if (variant === 'primary') return { backgroundColor: '#1498E5', color: '#FFFFFF', borderColor: '#7DD3FC' };
+    if (variant === 'secondary') return { backgroundColor: '#1B2A6B', color: '#FFFFFF', borderColor: '#38BDF8' };
+    if (variant === 'tool') return { backgroundColor: 'rgba(255,255,255,0.1)', color: '#FFFFFF', borderColor: 'rgba(125,211,252,0.25)' };
+    return { backgroundColor: 'transparent', color: '#7DD3FC', borderColor: 'rgba(125,211,252,0.24)' };
   }, [theme, variant]);
 
   const animatedStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
@@ -67,7 +67,7 @@ export const GameToolButton = (props: Omit<Props, 'variant'>) => <Button {...pro
 const styles = StyleSheet.create({
   button: {
     minHeight: 52,
-    borderRadius: 16,
+    borderRadius: 8,
     borderWidth: 1,
     paddingHorizontal: 18,
     alignItems: 'center',

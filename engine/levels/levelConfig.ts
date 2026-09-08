@@ -1,6 +1,6 @@
 import { Difficulty, LevelGenerationConfig } from '../types/game';
 
-export const GENERATION_VERSION = 8;
+export const GENERATION_VERSION = 9;
 
 export const DIFFICULTY_THRESHOLDS: Array<{ max: number; difficulty: Difficulty }> = [
   { max: 25, difficulty: 'Easy' },
@@ -50,7 +50,7 @@ export const createGenerationConfig = (levelNumber: number, seed: string): Level
       minPathLength: 2,
       maxPathLength: chapter >= 1 ? 10 : 9,
       maxTurnsPerArrow: chapter >= 1 ? 4 : 3,
-      targetDensity: { min: 0.46, max: 0.74 },
+      targetDensity: { min: 0.4 + chapter * 0.015, max: 0.66 },
       difficulty,
       targetScore: score,
       seed,
@@ -64,7 +64,7 @@ export const createGenerationConfig = (levelNumber: number, seed: string): Level
       minPathLength: 3,
       maxPathLength: 11 + Math.min(2, chapter),
       maxTurnsPerArrow: 4,
-      targetDensity: { min: 0.46, max: 0.72 },
+      targetDensity: { min: 0.43 + chapter * 0.018, max: 0.69 },
       difficulty,
       targetScore: score,
       seed,
@@ -77,7 +77,7 @@ export const createGenerationConfig = (levelNumber: number, seed: string): Level
     minPathLength: 3,
     maxPathLength: 13 + Math.min(2, chapter),
     maxTurnsPerArrow: 5,
-    targetDensity: { min: 0.46, max: 0.72 },
+    targetDensity: { min: 0.48 + chapter * 0.018, max: 0.72 },
     difficulty,
     targetScore: score,
     seed,

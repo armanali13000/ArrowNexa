@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, BackHandler, ScrollView, StyleSheet, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { AppBackground } from '../components/layout/AppBackground';
 import { BrandLogo } from '../components/ui/BrandLogo';
@@ -55,6 +55,17 @@ export default function HomeScreen() {
     loadGameplaySession().then((session) => setHasSession(Boolean(session))).catch(() => undefined);
   }, []);
 
+  useEffect(() => {
+    const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+      Alert.alert(t('Exit ArrowNexa?'), t('Find the Way Out'), [
+        { text: t('Cancel'), style: 'cancel' },
+        { text: t('Exit'), style: 'destructive', onPress: () => BackHandler.exitApp() },
+      ]);
+      return true;
+    });
+    return () => subscription.remove();
+  }, [t]);
+
   return (
     <AppBackground>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
@@ -66,7 +77,7 @@ export default function HomeScreen() {
           </View>
         </Animated.View>
 
-        <Card>
+        <View style={styles.heroPanel}>
           <View style={styles.row}>
             <View>
               <Text variant="caption" color={theme.colors.textSecondary}>{copy.currentLevel}</Text>
@@ -83,9 +94,9 @@ export default function HomeScreen() {
             <Text variant="bodySmall" color={theme.colors.textSecondary}>{copy.progress}: {currentLevel} / {TOTAL_LEVELS}</Text>
           </View>
           <ProgressBar value={currentLevel / TOTAL_LEVELS} />
-        </Card>
+        </View>
 
-        <Card>
+        <View style={styles.chapterPanel}>
           <Text variant="heading2">{copy.chapter} {chapter.chapter}</Text>
           <Text variant="title" color={theme.colors.textSecondary}>{chapter.name}</Text>
           <View style={styles.progressCopy}>
@@ -93,25 +104,25 @@ export default function HomeScreen() {
             <Text variant="bodySmall" color={theme.colors.textSecondary}>{chapterCompleted} / 50 {copy.complete}</Text>
           </View>
           <ProgressBar value={chapterCompleted / 50} />
-        </Card>
+        </View>
 
         <PrimaryButton title={hasSession ? copy.continue : copy.play} accessibilityLabel={t('Play latest unlocked level')} onPress={() => router.push('/game')} style={styles.play} />
 
-        <Card style={styles.dailyCard}>
+        <View style={styles.dailyCard}>
           <View>
             <Text variant="caption">{copy.dailyChallenge}</Text>
             <Text variant="heading2">{t(getDailyDifficulty(today))}</Text>
             <Text variant="bodySmall" color={theme.colors.textSecondary}>{t(dailyStatus)} - {t('Streak')} {progress.challengeStreak.current}</Text>
           </View>
           <SecondaryButton title={dailyStatus === 'Not Played' ? copy.play : copy.open} onPress={() => router.push('/daily')} style={styles.dailyButton} />
-        </Card>
+        </View>
 
         {weeklyPreview ? (
-          <Card style={styles.weeklyPreview}>
+          <View style={styles.weeklyPreview}>
             <Text variant="caption">{copy.weeklyGoal}</Text>
             <Text variant="bodySmall">{t(weeklyPreview.title)}</Text>
             <ProgressBar value={weeklyPreview.progress / weeklyPreview.target} />
-          </Card>
+          </View>
         ) : null}
 
         <View style={styles.menuGrid}>
@@ -141,6 +152,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 16,
     paddingTop: 12,
+  },
+  heroPanel: {
+    gap: 14,
+    padding: 20,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(56, 189, 248, 0.42)',
+    backgroundColor: 'rgba(6, 19, 68, 0.72)',
+  },
+  chapterPanel: {
+    gap: 12,
+    padding: 18,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 184, 77, 0.34)',
+    backgroundColor: 'rgba(10, 31, 68, 0.66)',
   },
   brandCopy: {
     flex: 1,
@@ -174,12 +201,20 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     gap: 12,
+    padding: 18,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(20, 152, 229, 0.36)',
+    backgroundColor: 'rgba(4, 28, 55, 0.7)',
   },
   dailyButton: {
     minWidth: 96,
   },
   weeklyPreview: {
     gap: 8,
+    padding: 16,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
   },
   menuGrid: {
     flexDirection: 'row',

@@ -4,7 +4,7 @@ import { createFallbackLevel } from './fallbackLevels';
 import { createGenerationConfig, createLevelSeed } from './levelConfig';
 import { createThemedLevel, isThemedLevelNumber } from './themedLevels';
 
-export const MAX_GENERATION_ATTEMPTS = 18;
+export const MAX_GENERATION_ATTEMPTS = 8;
 
 export const createLevel = (levelNumber: number): GeneratedLevel => {
   const themed = createThemedLevel(levelNumber, createLevelSeed(levelNumber, 0));

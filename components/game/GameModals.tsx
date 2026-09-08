@@ -29,7 +29,7 @@ export const PauseModal = ({ onRestart }: { onRestart?: () => void }) => {
             <SecondaryButton title={t('Restart')} onPress={() => setConfirmRestart(true)} />
             <Button title={t('Settings')} variant="tool" onPress={() => router.push('/settings')} />
             <Button title={t('How to Play')} variant="tool" onPress={() => router.push('/tutorial')} />
-            <Button title={t('Exit to Menu')} variant="ghost" onPress={() => router.replace('/')} />
+            <Button title={t('Exit to Menu')} variant="ghost" onPress={() => { setVisible(false); router.replace('/'); }} />
           </>
         )}
       </View>
